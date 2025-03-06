@@ -1,0 +1,206 @@
+WindowManager:
+    MenuScreen:
+    AreasScreen:
+    SalonesScreen:
+    EstadisticaScreen:
+    DonacionesScreen:
+    DistribucionScreen:
+    LogisticaScreen:
+    OtrasAreasScreen:
+    EnsenanzaScreen:
+    RecepcionScreen:
+    ReporteScreen:
+    AyudaScreen:
+
+<MenuScreen>:
+    name: "menu"
+    BoxLayout:
+        orientation: 'vertical'
+        
+        Label:
+            text: "Bienvenido a EMI"
+            font_size: '24sp'
+            size_hint_y: None
+            height: '50dp'
+        
+        Button:
+            text: "Áreas"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "areas"
+
+        Button:
+            text: "Salones"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "salones"
+
+        Button:
+            text: "Estadística"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "estadistica"
+
+        Button:
+            text: "Donaciones"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "donaciones"
+
+        Button:
+            text: "Distribución"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "distribucion"
+
+        Button:
+            text: "Logística"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "logistica"
+
+        Button:
+            text: "Otras Áreas"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "otras_areas"
+
+        Button:
+            text: "Enseñanza"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "ensenanza"
+
+        Button:
+            text: "Recepción"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "recepcion"
+
+        Button:
+            text: "Reporte"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "reporte"
+
+        Button:
+            text: "Ayuda"
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.manager.current = "ayuda"
+
+        Button:
+            text: "Salir"
+            size_hint_y: None
+            height: '50dp'
+            on_press: app.stop()
+
+<AreasScreen>:
+    name: "areas"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Áreas"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<SalonesScreen>:
+    name: "salones"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Salones"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<EstadisticaScreen>:
+    name: "estadistica"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Estadística"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<DonacionesScreen>:
+    name: "donaciones"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Donaciones"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<DistribucionScreen>:
+    name: "distribucion"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Distribución"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<LogisticaScreen>:
+    name: "logistica"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Logística"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<OtrasAreasScreen>:
+    name: "otras_areas"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Otras Áreas"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<EnsenanzaScreen>:
+    name: "ensenanza"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Enseñanza"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<RecepcionScreen>:
+    name: "recepcion"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Recepción"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<ReporteScreen>:
+    name: "reporte"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Reporte"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<AyudaScreen>:
+    name: "ayuda"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Ayuda"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
