@@ -22,7 +22,7 @@ GitHub: [jeancgarciaq](https://github.com/jeancgarciaq)
 ## Instalación
 1. Clona este repositorio:
    ```sh
-   git clone https://github.com/jeancgarciaq/tu-repositorio.git
+   git clone https://github.com/jeancgarciaq/New-Estadistica-Maranatha-Infantil-Kivy.git
    cd tu-repositorio
    ```
 2. Crea un entorno virtual (opcional pero recomendado):
