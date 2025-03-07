@@ -1,1 +1,71 @@
 # Archivo KV principal
+
+WindowManager:
+    MenuScreen:
+    AreasScreen:
+    SalonesScreen:
+    EstadisticaScreen:
+    DonacionesScreen:
+    DistribucionScreen:
+    LogisticaScreen:
+    OtrasAreasScreen:
+    EnsenanzaScreen:
+    RecepcionScreen:
+    ReporteScreen:
+    AyudaScreen:
+
+<MenuScreen>:
+    name: "menu"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Bienvenido a EMI"
+            font_size: '24sp'
+        Button:
+            text: "Áreas"
+            on_press: root.manager.current = "areas"
+        Button:
+            text: "Salones"
+            on_press: root.manager.current = "salones"
+        Button:
+            text: "Estadística"
+            on_press: root.manager.current = "estadistica"
+        Button:
+            text: "Donaciones"
+            on_press: root.manager.current = "donaciones"
+        Button:
+            text: "Distribución"
+            on_press: root.manager.current = "distribucion"
+        Button:
+            text: "Logística"
+            on_press: root.manager.current = "logistica"
+        Button:
+            text: "Otras Áreas"
+            on_press: root.manager.current = "otras_areas"
+        Button:
+            text: "Enseñanza"
+            on_press: root.manager.current = "ensenanza"
+        Button:
+            text: "Recepción"
+            on_press: root.manager.current = "recepcion"
+        Button:
+            text: "Reporte"
+            on_press: root.manager.current = "reporte"
+        Button:
+            text: "Ayuda"
+            on_press: root.manager.current = "ayuda"
+        Button:
+            text: "Salir"
+            on_press: app.stop()
+
+<AreasScreen>:    name: "areas"
+<SalonesScreen>:  name: "salones"
+<EstadisticaScreen>:  name: "estadistica"
+<DonacionesScreen>:  name: "donaciones"
+<DistribucionScreen>:  name: "distribucion"
+<LogisticaScreen>:  name: "logistica"
+<OtrasAreasScreen>:  name: "otras_areas"
+<EnsenanzaScreen>:  name: "ensenanza"
+<RecepcionScreen>:  name: "recepcion"
+<ReporteScreen>:  name: "reporte"
+<AyudaScreen>:  name: "ayuda"
