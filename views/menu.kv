@@ -1,207 +1,139 @@
-# Diseño del menú principal
-WindowManager:
-    MenuScreen:
-    AreasScreen:
-    SalonesScreen:
-    EstadisticaScreen:
-    DonacionesScreen:
-    DistribucionScreen:
-    LogisticaScreen:
-    OtrasAreasScreen:
-    EnsenanzaScreen:
-    RecepcionScreen:
-    ReporteScreen:
-    AyudaScreen:
-
 <MenuScreen>:
-    name: "menu"
-    BoxLayout:
-        orientation: 'vertical'
-        
-        Label:
-            text: "Bienvenido a EMI"
-            font_size: '24sp'
+    GridLayout:
+        cols: 4
+        rows: 6
+        size: root.width, root.height
+        padding: 10
+        spacing: 10
+
+        # Fila 1: Imágenes
+        Image:
+            source: 'images/areas.png'
+        Image:
+            source: 'images/salones.png'
+        Image:
+            source: 'images/aulas.png'
+        Image:
+            source: 'images/donacion.png'
+
+        # Fila 2: Botones
+        Button:
+            text: 'AREAS'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-        
+            height: 50
+            on_press: root.manager.current = "areas" # Agregado para navegación
         Button:
-            text: "Áreas"
+            text: 'SALONES'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "areas"
-
+            height: 50
+            on_press: root.manager.current = "salones" # Agregado para navegación
         Button:
-            text: "Salones"
+            text: 'ESTADISTICA'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "salones"
-
+            height: 50
+            on_press: root.manager.current = "estadistica" # Agregado para navegación
         Button:
-            text: "Estadística"
+            text: 'DONACIONES'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "estadistica"
+            height: 50
+            on_press: root.manager.current = "donaciones" # Agregado para navegación
 
+        # Fila 3: Imágenes
+        Image:
+            source: 'images/distribucion.png'
+        Image:
+            source: 'images/logistic.png'
+        Image:
+            source: 'images/otras.png'
+        Image:
+            source: 'images/ensenanza.png'
+
+        # Fila 4: Botones
         Button:
-            text: "Donaciones"
+            text: 'DISTRIBUCION'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "donaciones"
-
+            height: 50
+            on_press: root.manager.current = "distribucion" # Agregado para navegación
         Button:
-            text: "Distribución"
+            text: 'LOGISTICA'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "distribucion"
-
+            height: 50
+            on_press: root.manager.current = "logistica" # Agregado para navegación
         Button:
-            text: "Logística"
+            text: 'OTRAS AREAS'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "logistica"
-
+            height: 50
+            on_press: root.manager.current = "otras_areas" # Agregado para navegación
         Button:
-            text: "Otras Áreas"
+            text: 'ENSEÑANZA'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "otras_areas"
+            height: 50
+            on_press: root.manager.current = "ensenanza" # Agregado para navegación
 
+        # Fila 5: Imágenes
+        Image:
+            source: 'images/recepcion.png'
+        Image:
+            source: 'images/report.png'
+        Image:
+            source: 'images/ayuda.png'
+        Image:
+            source: 'images/exit.png'
+
+        # Fila 6: Botones
         Button:
-            text: "Enseñanza"
+            text: 'RECEPCION'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "ensenanza"
-
+            height: 50
+            on_press: root.manager.current = "recepcion" # Agregado para navegación
         Button:
-            text: "Recepción"
+            text: 'REPORTE'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "recepcion"
-
+            height: 50
+            on_press: root.manager.current = "reporte" # Agregado para navegación
         Button:
-            text: "Reporte"
+            text: 'AYUDA'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "reporte"
-
+            height: 50
+            on_press: root.manager.current = "ayuda" # Agregado para navegación
         Button:
-            text: "Ayuda"
+            text: 'SALIR'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: '50dp'
-            on_press: root.manager.current = "ayuda"
-
-        Button:
-            text: "Salir"
-            size_hint_y: None
-            height: '50dp'
-            on_press: app.stop()
-
-<AreasScreen>:
-    name: "areas"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Áreas"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<SalonesScreen>:
-    name: "salones"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Salones"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<EstadisticaScreen>:
-    name: "estadistica"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Estadística"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<DonacionesScreen>:
-    name: "donaciones"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Donaciones"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<DistribucionScreen>:
-    name: "distribucion"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Distribución"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<LogisticaScreen>:
-    name: "logistica"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Logística"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<OtrasAreasScreen>:
-    name: "otras_areas"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Otras Áreas"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<EnsenanzaScreen>:
-    name: "ensenanza"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Enseñanza"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<RecepcionScreen>:
-    name: "recepcion"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Recepción"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<ReporteScreen>:
-    name: "reporte"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Reporte"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
-
-<AyudaScreen>:
-    name: "ayuda"
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: "Pantalla de Ayuda"
-        Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
+            height: 50
+            on_press: app.stop() # Agregado para navegación
