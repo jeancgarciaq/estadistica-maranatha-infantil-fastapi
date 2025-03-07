@@ -6,8 +6,9 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
 from kivy.core.window import Window
 
-# Cargar la interfaz desde el archivo KV
-Builder.load_file('app.kv')
+# Cargar los archivos KV
+Builder.load_file('app.kv')  # Contiene el menú principal
+Builder.load_file('main.kv') # Contiene la navegación entre pantallas
 
 # Definir las pantallas
 class MenuScreen(Screen):
