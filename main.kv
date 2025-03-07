@@ -1,4 +1,6 @@
-# Archivo KV principal
+#Archivo KV Principal
+
+#:import WindowManager kivy.uix.screenmanager.ScreenManager
 
 WindowManager:
     MenuScreen:
@@ -14,58 +16,112 @@ WindowManager:
     ReporteScreen:
     AyudaScreen:
 
-<MenuScreen>:
-    name: "menu"
+<AreasScreen>:
+    name: "areas"
     BoxLayout:
         orientation: 'vertical'
         Label:
-            text: "Bienvenido a EMI"
-            font_size: '24sp'
+            text: "Pantalla de Áreas"
         Button:
-            text: "Áreas"
-            on_press: root.manager.current = "areas"
-        Button:
-            text: "Salones"
-            on_press: root.manager.current = "salones"
-        Button:
-            text: "Estadística"
-            on_press: root.manager.current = "estadistica"
-        Button:
-            text: "Donaciones"
-            on_press: root.manager.current = "donaciones"
-        Button:
-            text: "Distribución"
-            on_press: root.manager.current = "distribucion"
-        Button:
-            text: "Logística"
-            on_press: root.manager.current = "logistica"
-        Button:
-            text: "Otras Áreas"
-            on_press: root.manager.current = "otras_areas"
-        Button:
-            text: "Enseñanza"
-            on_press: root.manager.current = "ensenanza"
-        Button:
-            text: "Recepción"
-            on_press: root.manager.current = "recepcion"
-        Button:
-            text: "Reporte"
-            on_press: root.manager.current = "reporte"
-        Button:
-            text: "Ayuda"
-            on_press: root.manager.current = "ayuda"
-        Button:
-            text: "Salir"
-            on_press: app.stop()
+            text: "Volver"
+            on_press: root.manager.current = "menu"
 
-<AreasScreen>:    name: "areas"
-<SalonesScreen>:  name: "salones"
-<EstadisticaScreen>:  name: "estadistica"
-<DonacionesScreen>:  name: "donaciones"
-<DistribucionScreen>:  name: "distribucion"
-<LogisticaScreen>:  name: "logistica"
-<OtrasAreasScreen>:  name: "otras_areas"
-<EnsenanzaScreen>:  name: "ensenanza"
-<RecepcionScreen>:  name: "recepcion"
-<ReporteScreen>:  name: "reporte"
-<AyudaScreen>:  name: "ayuda"
+<SalonesScreen>:
+    name: "salones"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Salones"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<EstadisticaScreen>:
+    name: "estadistica"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Estadística"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<DonacionesScreen>:
+    name: "donaciones"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Donaciones"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<DistribucionScreen>:
+    name: "distribucion"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Distribución"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<LogisticaScreen>:
+    name: "logistica"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Logística"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<OtrasAreasScreen>:
+    name: "otras_areas"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Otras Áreas"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<EnsenanzaScreen>:
+    name: "ensenanza"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Enseñanza"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<RecepcionScreen>:
+    name: "recepcion"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Recepción"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<ReporteScreen>:
+    name: "reporte"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Reporte"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
+
+<AyudaScreen>:
+    name: "ayuda"
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Pantalla de Ayuda"
+        Button:
+            text: "Volver"
+            on_press: root.manager.current = "menu"
