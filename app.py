@@ -4,13 +4,7 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
-from kivy.core.window import Window
 
-# Cargar los archivos KV
-Builder.load_file('app.kv')  # Contiene el menú principal
-Builder.load_file('main.kv') # Contiene la navegación entre pantallas
-
-# Definir las pantallas
 class MenuScreen(Screen):
     pass
 
@@ -47,14 +41,36 @@ class ReporteScreen(Screen):
 class AyudaScreen(Screen):
     pass
 
-# Administrador de pantallas
-class WindowManager(ScreenManager):
-    pass
-
-class EmiApp(App):    
+class EmiApp(App):
     def build(self):
-        Window.clearcolor = (20/255, 40/255, 80/255, 1)
-        return WindowManager()
+        Builder.load_file('views/menu.kv')
+        Builder.load_file('views/areas.kv')
+        Builder.load_file('views/salones.kv')
+        Builder.load_file('views/estadistica.kv')
+        Builder.load_file('views/donaciones.kv')
+        Builder.load_file('views/distribucion.kv')
+        Builder.load_file('views/logistica.kv')
+        Builder.load_file('views/otras_areas.kv')
+        Builder.load_file('views/ensenanza.kv')
+        Builder.load_file('views/recepcion.kv')
+        Builder.load_file('views/reporte.kv')
+        Builder.load_file('views/ayuda.kv')
+
+        sm = ScreenManager()
+        sm.add_widget(MenuScreen(name='menu'))
+        sm.add_widget(AreasScreen(name='areas'))
+        sm.add_widget(SalonesScreen(name='salones'))
+        sm.add_widget(EstadisticaScreen(name='estadistica'))
+        sm.add_widget(DonacionesScreen(name='donaciones'))
+        sm.add_widget(DistribucionScreen(name='distribucion'))
+        sm.add_widget(LogisticaScreen(name='logistica'))
+        sm.add_widget(OtrasAreasScreen(name='otras_areas'))
+        sm.add_widget(EnsenanzaScreen(name='ensenanza'))
+        sm.add_widget(RecepcionScreen(name='recepcion'))
+        sm.add_widget(ReporteScreen(name='reporte'))
+        sm.add_widget(AyudaScreen(name='ayuda'))
+
+        return sm
 
 if __name__ == '__main__':
     EmiApp().run()
