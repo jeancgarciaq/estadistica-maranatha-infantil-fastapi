@@ -1,9 +1,35 @@
 <AreasScreen>:
-    name: "areas"
+    name: 'areas'
     BoxLayout:
         orientation: 'vertical'
-        Label:
-            text: "Pantalla de Áreas"
+        # Formulario
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'Nombre del área:'
+            TextInput:
+                id: area_nombre
+            TextInput:
+                id: area_id
+            Button:
+                text: 'Crear'
+                on_press: root.controlador.crear_area(area_nombre.text)
+            Button:
+                text: 'Actualizar'
+                on_press: root.controlador.actualizar_area(area_id.text, area_nombre.text)
+            Button:
+                text: 'Eliminar'
+                on_press: root.controlador.eliminar_area(area_id.text)
+            Button:
+                text: 'Listar'
+                on_press: root.controlador.listar_areas()
+        # Lista de áreas
+        ScrollView:
+            GridLayout:
+                id: lista_areas
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
         Button:
-            text: "Volver"
-            on_press: root.manager.current = "menu"
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
