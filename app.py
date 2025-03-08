@@ -9,10 +9,43 @@ class MenuScreen(Screen):
     pass
 
 class AreasScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorArea(self)
+
+    def actualizar_lista_areas(self, areas):
+        lista_areas_grid = self.ids.lista_areas
+        lista_areas_grid.clear_widgets()
+        for area in areas:
+            lista_areas_grid.add_widget(Label(text=area.nombre))
+            lista_areas_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=area.id: self.editar_area(id)))
+            lista_areas_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=area.id: self.controlador.eliminar_area(id)))
+
+    def editar_area(self, id):
+        area = self.controlador.obtener_area(id)
+        if area:
+            self.ids.area_nombre.text = area.nombre
+            self.ids.area_id.text = str(area.id)
 
 class SalonesScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorSalon(self)
+
+    def actualizar_lista_salones(self, salones):
+        lista_salones_grid = self.ids.lista_salones
+        lista_salones_grid.clear_widgets()
+        for salon in salones:
+            lista_salones_grid.add_widget(Label(text=salon.salon + " (" + salon.edad + ")"))
+            lista_salones_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=salon.id: self.editar_salon(id)))
+            lista_salones_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=salon.id: self.controlador.eliminar_salon(id)))
+
+    def editar_salon(self, id):
+        salon = self.controlador.obtener_salon(id)
+        if salon:
+            self.ids.salon_salon.text = salon.salon
+            self.ids.salon_edad.text = salon.edad
+            self.ids.salon_id.text = str(salon.id)
 
 class EstadisticaScreen(Screen):
     pass
@@ -43,6 +76,7 @@ class AyudaScreen(Screen):
 
 class EmiApp(App):
     def build(self):
+        # Vistas de la aplicación
         Builder.load_file('views/menu.kv')
         Builder.load_file('views/areas.kv')
         Builder.load_file('views/salones.kv')
@@ -56,6 +90,7 @@ class EmiApp(App):
         Builder.load_file('views/reporte.kv')
         Builder.load_file('views/ayuda.kv')
 
+        #Manejador de las ventanas
         sm = ScreenManager()
         sm.add_widget(MenuScreen(name='menu'))
         sm.add_widget(AreasScreen(name='areas'))
