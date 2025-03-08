@@ -1,1 +1,39 @@
-# Diseño de la pantalla de Salones
+<SalonesScreen>:
+    name: 'salones'
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'Salón:'
+            TextInput:
+                id: salon_salon
+            Label:
+                text: 'Edad:'
+            TextInput:
+                id: salon_edad
+            TextInput:
+                id: salon_id
+            Button:
+                text: 'Crear'
+                on_press: root.controlador.crear_salon(salon_salon.text, salon_edad.text)
+            Button:
+                text: 'Actualizar'
+                on_press: root.controlador.actualizar_salon(salon_id.text, salon_salon.text, salon_edad.text)
+            Button:
+                text: 'Eliminar'
+                on_press: root.controlador.eliminar_salon(salon_id.text)
+            Button:
+                text: 'Listar'
+                on_press: root.controlador.listar_salones()
+        # Lista de salones
+        ScrollView:
+            GridLayout:
+                id: lista_salones
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
