@@ -4,6 +4,10 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
+from controllers.areas_controller import ControladorArea
+from controllers.salones_controller import ControladorSalon
+from controllers.aulas_controller import ControladorAula
+
 
 class MenuScreen(Screen):
     pass
@@ -46,6 +50,34 @@ class SalonesScreen(Screen):
             self.ids.salon_salon.text = salon.salon
             self.ids.salon_edad.text = salon.edad
             self.ids.salon_id.text = str(salon.id)
+
+class AulasScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorAula(self)
+
+    def actualizar_lista_aulas(self, aulas):
+        lista_aulas_grid = self.ids.lista_aulas
+        lista_aulas_grid.clear_widgets()
+        for aula in aulas:
+            lista_aulas_grid.add_widget(Label(text=f'Aula {aula.id}'))
+            lista_aulas_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=aula.id: self.editar_aula(id)))
+            lista_aulas_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=aula.id: self.controlador.eliminar_aula(id)))
+
+    def editar_aula(self, id):
+        aula = self.controlador.obtener_aula(id)
+        if aula:
+            self.ids.aula_auxiliar.text = str(aula.auxiliar)
+            self.ids.aula_capitan.text = str(aula.capitan)
+            self.ids.aula_colaborador.text = str(aula.colaborador)
+            self.ids.aula_condicion.text = aula.condicion
+            self.ids.aula_edad.text = aula.edad
+            self.ids.aula_maestra.text = str(aula.maestra)
+            self.ids.aula_ninos.text = str(aula.ninos)
+            self.ids.aula_ninas.text = str(aula.ninas)
+            self.ids.aula_subcapitan.text = str(aula.subcapitan)
+            self.ids.aula_id_salon.text = str(aula.id_salon)
+            self.ids.aula_id.text = str(aula.id)
 
 class EstadisticaScreen(Screen):
     pass
