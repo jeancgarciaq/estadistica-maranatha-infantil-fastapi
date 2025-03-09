@@ -35,5 +35,8 @@
                 size_hint_y: None
                 height: self.minimum_height
         Button:
+            text: 'Gestionar Aulas'
+            on_press: root.manager.current = 'aulas'
+        Button:
             text: 'Volver al Menú'
             on_press: root.manager.current = 'menu'
