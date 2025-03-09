@@ -1,0 +1,74 @@
+<AulasScreen>:
+    name: 'aulas'
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Auxiliar:'
+                TextInput:
+                    id: aula_auxiliar
+                Label:
+                    text: 'Capitán:'
+                TextInput:
+                    id: aula_capitan
+                Label:
+                    text: 'Colaborador:'
+                TextInput:
+                    id: aula_colaborador
+                Label:
+                    text: 'Condición:'
+                TextInput:
+                    id: aula_condicion
+                Label:
+                    text: 'Edad:'
+                TextInput:
+                    id: aula_edad
+                Label:
+                    text: 'Maestra:'
+                TextInput:
+                    id: aula_maestra
+                Label:
+                    text: 'Niños:'
+                TextInput:
+                    id: aula_ninos
+                Label:
+                    text: 'Niñas:'
+                TextInput:
+                    id: aula_ninas
+                Label:
+                    text: 'Subcapitán:'
+                TextInput:
+                    id: aula_subcapitan
+                Label:
+                    text: 'ID Salón:'
+                TextInput:
+                    id: aula_id_salon
+                TextInput:
+                    id: aula_id
+                Button:
+                    text: 'Crear'
+                    on_press: root.controlador.crear_aula(aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_id_salon.text)
+                Button:
+                    text: 'Actualizar'
+                    on_press: root.controlador.actualizar_aula(aula_id.text, aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_id_salon.text)
+                Button:
+                    text: 'Eliminar'
+                    on_press: root.controlador.eliminar_aula(aula_id.text)
+                Button:
+                    text: 'Listar'
+                    on_press: root.controlador.listar_aulas()
+        # Lista de aulas
+        ScrollView:
+            GridLayout:
+                id: lista_aulas
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
