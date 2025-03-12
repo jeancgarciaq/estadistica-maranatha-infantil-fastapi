@@ -4,12 +4,8 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
-from controllers.areas_controller import ControladorArea
-from controllers.salones_controller import ControladorSalon
-from controllers.aulas_controller import ControladorAula
-from controllers.donaciones_controller import ControladorDonacion
-from controllers.ensenanza_controller import ControladorEnsenanza
-from models.salones import Salon
+from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController
+from models import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
 

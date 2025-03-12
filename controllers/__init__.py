@@ -1,0 +1,5 @@
+from .areas_controller import AreasController
+from .salones_controller import SalonesController
+from .aulas_controller import AulasController
+from .donaciones_controller import DonacionesController
+from .ensenanza_controller import EnsenanzaController
