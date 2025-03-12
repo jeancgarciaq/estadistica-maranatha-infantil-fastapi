@@ -1,6 +1,61 @@
 <DonacionesScreen>:
     name: 'donaciones'
-    Label:
-        text: 'Vista de Donaciones'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Cantidad:'
+                TextInput:
+                    id: donacion_cantidad
+                Label:
+                    text: 'Descripción:'
+                TextInput:
+                    id: donacion_descripcion
+                Label:
+                    text: 'Equipo:'
+                TextInput:
+                    id: donacion_equipo
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                TextInput:
+                    id: donacion_fecha
+                Label:
+                    text: 'Sembrador:'
+                TextInput:
+                    id: donacion_sembrador
+                Label:
+                    text: 'Salones:'
+                GridLayout:
+                    id: salones_seleccionados
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+                TextInput:
+                    id: donacion_id
+                Button:
+                    text: 'Crear'
+                    on_press: root.controlador.crear_donacion(donacion_cantidad.text, donacion_descripcion.text, donacion_equipo.text, donacion_fecha.text, donacion_sembrador.text, root.obtener_salones_seleccionados())
+                Button:
+                    text: 'Actualizar'
+                    on_press: root.controlador.actualizar_donacion(donacion_id.text, donacion_cantidad.text, donacion_descripcion.text, donacion_equipo.text, donacion_fecha.text, donacion_sembrador.text, root.obtener_salones_seleccionados())
+                Button:
+                    text: 'Eliminar'
+                    on_press: root.controlador.eliminar_donacion(donacion_id.text)
+                Button:
+                    text: 'Listar'
+                    on_press: root.controlador.listar_donaciones()
+        # Lista de donaciones
+        ScrollView:
+            GridLayout:
+                id: lista_donaciones
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'

@@ -1,6 +1,46 @@
 <EnsenanzaScreen>:
-    name: 'ensenanza'
-    Label:
-        text: 'Vista de Enseñanza'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    name: 'ensenanzas'
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Capitán:'
+                TextInput:
+                    id: ensenanza_capitan
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                TextInput:
+                    id: ensenanza_fecha
+                Label:
+                    text: 'Subcapitán:'
+                TextInput:
+                    id: ensenanza_subcapitan
+                TextInput:
+                    id: ensenanza_id
+                Button:
+                    text: 'Crear'
+                    on_press: root.controlador.crear_ensenanza(ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+                Button:
+                    text: 'Actualizar'
+                    on_press: root.controlador.actualizar_ensenanza(ensenanza_id.text, ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+                Button:
+                    text: 'Eliminar'
+                    on_press: root.controlador.eliminar_ensenanza(ensenanza_id.text)
+                Button:
+                    text: 'Listar'
+                    on_press: root.controlador.listar_ensenanzas()
+        # Lista de enseñanzas
+        ScrollView:
+            GridLayout:
+                id: lista_ensenanzas
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
