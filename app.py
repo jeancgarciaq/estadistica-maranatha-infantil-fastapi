@@ -7,7 +7,11 @@ from kivy.lang import Builder
 from controllers.areas_controller import ControladorArea
 from controllers.salones_controller import ControladorSalon
 from controllers.aulas_controller import ControladorAula
-
+from controllers.donaciones_controller import ControladorDonacion
+from controllers.ensenanza_controller import ControladorEnsenanza
+from models.salones import Salon
+from models.database import get_db
+from sqlalchemy.orm import Session
 
 class MenuScreen(Screen):
     pass
@@ -31,6 +35,10 @@ class AreasScreen(Screen):
             self.ids.area_nombre.text = area.nombre
             self.ids.area_id.text = str(area.id)
 
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
+
 class SalonesScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -50,6 +58,10 @@ class SalonesScreen(Screen):
             self.ids.salon_salon.text = salon.salon
             self.ids.salon_edad.text = salon.edad
             self.ids.salon_id.text = str(salon.id)
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class AulasScreen(Screen):
     def __init__(self, **kwargs):
@@ -79,11 +91,59 @@ class AulasScreen(Screen):
             self.ids.aula_id_salon.text = str(aula.id_salon)
             self.ids.aula_id.text = str(aula.id)
 
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
+
 class EstadisticaScreen(Screen):
     pass
 
 class DonacionesScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorDonacion(self)
+        self.cargar_salones()
+
+    def obtener_salones_seleccionados(self):
+        salones_seleccionados = []
+        for child in self.ids.salones_seleccionados.children:
+            if isinstance(child, CheckBox) and child.active:
+                salones_seleccionados.append(int(child.text.split(':')[0]))
+        return salones_seleccionados
+
+    def actualizar_lista_donaciones(self, donaciones):
+        lista_donaciones_grid = self.ids.lista_donaciones
+        lista_donaciones_grid.clear_widgets()
+        for donacion in donaciones:
+            salones_text = ', '.join([salon.salon for salon in donacion.salones])
+            lista_donaciones_grid.add_widget(Label(text=f'Donación {donacion.id} ({salones_text})'))
+            lista_donaciones_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=donacion.id: self.editar_donacion(id)))
+            lista_donaciones_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=donacion.id: self.controlador.eliminar_donacion(id)))
+
+    def editar_donacion(self, id):
+        donacion = self.controlador.obtener_donacion(id)
+        if donacion:
+            self.ids.donacion_cantidad.text = str(donacion.cantidad)
+            self.ids.donacion_descripcion.text = donacion.descripcion
+            self.ids.donacion_equipo.text = donacion.equipo
+            self.ids.donacion_fecha.text = str(donacion.fecha)
+            self.ids.donacion_sembrador.text = donacion.sembrador
+            self.ids.donacion_id.text = str(donacion.id)
+            self.cargar_salones(donacion.salones)
+
+    def cargar_salones(self, salones_seleccionados=None):
+        db: Session = next(get_db())
+        salones = db.query(Salon).all()
+        self.ids.salones_seleccionados.clear_widgets()
+        for salon in salones:
+            checkbox = CheckBox(text=f'{salon.id}: {salon.salon}', active=False)
+            if salones_seleccionados and salon in salones_seleccionados:
+                checkbox.active = True
+            self.ids.salones_seleccionados.add_widget(checkbox)
+    
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class DistribucionScreen(Screen):
     pass
@@ -95,7 +155,29 @@ class OtrasAreasScreen(Screen):
     pass
 
 class EnsenanzaScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorEnsenanza(self)
+
+    def actualizar_lista_ensenanzas(self, ensenanzas):
+        lista_ensenanzas_grid = self.ids.lista_ensenanzas
+        lista_ensenanzas_grid.clear_widgets()
+        for ensenanza in ensenanzas:
+            lista_ensenanzas_grid.add_widget(Label(text=f'Enseñanza {ensenanza.id}'))
+            lista_ensenanzas_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=ensenanza.id: self.editar_ensenanza(id)))
+            lista_ensenanzas_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=ensenanza.id: self.controlador.eliminar_ensenanza(id)))
+
+    def editar_ensenanza(self, id):
+        ensenanza = self.controlador.obtener_ensenanza(id)
+        if ensenanza:
+            self.ids.ensenanza_capitan.text = ensenanza.capitan
+            self.ids.ensenanza_fecha.text = str(ensenanza.fecha)
+            self.ids.ensenanza_subcapitan.text = str(ensenanza.subcapitan)
+            self.ids.ensenanza_id.text = str(ensenanza.id)
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class RecepcionScreen(Screen):
     pass
