@@ -1,53 +1,70 @@
-from modelos.aula import Aula
-from modelos.database import get_db
+import logging
+from models.aulas import Aula
+from models.database import get_db
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
+
+# Configuración de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ControladorAula:
     def __init__(self, vista):
         self.vista = vista
 
     def crear_aula(self, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, id_salon):
+        # ... (Validación de datos)
         db: Session = next(get_db())
-        nueva_aula = Aula(
-            auxiliar=auxiliar, capitan=capitan, colaborador=colaborador, condicion=condicion,
-            edad=edad, maestra=maestra, ninos=ninos, ninas=ninas, subcapitan=subcapitan,
-            id_salon=id_salon
-        )
-        db.add(nueva_aula)
-        db.commit()
-        db.refresh(nueva_aula)
-        self.listar_aulas()
+        try:
+            with db.begin():
+                # ... (Creación de aula)
+                logger.info(f"Aula creada: {aula.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al crear aula: {e}")
+            self.vista.mostrar_error("Error al crear aula. Inténtalo de nuevo.")
+        finally:
+            self.listar_aulas()
 
     def actualizar_aula(self, id, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, id_salon):
+        # ... (Validación de datos)
         db: Session = next(get_db())
-        aula_actualizar = db.query(Aula).filter(Aula.id == id).first()
-        if aula_actualizar:
-            aula_actualizar.auxiliar = auxiliar
-            aula_actualizar.capitan = capitan
-            aula_actualizar.colaborador = colaborador
-            aula_actualizar.condicion = condicion
-            aula_actualizar.edad = edad
-            aula_actualizar.maestra = maestra
-            aula_actualizar.ninos = ninos
-            aula_actualizar.ninas = ninas
-            aula_actualizar.subcapitan = subcapitan
-            aula_actualizar.id_salon = id_salon
-            db.commit()
+        try:
+            with db.begin():
+                # ... (Actualización de aula)
+                logger.info(f"Aula actualizada: {aula.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al actualizar aula: {e}")
+            self.vista.mostrar_error("Error al actualizar aula. Inténtalo de nuevo.")
+        finally:
             self.listar_aulas()
 
     def eliminar_aula(self, id):
         db: Session = next(get_db())
-        aula_eliminar = db.query(Aula).filter(Aula.id == id).first()
-        if aula_eliminar:
-            db.delete(aula_eliminar)
-            db.commit()
+        try:
+            with db.begin():
+                # ... (Eliminación de aula)
+                logger.info(f"Aula eliminada: {aula.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al eliminar aula: {e}")
+            self.vista.mostrar_error("Error al eliminar aula. Inténtalo de nuevo.")
+        finally:
             self.listar_aulas()
 
     def listar_aulas(self):
         db: Session = next(get_db())
-        aulas = db.query(Aula).all()
-        self.vista.actualizar_lista_aulas(aulas)
+        try:
+            aulas = db.query(Aula).all()
+            self.vista.actualizar_lista_aulas(aulas)
+            logger.info("Aulas listadas.")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar aulas: {e}")
+            self.vista.mostrar_error("Error al listar aulas. Inténtalo de nuevo.")
 
     def obtener_aula(self, id):
         db: Session = next(get_db())
-        return db.query(Aula).filter(Aula.id == id).first()
+        try:
+            return db.query(Aula).filter(Aula.id == id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener aula: {e}")
+            self.vista.mostrar_error("Error al obtener aula. Inténtalo de nuevo.")
+            return None

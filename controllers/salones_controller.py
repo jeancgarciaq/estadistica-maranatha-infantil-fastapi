@@ -1,41 +1,61 @@
-from models.salon import Salon
+import logging
+from models.salones import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
+
+# Configuración de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ControladorSalon:
     def __init__(self, vista):
         self.vista = vista
 
     def crear_salon(self, salon, edad):
+        # ... (Validación de datos)
         db: Session = next(get_db())
-        nuevo_salon = Salon(salon=salon, edad=edad)
-        db.add(nuevo_salon)
-        db.commit()
-        db.refresh(nuevo_salon)
-        self.listar_salones()
+        try:
+            with db.begin():
+                # ... (Creación de salón)
+                logger.info(f"Salón creado: {salon.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al crear salón: {e}")
+            self.vista.mostrar_error("Error al crear salón. Inténtalo de nuevo.")
+        finally:
+            self.listar_salones()
 
     def actualizar_salon(self, id, salon, edad):
+        # ... (Validación de datos)
         db: Session = next(get_db())
-        salon_actualizar = db.query(Salon).filter(Salon.id == id).first()
-        if salon_actualizar:
-            salon_actualizar.salon = salon
-            salon_actualizar.edad = edad
-            db.commit()
+        try:
+            with db.begin():
+                # ... (Actualización de salón)
+                logger.info(f"Salón actualizado: {salon.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al actualizar salón: {e}")
+            self.vista.mostrar_error("Error al actualizar salón. Inténtalo de nuevo.")
+        finally:
             self.listar_salones()
 
     def eliminar_salon(self, id):
         db: Session = next(get_db())
-        salon_eliminar = db.query(Salon).filter(Salon.id == id).first()
-        if salon_eliminar:
-            db.delete(salon_eliminar)
-            db.commit()
+        try:
+            with db.begin():
+                # ... (Eliminación de salón)
+                logger.info(f"Salón eliminado: {salon.id}")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al eliminar salón: {e}")
+            self.vista.mostrar_error("Error al eliminar salón. Inténtalo de nuevo.")
+        finally:
             self.listar_salones()
 
     def listar_salones(self):
         db: Session = next(get_db())
-        salones = db.query(Salon).all()
-        self.vista.actualizar_lista_salones(salones)
-
-    def obtener_salon(self, id):
-        db: Session = next(get_db())
-        return db.query(Salon).filter(Salon.id == id).first()
+        try:
+            salones = db.query(Salon).all()
+            self.vista.actualizar_lista_salones(salones)
+            logger.info("Salones listados.")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar salones: {e}")
+            self.vista.mostrar_error("Error al listar salones. Inténtalo de nuevo.")
