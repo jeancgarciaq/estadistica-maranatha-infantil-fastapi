@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from models.modelo_base_datos import Base
-from models.donacion_salon import donaciones_salones
+from models.database import Base
+from models.donaciones_salones import donaciones_salones
 
 class Salon(Base):
     __tablename__ = 'salones'
