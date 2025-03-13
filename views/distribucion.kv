@@ -1,6 +1,35 @@
 <DistribucionScreen>:
     name: 'distribucion'
-    Label:
-        text: 'Vista de Distribución'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Donación:'
+                Spinner:
+                    id: donacion_spinner
+                    values: root.obtener_donaciones()
+                Label:
+                    text: 'Salones:'
+                GridLayout:
+                    id: salones_seleccionados
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+                Button:
+                    text: 'Registrar Distribución'
+                    on_press: root.controlador.registrar_distribucion(root.obtener_donacion_seleccionada(), root.obtener_salones_seleccionados())
+        # Lista de distribuciones (opcional)
+        ScrollView:
+            GridLayout:
+                id: lista_distribuciones
+                cols: 2 # Donación, Salones
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'

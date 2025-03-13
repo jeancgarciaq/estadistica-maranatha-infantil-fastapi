@@ -4,10 +4,13 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
-from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController
-from models import Salon
+from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController, DistribucionController
+from models.salones import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.checkbox import CheckBox
 
 class MenuScreen(Screen):
     pass
@@ -142,7 +145,45 @@ class DonacionesScreen(Screen):
         popup.open()
 
 class DistribucionScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = DistribucionController(self)
+        self.cargar_salones()
+
+    def obtener_donaciones(self):
+        return self.controlador.obtener_donaciones()
+
+    def obtener_donacion_seleccionada(self):
+        donacion_text = self.ids.donacion_spinner.text
+        if donacion_text:
+            return int(donacion_text.split(':')[0])
+        return None
+
+    def obtener_salones_seleccionados(self):
+        salones_seleccionados = []
+        for child in self.ids.salones_seleccionados.children:
+            if isinstance(child, CheckBox) and child.active:
+                salones_seleccionados.append(int(child.text.split(':')[0]))
+        return salones_seleccionados
+
+    def cargar_salones(self):
+        salones = self.controlador.obtener_salones()
+        self.ids.salones_seleccionados.clear_widgets()
+        for salon in salones:
+            checkbox = CheckBox(text=f'{salon.id}: {salon.salon}')
+            self.ids.salones_seleccionados.add_widget(checkbox)
+
+    def actualizar_lista_distribuciones(self, donaciones):
+        lista_distribuciones_grid = self.ids.lista_distribuciones
+        lista_distribuciones_grid.clear_widgets()
+        for donacion in donaciones:
+            salones_text = ', '.join([salon.salon for salon in donacion.salones])
+            lista_distribuciones_grid.add_widget(Label(text=f'Donación {donacion.id}'))
+            lista_distribuciones_grid.add_widget(Label(text=f'Salones: {salones_text}'))
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class LogisticaScreen(Screen):
     def __init__(self, **kwargs):
