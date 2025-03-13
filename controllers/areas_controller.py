@@ -1,5 +1,5 @@
 import logging
-from models.area import Area
+from models.areas import Area
 from models.database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ControladorArea:
+class AreasController:
     def __init__(self, vista):
         self.vista = vista
 

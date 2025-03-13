@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ControladorAula:
+class AulasController:
     def __init__(self, vista):
         self.vista = vista
 

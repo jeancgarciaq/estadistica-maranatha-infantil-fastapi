@@ -9,7 +9,7 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ControladorEnsenanza:
+class EnsenanzaController:
     def __init__(self, vista):
         self.vista = vista
 

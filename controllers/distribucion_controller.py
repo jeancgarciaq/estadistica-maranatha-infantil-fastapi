@@ -1,6 +1,6 @@
 import logging
 from models.donaciones import Donacion
-from modelos.salones import Salon
+from models.salones import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
