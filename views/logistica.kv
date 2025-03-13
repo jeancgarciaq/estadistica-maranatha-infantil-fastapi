@@ -1,6 +1,62 @@
 <LogisticaScreen>:
-    name: 'logistica'
-    Label:
-        text: 'Vista de Logística'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    name: 'logisticas'
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Almacén:'
+                TextInput:
+                    id: logistica_almacen
+                Label:
+                    text: 'Capitán:'
+                TextInput:
+                    id: logistica_capitan
+                Label:
+                    text: 'Distribución:'
+                TextInput:
+                    id: logistica_distribucion
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                TextInput:
+                    id: logistica_fecha
+                Label:
+                    text: 'Hidratación:'
+                TextInput:
+                    id: logistica_hidratacion
+                Label:
+                    text: 'Pasillo:'
+                TextInput:
+                    id: logistica_pasillo
+                Label:
+                    text: 'Secretaría:'
+                TextInput:
+                    id: logistica_secretaria
+                TextInput:
+                    id: logistica_id
+                Button:
+                    text: 'Crear'
+                    on_press: root.controlador.crear_logistica(logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
+                Button:
+                    text: 'Actualizar'
+                    on_press: root.controlador.actualizar_logistica(logistica_id.text, logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
+                Button:
+                    text: 'Eliminar'
+                    on_press: root.controlador.eliminar_logistica(logistica_id.text)
+                Button:
+                    text: 'Listar'
+                    on_press: root.controlador.listar_logisticas()
+        # Lista de logísticas
+        ScrollView:
+            GridLayout:
+                id: lista_logisticas
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
