@@ -4,7 +4,7 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
-from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController
+from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController
 from models import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
@@ -145,10 +145,63 @@ class DistribucionScreen(Screen):
     pass
 
 class LogisticaScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = ControladorLogistica(self)
+
+    def actualizar_lista_logisticas(self, logisticas):
+        lista_logisticas_grid = self.ids.lista_logisticas
+        lista_logisticas_grid.clear_widgets()
+        for logistica in logisticas:
+            lista_logisticas_grid.add_widget(Label(text=f'Logística {logistica.id}'))
+            lista_logisticas_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=logistica.id: self.editar_logistica(id)))
+            lista_logisticas_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=logistica.id: self.controlador.eliminar_logistica(id)))
+
+    def editar_logistica(self, id):
+        logistica = self.controlador.obtener_logistica(id)
+        if logistica:
+            self.ids.logistica_almacen.text = str(logistica.almacen)
+            self.ids.logistica_capitan.text = str(logistica.capitan)
+            self.ids.logistica_distribucion.text = str(logistica.distribucion)
+            self.ids.logistica_fecha.text = str(logistica.fecha)
+            self.ids.logistica_hidratacion.text = str(logistica.hidratacion)
+            self.ids.logistica_pasillo.text = str(logistica.pasillo)
+            self.ids.logistica_secretaria.text = str(logistica.secretaria)
+            self.ids.logistica_id.text = str(logistica.id)
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class OtrasAreasScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = OtrasAreasController(self)
+
+    def actualizar_lista_otrasareas(self, otrasareas):
+        lista_otrasareas_grid = self.ids.lista_otrasareas
+        lista_otrasareas_grid.clear_widgets()
+        for otrasarea in otrasareas:
+            lista_otrasareas_grid.add_widget(Label(text=f'Otras áreas {otrasarea.id}'))
+            lista_otrasareas_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=otrasarea.id: self.editar_otrasareas(id)))
+            lista_otrasareas_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=otrasarea.id: self.controlador.eliminar_otrasareas(id)))
+
+    def editar_otrasareas(self, id):
+        otrasarea = self.controlador.obtener_otrasareas(id)
+        if otrasarea:
+            self.ids.otrasareas_alabanza.text = str(otrasarea.alabanza)
+            self.ids.otrasareas_fecha.text = str(otrasarea.fecha)
+            self.ids.otrasareas_protocolo.text = str(otrasarea.protocolo)
+            self.ids.otrasareas_semillitas.text = str(otrasarea.semillitas)
+            self.ids.otrasareas_sonido.text = str(otrasarea.sonido)
+            self.ids.otrasareas_teatro.text = str(otrasarea.teatro)
+            self.ids.otrasareas_tv.text = str(otrasarea.tv)
+            self.ids.otrasareas_ujier.text = str(otrasarea.ujier)
+            self.ids.otrasareas_id.text = str(otrasarea.id)
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class EnsenanzaScreen(Screen):
     def __init__(self, **kwargs):
@@ -176,7 +229,27 @@ class EnsenanzaScreen(Screen):
         popup.open()
 
 class RecepcionScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controlador = RecepcionController(self)
+
+    def actualizar_lista_recepciones(self, recepciones):
+        lista_recepciones_grid = self.ids.lista_recepciones
+        lista_recepciones_grid.clear_widgets()
+        for recepcion in recepciones:
+            lista_recepciones_grid.add_widget(Label(text=f'Recepción {recepcion.id}'))
+            lista_recepciones_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=recepcion.id: self.editar_recepcion(id)))
+            lista_recepciones_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=recepcion.id: self.controlador.eliminar_recepcion(id)))
+
+    def editar_recepcion(self, id):
+        recepcion = self.controlador.obtener_recepcion(id)
+        if recepcion:
+            self.ids.recepcion_nombre.text = recepcion.nombre
+            self.ids.recepcion_id.text = str(recepcion.id)
+
+    def mostrar_error(self, mensaje):
+        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 class ReporteScreen(Screen):
     pass
