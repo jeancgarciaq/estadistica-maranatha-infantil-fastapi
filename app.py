@@ -18,7 +18,7 @@ class MenuScreen(Screen):
 class AreasScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorArea(self)
+        self.controlador = AreasController(self)
 
     def actualizar_lista_areas(self, areas):
         lista_areas_grid = self.ids.lista_areas
@@ -41,7 +41,7 @@ class AreasScreen(Screen):
 class SalonesScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorSalon(self)
+        self.controlador = SalonesController(self)
 
     def actualizar_lista_salones(self, salones):
         lista_salones_grid = self.ids.lista_salones
@@ -65,7 +65,7 @@ class SalonesScreen(Screen):
 class AulasScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorAula(self)
+        self.controlador = AulasController(self)
 
     def actualizar_lista_aulas(self, aulas):
         lista_aulas_grid = self.ids.lista_aulas
@@ -100,7 +100,7 @@ class EstadisticaScreen(Screen):
 class DonacionesScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorDonacion(self)
+        self.controlador = DonacionesController(self)
         self.cargar_salones()
 
     def obtener_salones_seleccionados(self):
@@ -188,7 +188,7 @@ class DistribucionScreen(Screen):
 class LogisticaScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorLogistica(self)
+        self.controlador = LogisticaController(self)
 
     def actualizar_lista_logisticas(self, logisticas):
         lista_logisticas_grid = self.ids.lista_logisticas
@@ -247,7 +247,7 @@ class OtrasAreasScreen(Screen):
 class EnsenanzaScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = ControladorEnsenanza(self)
+        self.controlador = EnsenanzaController(self)
 
     def actualizar_lista_ensenanzas(self, ensenanzas):
         lista_ensenanzas_grid = self.ids.lista_ensenanzas
