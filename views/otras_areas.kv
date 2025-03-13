@@ -1,6 +1,66 @@
 <OtrasAreasScreen>:
-    name: 'otras_areas'
-    Label:
-        text: 'Vista de Otras Áreas'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    name: 'otrasareas'
+    BoxLayout:
+        orientation: 'vertical'
+        # Formulario
+        ScrollView:
+            GridLayout:
+                cols: 2
+                size_hint_y: None
+                height: self.minimum_height
+                Label:
+                    text: 'Alabanza:'
+                TextInput:
+                    id: otrasareas_alabanza
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                TextInput:
+                    id: otrasareas_fecha
+                Label:
+                    text: 'Protocolo:'
+                TextInput:
+                    id: otrasareas_protocolo
+                Label:
+                    text: 'Semillitas:'
+                TextInput:
+                    id: otrasareas_semillitas
+                Label:
+                    text: 'Sonido:'
+                TextInput:
+                    id: otrasareas_sonido
+                Label:
+                    text: 'Teatro:'
+                TextInput:
+                    id: otrasareas_teatro
+                Label:
+                    text: 'TV:'
+                TextInput:
+                    id: otrasareas_tv
+                Label:
+                    text: 'Ujier:'
+                TextInput:
+                    id: otrasareas_ujier
+                TextInput:
+                    id: otrasareas_id
+                Button:
+                    text: 'Crear'
+                    on_press: root.controlador.crear_otrasareas(otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
+                Button:
+                    text: 'Actualizar'
+                    on_press: root.controlador.actualizar_otrasareas(otrasareas_id.text, otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
+                Button:
+                    text: 'Eliminar'
+                    on_press: root.controlador.eliminar_otrasareas(otrasareas_id.text)
+                Button:
+                    text: 'Listar'
+                    on_press: root.controlador.listar_otrasareas()
+        # Lista de otras áreas
+        ScrollView:
+            GridLayout:
+                id: lista_otrasareas
+                cols: 3 # Nombre, Editar, Eliminar
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Volver al Menú'
+            on_press: root.manager.current = 'menu'
