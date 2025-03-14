@@ -2,26 +2,66 @@
     name: 'areas'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
         # Formulario
         GridLayout:
             cols: 2
+            padding: 20
+            spacing: 20
             Label:
-                text: 'Nombre del área:'
-            TextInput:
-                id: area_nombre
+                text: 'Id área:'
+                font_size: 28
+                color: 1, 1, 1, 1
+                size_hint_y: None
+                height: 50
             TextInput:
                 id: area_id
+                height: 50
+            Label:
+                text: 'Nombre del área:'
+                font_size: 28
+                color: 1, 1, 1, 1
+                size_hint_y: None
+                height: 50
+            TextInput:
+                id: area_nombre
+                height: 50
             Button:
                 text: 'Crear'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.crear_area(area_nombre.text)
             Button:
                 text: 'Actualizar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.actualizar_area(area_id.text, area_nombre.text)
             Button:
                 text: 'Eliminar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.eliminar_area(area_id.text)
             Button:
                 text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.listar_areas()
         # Lista de áreas
         ScrollView:
@@ -32,4 +72,9 @@
                 height: self.minimum_height
         Button:
             text: 'Volver al Menú'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'
