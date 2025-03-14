@@ -1,8 +1,8 @@
 """Creacion de tablas iniciales
 
-Revision ID: 2ac7dd4f9840
+Revision ID: 868c3b0c79e4
 Revises: 
-Create Date: 2025-03-12 23:58:14.890889
+Create Date: 2025-03-13 23:10:12.559875
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '2ac7dd4f9840'
+revision: str = '868c3b0c79e4'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,15 +28,13 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_areas_id'), 'areas', ['id'], unique=False)
     op.create_table('donaciones',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('cantidad', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('descripcion', sa.String(), nullable=True),
-    sa.Column('equipo', sa.String(), nullable=True),
+    sa.Column('cantidad', sa.Float(), nullable=True),
+    sa.Column('unidad', sa.String(), nullable=True),
     sa.Column('fecha', sa.Date(), nullable=True),
-    sa.Column('sembrador', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_donaciones_id'), 'donaciones', ['id'], unique=False)
     op.create_table('ensenanzas',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('capitan', sa.String(), nullable=True),
@@ -125,7 +123,6 @@ def downgrade() -> None:
     op.drop_table('logisticas')
     op.drop_index(op.f('ix_ensenanzas_id'), table_name='ensenanzas')
     op.drop_table('ensenanzas')
-    op.drop_index(op.f('ix_donaciones_id'), table_name='donaciones')
     op.drop_table('donaciones')
     op.drop_index(op.f('ix_areas_id'), table_name='areas')
     op.drop_table('areas')
