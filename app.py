@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
+from datetime import datetime
 
 class MenuScreen(Screen):
     pass
@@ -19,6 +20,18 @@ class AreasScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.controlador = AreasController(self)
+    
+    def obtener_datos_formulario(self):
+        area_nombre = self.ids.area_nombre.text
+
+        # Validación básica
+        if not area_nombre:
+            self.mostrar_error("El nombre del área es obligatorio.")
+            return None
+
+        return {
+            "area": area_nombre
+        }
 
     def actualizar_lista_areas(self, areas):
         lista_areas_grid = self.ids.lista_areas
@@ -43,6 +56,23 @@ class SalonesScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = SalonesController(self)
 
+    def obtener_datos_formulario(self):
+        salon_nombre = self.ids.salon_nombre.text
+        salon_edad = self.ids.salon_edad.text
+
+        # Validación básica
+        if not salon_nombre:
+            self.mostrar_error("El nombre del salón es obligatorio.")
+            return None
+        if not salon_edad:
+            self.mostrar_error("La edad del salón es obligatoria.")
+            return None
+
+        return {
+            "salon": salon_nombre,
+            "edad": salon_edad
+        }
+    
     def actualizar_lista_salones(self, salones):
         lista_salones_grid = self.ids.lista_salones
         lista_salones_grid.clear_widgets()
@@ -66,6 +96,76 @@ class AulasScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.controlador = AulasController(self)
+    
+    def obtener_datos_formulario(self):
+        auxiliar = self.ids.aula_auxiliar.text
+        capitan = self.ids.aula_capitan.text
+        colaborador = self.ids.aula_colaborador.text
+        condicion = self.ids.aula_condicion.text
+        edad = self.ids.aula_edad.text
+        maestra = self.ids.aula_maestra.text
+        ninos = self.ids.aula_ninos.text
+        ninas = self.ids.aula_ninas.text
+        subcapitan = self.ids.aula_subcapitan.text
+        id_salon = self.ids.aula_id_salon.text
+
+        # Validación básica
+        if not auxiliar:
+            self.mostrar_error("El número de auxiliares es obligatorio.")
+            return None
+        if not capitan:
+            self.mostrar_error("El número de capitanes es obligatorio.")
+            return None
+        if not colaborador:
+            self.mostrar_error("El número de colaboradores es obligatorio.")
+            return None
+        if not condicion:
+            self.mostrar_error("La condición es obligatoria.")
+            return None
+        if not edad:
+            self.mostrar_error("La edad es obligatoria.")
+            return None
+        if not maestra:
+            self.mostrar_error("El número de maestras es obligatorio.")
+            return None
+        if not ninos:
+            self.mostrar_error("El número de niños es obligatorio.")
+            return None
+        if not ninas:
+            self.mostrar_error("El número de niñas es obligatorio.")
+            return None
+        if not subcapitan:
+            self.mostrar_error("El número de subcapitanes es obligatorio.")
+            return None
+        if not id_salon:
+            self.mostrar_error("El ID del salón es obligatorio.")
+            return None
+
+        try:
+            int(auxiliar)
+            int(capitan)
+            int(colaborador)
+            int(maestra)
+            int(ninos)
+            int(ninas)
+            int(subcapitan)
+            int(id_salon)
+        except ValueError:
+            self.mostrar_error("Los campos numéricos deben ser números enteros.")
+            return None
+
+        return {
+            "auxiliar": int(auxiliar),
+            "capitan": int(capitan),
+            "colaborador": int(colaborador),
+            "condicion": condicion,
+            "edad": edad,
+            "maestra": int(maestra),
+            "ninos": int(ninos),
+            "ninas": int(ninas),
+            "subcapitan": int(subcapitan),
+            "id_salon": int(id_salon)
+        }
 
     def actualizar_lista_aulas(self, aulas):
         lista_aulas_grid = self.ids.lista_aulas
@@ -101,45 +201,104 @@ class DonacionesScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.controlador = DonacionesController(self)
-        self.cargar_salones()
+
+    def obtener_datos_formulario(self):
+        descripcion = self.ids.donacion_descripcion.text
+        cantidad = self.ids.donacion_cantidad.text
+        unidad = self.ids.donacion_unidad.textclear
+        fecha = self.ids.donacion_fecha.text
+        equipo = self.ids.donacion_equipo.text
+
+        # Validación básica
+        if not descripcion:
+            self.mostrar_error("La descripción es obligatoria.")
+            return None
+        if not cantidad:
+            self.mostrar_error("La cantidad es obligatoria.")
+            return None
+        try:
+            float(cantidad)
+        except ValueError:
+            self.mostrar_error("La cantidad debe ser un número.")
+            return None
+        if not unidad:
+            self.mostrar_error("La unidad es obligatoria.")
+            return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
+            return None
+        if not equipo:
+            self.mostrar_error("El equipo es obligatorio.")
+            return None
+
+        return {
+            "descripcion": descripcion,
+            "cantidad": cantidad,
+            "unidad": unidad,
+            "fecha": fecha,
+            "equipo": equipo
+        }
+
+    def crear_donacion(self):
+        datos = self.obtener_datos_formulario()
+        self.controlador.crear_donacion(datos["cantidad"], datos["descripcion"], datos["unidad"], datos["fecha"], datos["equipo"], self.obtener_salones_seleccionados())
+
+    def actualizar_donacion(self):
+        datos = self.obtener_datos_formulario()
+        self.controlador.actualizar_donacion(self.ids.donacion_id.text, datos["cantidad"], datos["descripcion"], datos["unidad"], datos["fecha"], datos["equipo"], self.obtener_salones_seleccionados())
+
+    def eliminar_donacion(self):
+        self.controlador.eliminar_donacion(self.ids.donacion_id.text)
+
+    def listar_donaciones(self):
+        self.controlador.listar_donaciones()
+
+    def actualizar_lista_donaciones(self, donaciones):
+        self.ids.lista_donaciones.clear_widgets()
+        for donacion in donaciones:
+            self.ids.lista_donaciones.add_widget(Label(text=str(donacion.id)))
+            self.ids.lista_donaciones.add_widget(Label(text=donacion.descripcion))
+            editar_btn = Button(text='Editar')
+            editar_btn.donacion = donacion
+            editar_btn.bind(on_press=self.cargar_donacion_editar)
+            self.ids.lista_donaciones.add_widget(editar_btn)
+
+    def cargar_donacion_editar(self, instance):
+        donacion = instance.donacion
+        self.ids.donacion_id.text = str(donacion.id)
+        self.ids.donacion_descripcion.text = donacion.descripcion
+        self.ids.donacion_cantidad.text = str(donacion.cantidad)
+        self.ids.donacion_unidad.text = donacion.unidad
+        self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d')
+        self.ids.donacion_equipo.text = donacion.equipo
+        self.cargar_salones_seleccionados(donacion.salones)
 
     def obtener_salones_seleccionados(self):
         salones_seleccionados = []
         for child in self.ids.salones_seleccionados.children:
             if isinstance(child, CheckBox) and child.active:
-                salones_seleccionados.append(int(child.text.split(':')[0]))
+                salones_seleccionados.append(int(child.text.split('-')[0]))
         return salones_seleccionados
 
-    def actualizar_lista_donaciones(self, donaciones):
-        lista_donaciones_grid = self.ids.lista_donaciones
-        lista_donaciones_grid.clear_widgets()
-        for donacion in donaciones:
-            salones_text = ', '.join([salon.salon for salon in donacion.salones])
-            lista_donaciones_grid.add_widget(Label(text=f'Donación {donacion.id} ({salones_text})'))
-            lista_donaciones_grid.add_widget(Button(text="Editar", on_press=lambda *args, id=donacion.id: self.editar_donacion(id)))
-            lista_donaciones_grid.add_widget(Button(text="Eliminar", on_press=lambda *args, id=donacion.id: self.controlador.eliminar_donacion(id)))
-
-    def editar_donacion(self, id):
-        donacion = self.controlador.obtener_donacion(id)
-        if donacion:
-            self.ids.donacion_cantidad.text = str(donacion.cantidad)
-            self.ids.donacion_descripcion.text = donacion.descripcion
-            self.ids.donacion_equipo.text = donacion.equipo
-            self.ids.donacion_fecha.text = str(donacion.fecha)
-            self.ids.donacion_sembrador.text = donacion.sembrador
-            self.ids.donacion_id.text = str(donacion.id)
-            self.cargar_salones(donacion.salones)
-
-    def cargar_salones(self, salones_seleccionados=None):
-        db: Session = next(get_db())
-        salones = db.query(Salon).all()
+    def cargar_salones(self):
         self.ids.salones_seleccionados.clear_widgets()
+        salones = self.controlador.obtener_salones()
         for salon in salones:
-            checkbox = CheckBox(text=f'{salon.id}: {salon.salon}', active=False)
-            if salones_seleccionados and salon in salones_seleccionados:
-                checkbox.active = True
+            checkbox = CheckBox(text=f"{salon.id}-{salon.nombre}")
             self.ids.salones_seleccionados.add_widget(checkbox)
-    
+
+    def cargar_salones_seleccionados(self, salones):
+        for child in self.ids.salones_seleccionados.children:
+            if isinstance(child, CheckBox):
+                salon_id = int(child.text.split('-')[0])
+                if any(s.id == salon_id for s in salones):
+                    child.active = True
+
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
@@ -149,6 +308,10 @@ class DistribucionScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = DistribucionController(self)
         self.cargar_salones()
+        self.cargar_donaciones()
+
+    def cargar_donaciones(self):
+      self.ids.donacion_spinner.values = self.controlador.obtener_donaciones()
 
     def obtener_donaciones(self):
         return self.controlador.obtener_donaciones()
@@ -190,6 +353,60 @@ class LogisticaScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = LogisticaController(self)
 
+    def obtener_datos_formulario(self):
+        almacen = self.ids.logistica_almacen.text
+        capitan = self.ids.logistica_capitan.text
+        distribucion = self.ids.logistica_distribucion.text
+        fecha = self.ids.logistica_fecha.text
+        hidratacion = self.ids.logistica_hidratacion.text
+        pasillo = self.ids.logistica_pasillo.text
+        secretaria = self.ids.logistica_secretaria.text
+
+        # Validación básica
+        if not almacen:
+            self.mostrar_error("El número de almacenes es obligatorio.")
+            return None
+        if not capitan:
+            self.mostrar_error("El número de capitanes es obligatorio.")
+            return None
+        if not distribucion:
+            self.mostrar_error("El número de distribuciones es obligatorio.")
+            return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        if not hidratacion:
+            self.mostrar_error("El número de hidrataciones es obligatorio.")
+            return None
+        if not pasillo:
+            self.mostrar_error("El número de pasillos es obligatorio.")
+            return None
+        if not secretaria:
+            self.mostrar_error("El número de secretarias es obligatorio.")
+            return None
+
+        try:
+            int(almacen)
+            int(capitan)
+            int(distribucion)
+            int(hidratacion)
+            int(pasillo)
+            int(secretaria)
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Los campos numéricos deben ser números enteros y la fecha debe tener el formato AAAA-MM-DD.")
+            return None
+
+        return {
+            "almacen": int(almacen),
+            "capitan": int(capitan),
+            "distribucion": int(distribucion),
+            "fecha": fecha,
+            "hidratacion": int(hidratacion),
+            "pasillo": int(pasillo),
+            "secretaria": int(secretaria)
+        }
+    
     def actualizar_lista_logisticas(self, logisticas):
         lista_logisticas_grid = self.ids.lista_logisticas
         lista_logisticas_grid.clear_widgets()
@@ -219,6 +436,66 @@ class OtrasAreasScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = OtrasAreasController(self)
 
+    def obtener_datos_formulario(self):
+        alabanza = self.ids.otrasareas_alabanza.text
+        fecha = self.ids.otrasareas_fecha.text
+        protocolo = self.ids.otrasareas_protocolo.text
+        semillitas = self.ids.otrasareas_semillitas.text
+        sonido = self.ids.otrasareas_sonido.text
+        teatro = self.ids.otrasareas_teatro.text
+        tv = self.ids.otrasareas_tv.text
+        ujier = self.ids.otrasareas_ujier.text
+
+        # Validación básica
+        if not alabanza:
+            self.mostrar_error("El número de alabanzas es obligatorio.")
+            return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        if not protocolo:
+            self.mostrar_error("El número de protocolos es obligatorio.")
+            return None
+        if not semillitas:
+            self.mostrar_error("El número de semillitas es obligatorio.")
+            return None
+        if not sonido:
+            self.mostrar_error("El número de sonidos es obligatorio.")
+            return None
+        if not teatro:
+            self.mostrar_error("El número de teatros es obligatorio.")
+            return None
+        if not tv:
+            self.mostrar_error("El número de tvs es obligatorio.")
+            return None
+        if not ujier:
+            self.mostrar_error("El número de ujieres es obligatorio.")
+            return None
+
+        try:
+            int(alabanza)
+            int(protocolo)
+            int(semillitas)
+            int(sonido)
+            int(teatro)
+            int(tv)
+            int(ujier)
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Los campos numéricos deben ser números enteros y la fecha debe tener el formato AAAA-MM-DD.")
+            return None
+
+        return {
+            "alabanza": int(alabanza),
+            "fecha": fecha,
+            "protocolo": int(protocolo),
+            "semillitas": int(semillitas),
+            "sonido": int(sonido),
+            "teatro": int(teatro),
+            "tv": int(tv),
+            "ujier": int(ujier)
+        }
+    
     def actualizar_lista_otrasareas(self, otrasareas):
         lista_otrasareas_grid = self.ids.lista_otrasareas
         lista_otrasareas_grid.clear_widgets()
@@ -249,6 +526,35 @@ class EnsenanzaScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = EnsenanzaController(self)
 
+    def obtener_datos_formulario(self):
+        capitan = self.ids.ensenanza_capitan.text
+        fecha = self.ids.ensenanza_fecha.text
+        subcapitan = self.ids.ensenanza_subcapitan.text
+
+        # Validación básica
+        if not capitan:
+            self.mostrar_error("El nombre del capitán es obligatorio.")
+            return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        if not subcapitan:
+            self.mostrar_error("El número de subcapitanes es obligatorio.")
+            return None
+
+        try:
+            int(subcapitan)
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("El número de subcapitanes debe ser un número entero y la fecha debe tener el formato AAAA-MM-DD.")
+            return None
+
+        return {
+            "capitan": capitan,
+            "fecha": fecha,
+            "subcapitan": int(subcapitan)
+        }
+    
     def actualizar_lista_ensenanzas(self, ensenanzas):
         lista_ensenanzas_grid = self.ids.lista_ensenanzas
         lista_ensenanzas_grid.clear_widgets()
@@ -274,6 +580,18 @@ class RecepcionScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = RecepcionController(self)
 
+    def obtener_datos_formulario(self):
+        nombre = self.ids.recepcion_nombre.text
+
+        # Validación básica
+        if not nombre:
+            self.mostrar_error("El nombre es obligatorio.")
+            return None
+
+        return {
+            "nombre": nombre
+        }
+    
     def actualizar_lista_recepciones(self, recepciones):
         lista_recepciones_grid = self.ids.lista_recepciones
         lista_recepciones_grid.clear_widgets()
@@ -300,6 +618,8 @@ class AyudaScreen(Screen):
 
 class EmiApp(App):
     def build(self):
+        #Icono
+        self.icon = 'kids.ico'
         # Vistas de la aplicación
         Builder.load_file('views/menu.kv')
         Builder.load_file('views/areas.kv')
