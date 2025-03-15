@@ -2,30 +2,81 @@
     name: 'salones'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Salones de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
         # Formulario
         GridLayout:
             cols: 2
+            padding: 20
+            spacing: 20
             Label:
-                text: 'Salón:'
-            TextInput:
-                id: salon_salon
-            Label:
-                text: 'Edad:'
-            TextInput:
-                id: salon_edad
+                text: 'Id Salón:'
+                font_size: 28
+                color: 1, 1, 1, 1
+                size_hint_y: None
+                height: 50
             TextInput:
                 id: salon_id
+                height: 50
+            Label:
+                text: 'Salón:'
+                font_size: 28
+                color: 1, 1, 1, 1
+                size_hint_y: None
+                height: 50
+            TextInput:
+                id: salon_salon
+                height: 50
+            Label:
+                text: 'Edad:'
+                font_size: 28
+                color: 1, 1, 1, 1
+                size_hint_y: None
+                height: 50
+            TextInput:
+                id: salon_edad
+                height: 50
             Button:
                 text: 'Crear'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.crear_salon(salon_salon.text, salon_edad.text)
             Button:
                 text: 'Actualizar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.actualizar_salon(salon_id.text, salon_salon.text, salon_edad.text)
             Button:
                 text: 'Eliminar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.eliminar_salon(salon_id.text)
             Button:
                 text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
                 on_press: root.controlador.listar_salones()
         # Lista de salones
         ScrollView:
@@ -34,9 +85,25 @@
                 cols: 3 # Nombre, Editar, Eliminar
                 size_hint_y: None
                 height: self.minimum_height
-        Button:
-            text: 'Gestionar Aulas'
-            on_press: root.manager.current = 'aulas'
-        Button:
-            text: 'Volver al Menú'
-            on_press: root.manager.current = 'menu'
+        # Contenedor de Botones
+        BoxLayout:
+            size_hint_y: None
+            height: 50 # Ajusta la altura según sea necesario
+            spacing: 10
+            padding: 10
+            Button:
+                text: 'Gestionar Aulas'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.manager.current = 'aulas'
+            Button:
+                text: 'Volver al Menú'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.manager.current = 'menu'
