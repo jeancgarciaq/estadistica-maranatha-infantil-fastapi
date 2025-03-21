@@ -13,7 +13,7 @@ class LogisticaController:
     def __init__(self, vista):
         self.vista = vista
 
-    def crear_logistica(self, almacen, capitan, distribucion, fecha, hidratacion, pasillo, secretaria):
+    def crear_logistica(self, almacen, capitan, distribucion, hidratacion, pasillo, secretaria, fecha):
         if not fecha:
             self.vista.mostrar_error("La fecha es obligatoria.")
             return
@@ -22,7 +22,7 @@ class LogisticaController:
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                logistica = Logistica(almacen=almacen, capitan=capitan, distribucion=distribucion, fecha=fecha_date, hidratacion=hidratacion, pasillo=pasillo, secretaria=secretaria)
+                logistica = Logistica(almacen=almacen, capitan=capitan, distribucion=distribucion, hidratacion=hidratacion, pasillo=pasillo, secretaria=secretaria, fecha=fecha_date)
                 db.add(logistica)
                 logger.info(f"Logística creada: {logistica.id}")
         except SQLAlchemyError as e:
@@ -34,7 +34,7 @@ class LogisticaController:
         finally:
             self.listar_logisticas()
 
-    def actualizar_logistica(self, id, almacen, capitan, distribucion, fecha, hidratacion, pasillo, secretaria):
+    def actualizar_logistica(self, id, almacen, capitan, distribucion, hidratacion, pasillo, secretaria, fecha):
         if not fecha:
             self.vista.mostrar_error("La fecha es obligatoria.")
             return
@@ -48,10 +48,10 @@ class LogisticaController:
                     logistica.almacen = almacen
                     logistica.capitan = capitan
                     logistica.distribucion = distribucion
-                    logistica.fecha = fecha_date
                     logistica.hidratacion = hidratacion
                     logistica.pasillo = pasillo
                     logistica.secretaria = secretaria
+                    logistica.fecha = fecha_date
                     logger.info(f"Logística actualizada: {logistica.id}")
                 else:
                     self.vista.mostrar_error("Logística no encontrada.")

@@ -8,7 +8,7 @@ class Logistica(Base):
     almacen = Column(Integer)
     capitan = Column(Integer)
     distribucion = Column(Integer)
-    fecha = Column(Date)
     hidratacion = Column(Integer)
     pasillo = Column(Integer)
     secretaria = Column(Integer)
+    fecha = Column(Date)
