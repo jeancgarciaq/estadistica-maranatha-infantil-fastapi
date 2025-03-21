@@ -29,6 +29,25 @@
                     height: 50
                 Spinner:
                     id: donacion_spinner
+                    text: 'Seleccionar Donación'
+                    values: []
+                Label:
+                    text: 'Cantidad:'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None 
+                    height: 50
+                TextInput:
+                    id: donacion_cantidad
+                    input_type: 'number'
+                Label:
+                    text: 'Unidad:'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None 
+                    height: 50
+                TextInput:
+                    id: donacion_unidad
                 Label:
                     text: 'Salones:'
                     font_size: 28
@@ -48,6 +67,14 @@
                     size_hint_y: None
                     height: 50
                     on_press: root.controlador.registrar_distribucion(root.obtener_donacion_seleccionada(), root.obtener_salones_seleccionados())
+                Button:
+                    text: 'Listar Distribuciones'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
+                    on_press: root.mostrar_popup_lista()
         # Lista de distribuciones (opcional)
         ScrollView:
             GridLayout:
