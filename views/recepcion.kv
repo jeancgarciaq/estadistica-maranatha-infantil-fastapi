@@ -10,21 +10,59 @@
                 height: self.minimum_height
                 Label:
                     text: 'Nombre:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: recepcion_nombre
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: recepcion_fecha
+                Label:
+                    text: 'ID Recepción:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: recepcion_id
                 Button:
                     text: 'Crear'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.crear_recepcion(recepcion_nombre.text)
                 Button:
                     text: 'Actualizar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.actualizar_recepcion(recepcion_id.text, recepcion_nombre.text)
                 Button:
                     text: 'Eliminar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.eliminar_recepcion(recepcion_id.text)
                 Button:
                     text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.listar_recepciones()
         # Lista de recepciones
         ScrollView:
