@@ -2,6 +2,19 @@
     name: 'distribucion'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Distribución de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         # Formulario
         ScrollView:
             GridLayout:
@@ -10,10 +23,18 @@
                 height: self.minimum_height
                 Label:
                     text: 'Donación:'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 50
                 Spinner:
                     id: donacion_spinner
                 Label:
                     text: 'Salones:'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 50
                 GridLayout:
                     id: salones_seleccionados
                     cols: 1
@@ -21,6 +42,11 @@
                     height: self.minimum_height
                 Button:
                     text: 'Registrar Distribución'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.registrar_distribucion(root.obtener_donacion_seleccionada(), root.obtener_salones_seleccionados())
         # Lista de distribuciones (opcional)
         ScrollView:
@@ -31,4 +57,9 @@
                 height: self.minimum_height
         Button:
             text: 'Volver al Menú'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'
