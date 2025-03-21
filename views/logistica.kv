@@ -10,45 +10,107 @@
                 height: self.minimum_height
                 Label:
                     text: 'Almacén:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_almacen
                 Label:
                     text: 'Capitán:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_capitan
                 Label:
                     text: 'Distribución:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_distribucion
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_fecha
                 Label:
                     text: 'Hidratación:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_hidratacion
                 Label:
                     text: 'Pasillo:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_pasillo
                 Label:
                     text: 'Secretaría:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: logistica_fecha
                 TextInput:
                     id: logistica_secretaria
+                Label:
+                    text: 'ID Logistica:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: logistica_id
                 Button:
                     text: 'Crear'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.crear_logistica(logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
                 Button:
                     text: 'Actualizar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.actualizar_logistica(logistica_id.text, logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
                 Button:
                     text: 'Eliminar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.eliminar_logistica(logistica_id.text)
                 Button:
                     text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.listar_logisticas()
         # Lista de logísticas
         ScrollView:
