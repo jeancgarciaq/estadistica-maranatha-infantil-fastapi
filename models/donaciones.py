@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String, Float, Date
 from sqlalchemy.orm import relationship
 from models.database import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class Donacion(Base):
     __tablename__ = 'donaciones'
@@ -12,4 +15,5 @@ class Donacion(Base):
     equipo = Column(String)
     fecha = Column(Date)
 
-    salones = relationship("Salon", secondary="donaciones_salones", back_populates="donaciones")
+    distribuciones = relationship("Distribucion", back_populates="donacion")
+        
