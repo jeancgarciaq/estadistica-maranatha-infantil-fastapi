@@ -10,49 +10,115 @@
                 height: self.minimum_height
                 Label:
                     text: 'Alabanza:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_alabanza
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_fecha
                 Label:
                     text: 'Protocolo:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_protocolo
                 Label:
                     text: 'Semillitas:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_semillitas
                 Label:
                     text: 'Sonido:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_sonido
                 Label:
                     text: 'Teatro:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_teatro
                 Label:
                     text: 'TV:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_tv
                 Label:
                     text: 'Ujier:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_ujier
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: otrasareas_fecha
+                Label:
+                    text: 'ID Otras Áreas:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: otrasareas_id
                 Button:
                     text: 'Crear'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.crear_otrasareas(otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
                 Button:
                     text: 'Actualizar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.actualizar_otrasareas(otrasareas_id.text, otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
                 Button:
                     text: 'Eliminar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.eliminar_otrasareas(otrasareas_id.text)
                 Button:
                     text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.listar_otrasareas()
         # Lista de otras áreas
         ScrollView:
@@ -62,5 +128,10 @@
                 size_hint_y: None
                 height: self.minimum_height
         Button:
-            text: 'Volver al Menú'
+            text: 'Inicio'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'
