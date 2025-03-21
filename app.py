@@ -12,6 +12,9 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from datetime import datetime
+from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
 
 class MenuScreen(Screen):
     pass
@@ -46,6 +49,37 @@ class AreasScreen(Screen):
         if area:
             self.ids.area_nombre.text = area.nombre
             self.ids.area_id.text = str(area.id)
+
+    def mostrar_popup_lista(self):
+        areas = self.controlador.listar_areas()  # Obtener la lista de áreas desde el controlador
+
+        # Crear el contenido del popup (lista de áreas)
+        content = ScrollView(
+            GridLayout(
+                cols=3,
+                size_hint_y=None,
+                height=self.minimum_height,
+                id='lista_areas_popup'  # ID para el GridLayout del popup
+            )
+        )
+
+        for area in areas:
+            content.children[0].add_widget(Label(text=str(area.id)))
+            content.children[0].add_widget(Label(text=area.area))  
+
+        # Crear el botón de cerrar
+        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+
+        # Crear el popup
+        popup = Popup(title='Lista de Áreas', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(400, 400))
+        popup.content.add_widget(content)
+        popup.content.add_widget(close_button)
+
+        # Asignar la función de cierre al botón
+        close_button.bind(on_press=popup.dismiss)
+
+        # Mostrar el popup
+        popup.open()
 
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
@@ -107,6 +141,7 @@ class AulasScreen(Screen):
         ninos = self.ids.aula_ninos.text
         ninas = self.ids.aula_ninas.text
         subcapitan = self.ids.aula_subcapitan.text
+        fecha = self.ids.aula_fecha.text
         id_salon = self.ids.aula_id_salon.text
 
         # Validación básica
@@ -137,8 +172,13 @@ class AulasScreen(Screen):
         if not subcapitan:
             self.mostrar_error("El número de subcapitanes es obligatorio.")
             return None
-        if not id_salon:
-            self.mostrar_error("El ID del salón es obligatorio.")
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
             return None
 
         try:
@@ -149,7 +189,6 @@ class AulasScreen(Screen):
             int(ninos)
             int(ninas)
             int(subcapitan)
-            int(id_salon)
         except ValueError:
             self.mostrar_error("Los campos numéricos deben ser números enteros.")
             return None
@@ -164,7 +203,8 @@ class AulasScreen(Screen):
             "ninos": int(ninos),
             "ninas": int(ninas),
             "subcapitan": int(subcapitan),
-            "id_salon": int(id_salon)
+            "id_salon": int(id_salon),
+            "fecha": fecha
         }
 
     def actualizar_lista_aulas(self, aulas):
@@ -190,6 +230,48 @@ class AulasScreen(Screen):
             self.ids.aula_id_salon.text = str(aula.id_salon)
             self.ids.aula_id.text = str(aula.id)
 
+    def mostrar_popup_lista(self):
+        aulas = self.controlador.listar_aulas()  # Obtener la lista de aulas desde el controlador
+
+        # Crear el contenido del popup (lista de aulas)
+        content = ScrollView(
+            GridLayout(
+                cols=10,
+                size_hint_y=None,
+                height=self.minimum_height,
+                id='lista_aulas_popup'
+            )
+        )
+
+        for aula in aulas:
+            content.children[0].add_widget(Label(text=str(aula.id)))
+            content.children[0].add_widget(Label(text=str(aula.auxiliar)))
+            content.children[0].add_widget(Label(text=str(aula.capitan)))
+            content.children[0].add_widget(Label(text=str(aula.colaborador)))
+            content.children[0].add_widget(Label(text=aula.condicion))
+            content.children[0].add_widget(Label(text=aula.edad))
+            content.children[0].add_widget(Label(text=str(aula.maestra)))
+            content.children[0].add_widget(Label(text=str(aula.ninos)))
+            content.children[0].add_widget(Label(text=str(aula.ninas)))
+            content.children[0].add_widget(Label(text=str(aula.subcapitan)))
+            content.children[0].add_widget(Label(text=str(aula.fecha)))
+            
+
+        # Crear el botón de cerrar
+        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+
+        # Crear el popup
+        popup = Popup(title='Lista de Aulas', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(400, 400))
+        popup.content.add_widget(content)
+        popup.content.add_widget(close_button)
+
+        # Asignar la función de cierre al botón
+        close_button.bind(on_press=popup.dismiss)
+
+        # Mostrar el popup
+        popup.open()
+
+
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
@@ -205,7 +287,7 @@ class DonacionesScreen(Screen):
     def obtener_datos_formulario(self):
         descripcion = self.ids.donacion_descripcion.text
         cantidad = self.ids.donacion_cantidad.text
-        unidad = self.ids.donacion_unidad.textclear
+        unidad = self.ids.donacion_unidad.text
         fecha = self.ids.donacion_fecha.text
         equipo = self.ids.donacion_equipo.text
 
@@ -224,6 +306,9 @@ class DonacionesScreen(Screen):
         if not unidad:
             self.mostrar_error("La unidad es obligatoria.")
             return None
+        if not equipo:
+            self.mostrar_error("El equipo es obligatorio.")
+            return None
         if not fecha:
             self.mostrar_error("La fecha es obligatoria.")
             return None
@@ -232,16 +317,13 @@ class DonacionesScreen(Screen):
         except ValueError:
             self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
             return None
-        if not equipo:
-            self.mostrar_error("El equipo es obligatorio.")
-            return None
 
         return {
             "descripcion": descripcion,
             "cantidad": cantidad,
             "unidad": unidad,
-            "fecha": fecha,
-            "equipo": equipo
+            "equipo": equipo,
+            "fecha": fecha
         }
 
     def crear_donacion(self):
@@ -257,6 +339,42 @@ class DonacionesScreen(Screen):
 
     def listar_donaciones(self):
         self.controlador.listar_donaciones()
+
+    def mostrar_popup_lista(self):
+        donaciones = self.controlador.listar_donaciones()  # Obtener la lista de donaciones desde el controlador
+
+        # Crear el contenido del popup (lista de donaciones)
+        content = ScrollView(
+            GridLayout(
+                cols=5,
+                size_hint_y=None,
+                height=self.minimum_height,
+                id='lista_donaciones'
+            )
+        )
+
+        for donacion in donaciones:
+            content.children[0].add_widget(Label(text=str(donacion.id)))
+            content.children[0].add_widget(Label(text=donacion.descripcion))
+            content.children[0].add_widget(Label(text=str(donacion.cantidad)))
+            content.children[0].add_widget(Label(text=str(donacion.fecha)))
+            content.children[0].add_widget(Label(text=donacion.equipo))
+            content.children[0].add_widget(Label(text=donacion.fecha))
+            
+
+        # Crear el botón de cerrar
+        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+
+        # Crear el popup
+        popup = Popup(title='Lista de Donaciones', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(400, 400))
+        popup.content.add_widget(content)
+        popup.content.add_widget(close_button)
+
+        # Asignar la función de cierre al botón
+        close_button.bind(on_press=popup.dismiss)
+
+        # Mostrar el popup
+        popup.open()
 
     def actualizar_lista_donaciones(self, donaciones):
         self.ids.lista_donaciones.clear_widgets()
@@ -274,8 +392,8 @@ class DonacionesScreen(Screen):
         self.ids.donacion_descripcion.text = donacion.descripcion
         self.ids.donacion_cantidad.text = str(donacion.cantidad)
         self.ids.donacion_unidad.text = donacion.unidad
-        self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d')
         self.ids.donacion_equipo.text = donacion.equipo
+        self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d')
         self.cargar_salones_seleccionados(donacion.salones)
 
     def obtener_salones_seleccionados(self):
@@ -298,6 +416,34 @@ class DonacionesScreen(Screen):
                 salon_id = int(child.text.split('-')[0])
                 if any(s.id == salon_id for s in salones):
                     child.active = True
+
+    def actualizar_salones(self, salones):
+        # Limpiar el GridLayout antes de agregar nuevos CheckBoxes
+        self.ids.salones_seleccionados.clear_widgets()
+
+        for salon in salones:
+            checkbox = CheckBox(active=False)  # Inicialmente no seleccionados
+            label = Label(text=salon.salon)  # Asume que cada salón tiene un atributo 'nombre'
+            box_layout = BoxLayout(orientation='horizontal')
+            box_layout.add_widget(checkbox)
+            box_layout.add_widget(label)
+            self.ids.salones_seleccionados.add_widget(box_layout)
+
+    def obtener_salones_seleccionados(self):
+        salones_seleccionados = []
+        for box_layout in self.ids.salones_seleccionados.children:
+            checkbox = box_layout.children[1]  # CheckBox es el segundo widget
+            label = box_layout.children[0]  # Label es el primer widget
+            if checkbox.active:
+                salones_seleccionados.append(label.text)
+        return salones_seleccionados
+
+    # Ejemplo de cómo se llama a la función para mostrar los salones
+    def mostrar_salones(self):
+        # Obtener la lista de salones desde el controlador
+        salones = self.controlador.obtener_salones()
+        # Llamar a la función para actualizar los salones en la vista
+        self.actualizar_salones(salones)
 
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
@@ -361,6 +507,7 @@ class LogisticaScreen(Screen):
         hidratacion = self.ids.logistica_hidratacion.text
         pasillo = self.ids.logistica_pasillo.text
         secretaria = self.ids.logistica_secretaria.text
+        fecha = self.ids.logistica_fecha.text
 
         # Validación básica
         if not almacen:
@@ -384,6 +531,14 @@ class LogisticaScreen(Screen):
         if not secretaria:
             self.mostrar_error("El número de secretarias es obligatorio.")
             return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
+            return None
 
         try:
             int(almacen)
@@ -404,7 +559,8 @@ class LogisticaScreen(Screen):
             "fecha": fecha,
             "hidratacion": int(hidratacion),
             "pasillo": int(pasillo),
-            "secretaria": int(secretaria)
+            "secretaria": int(secretaria),
+            "fecha": fecha
         }
     
     def actualizar_lista_logisticas(self, logisticas):
@@ -425,6 +581,7 @@ class LogisticaScreen(Screen):
             self.ids.logistica_hidratacion.text = str(logistica.hidratacion)
             self.ids.logistica_pasillo.text = str(logistica.pasillo)
             self.ids.logistica_secretaria.text = str(logistica.secretaria)
+            self.ids.logistica_fecha.text = str(logistica.fecha)
             self.ids.logistica_id.text = str(logistica.id)
 
     def mostrar_error(self, mensaje):
@@ -445,6 +602,7 @@ class OtrasAreasScreen(Screen):
         teatro = self.ids.otrasareas_teatro.text
         tv = self.ids.otrasareas_tv.text
         ujier = self.ids.otrasareas_ujier.text
+        fecha = self.ids.otrasareas_fecha.text
 
         # Validación básica
         if not alabanza:
@@ -471,6 +629,14 @@ class OtrasAreasScreen(Screen):
         if not ujier:
             self.mostrar_error("El número de ujieres es obligatorio.")
             return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
+            return None
 
         try:
             int(alabanza)
@@ -493,7 +659,8 @@ class OtrasAreasScreen(Screen):
             "sonido": int(sonido),
             "teatro": int(teatro),
             "tv": int(tv),
-            "ujier": int(ujier)
+            "ujier": int(ujier),
+            "fecha": fecha
         }
     
     def actualizar_lista_otrasareas(self, otrasareas):
@@ -528,31 +695,35 @@ class EnsenanzaScreen(Screen):
 
     def obtener_datos_formulario(self):
         capitan = self.ids.ensenanza_capitan.text
-        fecha = self.ids.ensenanza_fecha.text
         subcapitan = self.ids.ensenanza_subcapitan.text
+        fecha = self.ids.ensenanza_fecha.text
 
         # Validación básica
         if not capitan:
             self.mostrar_error("El nombre del capitán es obligatorio.")
             return None
+        if not subcapitan:
+            self.mostrar_error("El número de subcapitanes es obligatorio.")
+            return None
         if not fecha:
             self.mostrar_error("La fecha es obligatoria.")
             return None
-        if not subcapitan:
-            self.mostrar_error("El número de subcapitanes es obligatorio.")
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
             return None
 
         try:
             int(subcapitan)
-            datetime.strptime(fecha, '%Y-%m-%d').date()
         except ValueError:
-            self.mostrar_error("El número de subcapitanes debe ser un número entero y la fecha debe tener el formato AAAA-MM-DD.")
+            self.mostrar_error("El número de subcapitanes debe ser un número entero")
             return None
 
         return {
             "capitan": capitan,
-            "fecha": fecha,
-            "subcapitan": int(subcapitan)
+            "subcapitan": int(subcapitan),
+            "fecha": fecha
         }
     
     def actualizar_lista_ensenanzas(self, ensenanzas):
@@ -582,14 +753,24 @@ class RecepcionScreen(Screen):
 
     def obtener_datos_formulario(self):
         nombre = self.ids.recepcion_nombre.text
+        fecha = self.ids.recepcion_fecha.text
 
         # Validación básica
         if not nombre:
             self.mostrar_error("El nombre es obligatorio.")
             return None
+        if not fecha:
+            self.mostrar_error("La fecha es obligatoria.")
+            return None
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
+            return None
 
         return {
-            "nombre": nombre
+            "nombre": nombre,
+            "fecha": fecha
         }
     
     def actualizar_lista_recepciones(self, recepciones):
@@ -604,6 +785,7 @@ class RecepcionScreen(Screen):
         recepcion = self.controlador.obtener_recepcion(id)
         if recepcion:
             self.ids.recepcion_nombre.text = recepcion.nombre
+            self.ids.recepcion_fecha.text = recepcion.fecha.strftime('%Y-%m-%d')
             self.ids.recepcion_id.text = str(recepcion.id)
 
     def mostrar_error(self, mensaje):
