@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from models.database import Base
 
@@ -15,6 +15,7 @@ class Aula(Base):
     ninos = Column(Integer)
     ninas = Column(Integer)
     subcapitan = Column(Integer)
+    fecha = Column(Date)
+    
     id_salon = Column(Integer, ForeignKey('salones.id'))
-
     salon = relationship("Salon", backref="aulas")

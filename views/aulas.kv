@@ -2,73 +2,169 @@
     name: 'aulas'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Aulas de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
         # Formulario
         ScrollView:
+            size_hint_y: 1 # Ocupa todo el espacio vertical disponible
             GridLayout:
                 cols: 2
+                padding: 20
+                spacing: 20
                 size_hint_y: None
                 height: self.minimum_height
+                row_default_height: 30
+                Label:
+                    text: 'Id Aulas:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: aula_id
                 Label:
                     text: 'Auxiliar:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_auxiliar
                 Label:
                     text: 'Capitán:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_capitan
                 Label:
                     text: 'Colaborador:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_colaborador
                 Label:
                     text: 'Condición:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_condicion
                 Label:
                     text: 'Edad:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_edad
                 Label:
                     text: 'Maestra:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_maestra
                 Label:
                     text: 'Niños:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_ninos
                 Label:
                     text: 'Niñas:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_ninas
                 Label:
                     text: 'Subcapitán:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_subcapitan
                 Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: aula_fecha
+                Label:
                     text: 'ID Salón:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: aula_id_salon
-                TextInput:
-                    id: aula_id
-                Button:
-                    text: 'Crear'
-                    on_press: root.controlador.crear_aula(aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_id_salon.text)
-                Button:
-                    text: 'Actualizar'
-                    on_press: root.controlador.actualizar_aula(aula_id.text, aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_id_salon.text)
-                Button:
-                    text: 'Eliminar'
-                    on_press: root.controlador.eliminar_aula(aula_id.text)
-                Button:
-                    text: 'Listar'
-                    on_press: root.controlador.listar_aulas()
-        # Lista de aulas
-        ScrollView:
-            GridLayout:
-                id: lista_aulas
-                cols: 3 # Nombre, Editar, Eliminar
+        # Contenedor de Botones
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            padding: 10
+            Button:
+                text: 'Crear'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
-                height: self.minimum_height
+                height: 50
+                on_press: root.crear_aula()
+            Button:
+                text: 'Actualizar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.actualizar_aula()
+            Button:
+                text: 'Eliminar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.eliminar_aula()
+            Button:
+                text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                # Llama a la función para mostrar el popup
+                on_press: root.mostrar_popup_lista()
+        # Botón Volver al Menú
         Button:
             text: 'Volver al Menú'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'

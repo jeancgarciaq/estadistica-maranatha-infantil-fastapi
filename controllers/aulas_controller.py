@@ -12,7 +12,7 @@ class AulasController:
     def __init__(self, vista):
         self.vista = vista
 
-    def crear_aula(self, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, id_salon):
+    def crear_aula(self, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, fecha, id_salon):
         # ... (Validación de datos)
         db: Session = next(get_db())
         try:
@@ -25,7 +25,7 @@ class AulasController:
         finally:
             self.listar_aulas()
 
-    def actualizar_aula(self, id, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, id_salon):
+    def actualizar_aula(self, id, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, fecha, id_salon):
         # ... (Validación de datos)
         db: Session = next(get_db())
         try:
