@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from models.database import Base
-from models.donaciones_salones import donaciones_salones
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class Salon(Base):
     __tablename__ = 'salones'
@@ -10,4 +12,4 @@ class Salon(Base):
     salon = Column(String)
     edad = Column(String)
     
-    donaciones = relationship('Donacion', secondary=donaciones_salones, back_populates='salones')
+    distribuciones = relationship("Distribucion", back_populates="salon")
