@@ -10,25 +10,26 @@
                 size: self.size
         Label:
             text: 'Donaciones de Maranatha Infantil'
-            font_size: 30
+            font_size: 36
             color: 1, 1, 1, 1
             size_hint_y: None
             height: 50
         # Formulario
         ScrollView:
+            size_hint_y: 1  # Ocupa todo el espacio vertical disponible
             GridLayout:
                 cols: 2
                 padding: 20
                 spacing: 20
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
+                row_default_height: 30
                 Label:
                     text: 'Id Donación:'
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_id
                 Label:
@@ -36,7 +37,7 @@
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_descripcion
                 Label:
@@ -44,7 +45,7 @@
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_cantidad
                 Label:
@@ -52,31 +53,31 @@
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_unidad
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
-                    font_size: 16
+                    font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_fecha
                 Label:
                     text: 'Equipo:'
-                    font_size: 16
+                    font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 TextInput:
                     id: donacion_equipo
                 Label:
                     text: 'Salones:'
-                    font_size: 16
+                    font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
-                    height: 50
+                    height: 30
                 GridLayout:
                     id: salones_seleccionados
                     cols: 1
@@ -85,7 +86,7 @@
         # Contenedor de Botones
         BoxLayout:
             size_hint_y: None
-            height: 50 # Ajusta la altura según sea necesario
+            height: 50
             spacing: 10
             padding: 10
             Button:
@@ -95,7 +96,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.crear_donacion(donacion_cantidad.text, donacion_descripcion.text, donacion_equipo.text, donacion_fecha.text, donacion_sembrador.text, root.obtener_salones_seleccionados())
+                on_press: root.crear_donacion()
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -103,7 +104,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.actualizar_donacion(donacion_id.text, donacion_cantidad.text, donacion_descripcion.text, donacion_equipo.text, donacion_fecha.text, donacion_sembrador.text, root.obtener_salones_seleccionados())
+                on_press: root.actualizar_donacion()
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -111,7 +112,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.eliminar_donacion(donacion_id.text)
+                on_press: root.eliminar_donacion()
             Button:
                 text: 'Listar'
                 font_size: 28
@@ -119,16 +120,10 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.listar_donaciones()
-        # Lista de donaciones
-        ScrollView:
-            GridLayout:
-                id: lista_donaciones
-                cols: 3 # Nombre, Editar, Eliminar
-                size_hint_y: None
-                height: self.minimum_height
+                on_press: root.mostrar_popup_lista()  # Llama a la función para mostrar el popup
+        # Botón Inicio
         Button:
-            text: 'Volver al Menú'
+            text: 'Inicio'
             font_size: 28
             background_normal: ''
             background_color: (0, 119/255, 194/255, 1)
