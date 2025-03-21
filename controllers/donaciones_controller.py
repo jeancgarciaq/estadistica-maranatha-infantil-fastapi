@@ -14,7 +14,7 @@ class DonacionesController:
     def __init__(self, vista):
         self.vista = vista
 
-    def crear_donacion(self, cantidad, descripcion, unidad, fecha, equipo, salones_ids):
+    def crear_donacion(self, cantidad, descripcion, unidad, equipo, fecha, salones_ids):
         db: Session = next(get_db())
         try:
             with db.begin():
@@ -40,7 +40,7 @@ class DonacionesController:
         finally:
             self.vista.listar_donaciones()
 
-    def actualizar_donacion(self, donacion_id, cantidad, descripcion, unidad, fecha, equipo, salones_ids):
+    def actualizar_donacion(self, donacion_id, cantidad, descripcion, unidad, equipo, fecha, salones_ids):
         db: Session = next(get_db())
         try:
             with db.begin():

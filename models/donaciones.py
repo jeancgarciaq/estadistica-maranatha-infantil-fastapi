@@ -9,6 +9,7 @@ class Donacion(Base):
     descripcion = Column(String)
     cantidad = Column(Float)
     unidad = Column(String)
-    fecha = Column(Date)
     equipo = Column(String)
+    fecha = Column(Date)
+
     salones = relationship("Salon", secondary="donaciones_salones", back_populates="donaciones")
