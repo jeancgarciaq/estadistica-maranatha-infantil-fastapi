@@ -9,4 +9,5 @@ class Salon(Base):
     id = Column(Integer, primary_key=True, index=True)
     salon = Column(String)
     edad = Column(String)
+    
     donaciones = relationship('Donacion', secondary=donaciones_salones, back_populates='salones')
