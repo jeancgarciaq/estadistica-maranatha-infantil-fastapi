@@ -13,3 +13,4 @@ class OtrasAreas(Base):
     teatro = Column(Integer)
     tv = Column(Integer)
     ujier = Column(Integer)
+    fecha = Column(Date)

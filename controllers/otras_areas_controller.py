@@ -13,7 +13,7 @@ class OtrasAreasController:
     def __init__(self, vista):
         self.vista = vista
 
-    def crear_otrasareas(self, alabanza, fecha, protocolo, semillitas, sonido, teatro, tv, ujier):
+    def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
         if not fecha:
             self.vista.mostrar_error("La fecha es obligatoria.")
             return
@@ -22,7 +22,7 @@ class OtrasAreasController:
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                otrasareas = OtrasAreas(alabanza=alabanza, fecha=fecha_date, protocolo=protocolo, semillitas=semillitas, sonido=sonido, teatro=teatro, tv=tv, ujier=ujier)
+                otrasareas = OtrasAreas(alabanza=alabanza, protocolo=protocolo, semillitas=semillitas, sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, fecha=fecha_date)
                 db.add(otrasareas)
                 logger.info(f"Otras áreas creadas: {otrasareas.id}")
         except SQLAlchemyError as e:
@@ -34,7 +34,7 @@ class OtrasAreasController:
         finally:
             self.listar_otrasareas()
 
-    def actualizar_otrasareas(self, id, alabanza, fecha, protocolo, semillitas, sonido, teatro, tv, ujier):
+    def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
         if not fecha:
             self.vista.mostrar_error("La fecha es obligatoria.")
             return
@@ -46,13 +46,13 @@ class OtrasAreasController:
                 if otrasareas:
                     fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
                     otrasareas.alabanza = alabanza
-                    otrasareas.fecha = fecha_date
                     otrasareas.protocolo = protocolo
                     otrasareas.semillitas = semillitas
                     otrasareas.sonido = sonido
                     otrasareas.teatro = teatro
                     otrasareas.tv = tv
                     otrasareas.ujier = ujier
+                    otrasareas.fecha = fecha_date
                     logger.info(f"Otras áreas actualizadas: {otrasareas.id}")
                 else:
                     self.vista.mostrar_error("Otras áreas no encontradas.")
