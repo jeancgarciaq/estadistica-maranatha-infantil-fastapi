@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Date
 from models.database import Base
 
 class Recepcion(Base):
@@ -6,3 +6,4 @@ class Recepcion(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String)
+    fecha = Column(Date)

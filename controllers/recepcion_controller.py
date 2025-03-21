@@ -20,7 +20,7 @@ class RecepcionController:
         db: Session = next(get_db())
         try:
             with db.begin():
-                recepcion = Recepcion(nombre=nombre)
+                recepcion = Recepcion(nombre=nombre, fecha=fecha_date)
                 db.add(recepcion)
                 logger.info(f"Recepción creada: {recepcion.id}")
         except SQLAlchemyError as e:
@@ -29,9 +29,12 @@ class RecepcionController:
         finally:
             self.listar_recepciones()
 
-    def actualizar_recepcion(self, id, nombre):
+    def actualizar_recepcion(self, id, nombre, fecha):
         if not nombre:
             self.vista.mostrar_error("El nombre es obligatorio.")
+            return
+        elif not fecha:
+            self.vista.mostrar_error("La fecha es obligatoria.")
             return
 
         db: Session = next(get_db())
@@ -40,6 +43,7 @@ class RecepcionController:
                 recepcion = db.query(Recepcion).filter(Recepcion.id == id).first()
                 if recepcion:
                     recepcion.nombre = nombre
+                    recepcion.fecha = fecha_date
                     logger.info(f"Recepción actualizada: {recepcion.id}")
                 else:
                     self.vista.mostrar_error("Recepción no encontrada.")
