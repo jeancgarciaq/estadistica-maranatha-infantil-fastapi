@@ -4,7 +4,7 @@ kivy.require('2.3.1')
 from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
-from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController, DistribucionController
+from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController
 from models.salones import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
@@ -15,6 +15,8 @@ from datetime import datetime
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
 
 class MenuScreen(Screen):
     pass
@@ -422,8 +424,8 @@ class DonacionesScreen(Screen):
         self.ids.salones_seleccionados.clear_widgets()
 
         for salon in salones:
-            checkbox = CheckBox(active=False)  # Inicialmente no seleccionados
-            label = Label(text=salon.salon)  # Asume que cada salón tiene un atributo 'nombre'
+            checkbox = CheckBox(active=False)  
+            label = Label(text=salon.salon)  
             box_layout = BoxLayout(orientation='horizontal')
             box_layout.add_widget(checkbox)
             box_layout.add_widget(label)
@@ -432,66 +434,104 @@ class DonacionesScreen(Screen):
     def obtener_salones_seleccionados(self):
         salones_seleccionados = []
         for box_layout in self.ids.salones_seleccionados.children:
-            checkbox = box_layout.children[1]  # CheckBox es el segundo widget
-            label = box_layout.children[0]  # Label es el primer widget
+            checkbox = box_layout.children[1]  
+            label = box_layout.children[0]  
             if checkbox.active:
                 salones_seleccionados.append(label.text)
         return salones_seleccionados
 
-    # Ejemplo de cómo se llama a la función para mostrar los salones
+    # Función para mostrar los salones
     def mostrar_salones(self):
         # Obtener la lista de salones desde el controlador
         salones = self.controlador.obtener_salones()
-        # Llamar a la función para actualizar los salones en la vista
+        # Llamar a la función para actualizar los salones
         self.actualizar_salones(salones)
 
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
 
-class DistribucionScreen(Screen):
+class DistribucionesScreen(Screen):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.controlador = DistribucionController(self)
-        self.cargar_salones()
-        self.cargar_donaciones()
+        self.controlador = DistribucionesController(self)
 
-    def cargar_donaciones(self):
-      self.ids.donacion_spinner.values = self.controlador.obtener_donaciones()
-
-    def obtener_donaciones(self):
-        return self.controlador.obtener_donaciones()
-
-    def obtener_donacion_seleccionada(self):
-        donacion_text = self.ids.donacion_spinner.text
-        if donacion_text:
-            return int(donacion_text.split(':')[0])
-        return None
-
-    def obtener_salones_seleccionados(self):
-        salones_seleccionados = []
-        for child in self.ids.salones_seleccionados.children:
-            if isinstance(child, CheckBox) and child.active:
-                salones_seleccionados.append(int(child.text.split(':')[0]))
-        return salones_seleccionados
-
-    def cargar_salones(self):
+    def on_pre_enter(self, *args):
+        donaciones = self.controlador.listar_donaciones()
+        self.ids.donacion_spinner.values = [donacion.descripcion for donacion in donaciones]
         salones = self.controlador.obtener_salones()
+        self.actualizar_salones(salones)
+        self.actualizar_lista_distribuciones()
+
+    def actualizar_salones(self, salones):
         self.ids.salones_seleccionados.clear_widgets()
         for salon in salones:
-            checkbox = CheckBox(text=f'{salon.id}: {salon.salon}')
-            self.ids.salones_seleccionados.add_widget(checkbox)
+            checkbox = CheckBox(active=False)
+            label = Label(text=salon.nombre)
+            cantidad_input = TextInput(hint_text='Cantidad', input_type='float')
+            unidad_input = TextInput(hint_text='Unidad')
+            box_layout = BoxLayout(orientation='horizontal')
+            box_layout.add_widget(checkbox)
+            box_layout.add_widget(label)
+            box_layout.add_widget(cantidad_input)
+            box_layout.add_widget(unidad_input)
+            self.ids.salones_seleccionados.add_widget(box_layout)
 
-    def actualizar_lista_distribuciones(self, donaciones):
-        lista_distribuciones_grid = self.ids.lista_distribuciones
-        lista_distribuciones_grid.clear_widgets()
-        for donacion in donaciones:
-            salones_text = ', '.join([salon.salon for salon in donacion.salones])
-            lista_distribuciones_grid.add_widget(Label(text=f'Donación {donacion.id}'))
-            lista_distribuciones_grid.add_widget(Label(text=f'Salones: {salones_text}'))
+    def obtener_salones_seleccionados(self):
+        salones_distribucion = []
+        for box_layout in self.ids.salones_seleccionados.children:
+            checkbox = box_layout.children[3]
+            label = box_layout.children[2]
+            cantidad_input = box_layout.children[1]
+            unidad_input = box_layout.children[0]
+            if checkbox.active:
+                salones_distribucion.append((label.text, float(cantidad_input.text), unidad_input.text))
+        return salones_distribucion
 
-    def mostrar_error(self, mensaje):
-        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+    def obtener_donacion_seleccionada(self):
+        return self.ids.donacion_spinner.text
+
+    def registrar_distribucion(self):
+        donacion_id = self.obtener_donacion_seleccionada()
+        salones_distribucion = self.obtener_salones_seleccionados()
+        self.controlador.registrar_distribucion(donacion_id, salones_distribucion)
+        self.actualizar_lista_distribuciones()
+
+    def actualizar_lista_distribuciones(self):
+        distribuciones = self.controlador.listar_distribuciones()
+        self.ids.lista_distribuciones.clear_widgets()
+        for distribucion in distribuciones:
+            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.donacion.descripcion))
+            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.salon.nombre))
+            self.ids.lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad)))
+            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.unidad))
+
+    def mostrar_popup_lista(self):
+        distribuciones = self.controlador.listar_distribuciones()
+
+        content = ScrollView(
+            GridLayout(
+                cols=4,
+                size_hint_y=None,
+                height=self.minimum_height,
+                id='lista_distribuciones_popup'
+            )
+        )
+
+        for distribucion in distribuciones:
+            content.children[0].add_widget(Label(text=distribucion.donacion.descripcion))
+            content.children[0].add_widget(Label(text=distribucion.salon.nombre))
+            content.children[0].add_widget(Label(text=str(distribucion.cantidad)))
+            content.children[0].add_widget(Label(text=distribucion.unidad))
+
+        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+
+        popup = Popup(title='Lista de Distribuciones', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(600, 400))
+        popup.content.add_widget(content)
+        popup.content.add_widget(close_button)
+
+        close_button.bind(on_press=popup.dismiss)
         popup.open()
 
 class LogisticaScreen(Screen):
@@ -825,7 +865,7 @@ class EmiApp(App):
         sm.add_widget(AulasScreen(name='aulas'))
         sm.add_widget(EstadisticaScreen(name='estadistica'))
         sm.add_widget(DonacionesScreen(name='donaciones'))
-        sm.add_widget(DistribucionScreen(name='distribucion'))
+        sm.add_widget(DistribucionesScreen(name='distribucion'))
         sm.add_widget(LogisticaScreen(name='logistica'))
         sm.add_widget(OtrasAreasScreen(name='otras_areas'))
         sm.add_widget(EnsenanzaScreen(name='ensenanza'))
