@@ -22,7 +22,7 @@ class EnsenanzaController:
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                ensenanza = Ensenanza(capitan=capitan, fecha=fecha_date, subcapitan=subcapitan)
+                ensenanza = Ensenanza(capitan=capitan, subcapitan=subcapitan, fecha=fecha_date)
                 db.add(ensenanza)
                 logger.info(f"Enseñanza creada: {ensenanza.id}")
         except SQLAlchemyError as e:
@@ -34,7 +34,7 @@ class EnsenanzaController:
         finally:
             self.listar_ensenanzas()
 
-    def actualizar_ensenanza(self, id, capitan, fecha, subcapitan):
+    def actualizar_ensenanza(self, id, capitan, subcapitan, fecha):
         if not capitan or not fecha or not subcapitan:
             self.vista.mostrar_error("Todos los campos son obligatorios.")
             return
@@ -46,8 +46,8 @@ class EnsenanzaController:
                 if ensenanza:
                     fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
                     ensenanza.capitan = capitan
-                    ensenanza.fecha = fecha_date
                     ensenanza.subcapitan = subcapitan
+                    ensenanza.fecha = fecha_date
                     logger.info(f"Enseñanza actualizada: {ensenanza.id}")
                 else:
                     self.vista.mostrar_error("Enseñanza no encontrada.")

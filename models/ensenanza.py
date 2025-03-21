@@ -6,5 +6,5 @@ class Ensenanza(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     capitan = Column(String)
-    fecha = Column(Date)
     subcapitan = Column(Integer)
+    fecha = Column(Date)
