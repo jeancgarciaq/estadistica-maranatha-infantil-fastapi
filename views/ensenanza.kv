@@ -10,29 +10,73 @@
                 height: self.minimum_height
                 Label:
                     text: 'Capitán:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: ensenanza_capitan
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 TextInput:
                     id: ensenanza_fecha
                 Label:
                     text: 'Subcapitán:'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                Label:
+                    text: 'Fecha (YYYY-MM-DD):'
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
+                TextInput:
+                    id: ensenanza_fecha
                 TextInput:
                     id: ensenanza_subcapitan
                 TextInput:
                     id: ensenanza_id
+                    font_size: 20
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 30
                 Button:
                     text: 'Crear'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.crear_ensenanza(ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
                 Button:
                     text: 'Actualizar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.actualizar_ensenanza(ensenanza_id.text, ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
                 Button:
                     text: 'Eliminar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.eliminar_ensenanza(ensenanza_id.text)
                 Button:
                     text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint_y: None
+                    height: 50
                     on_press: root.controlador.listar_ensenanzas()
         # Lista de enseñanzas
         ScrollView:
@@ -42,5 +86,10 @@
                 size_hint_y: None
                 height: self.minimum_height
         Button:
-            text: 'Volver al Menú'
+            text: 'Inicio'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'
