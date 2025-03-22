@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date
-from models.database import Base
+from models.base import Base
 
 class Recepcion(Base):
     __tablename__ = 'recepciones'

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from models.database import Base
+from models.base import Base
 
 class Aula(Base):
     __tablename__ = 'aulas'

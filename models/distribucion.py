@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from models.base import Base
 
 class Distribucion(Base):
     __tablename__ = 'distribuciones'

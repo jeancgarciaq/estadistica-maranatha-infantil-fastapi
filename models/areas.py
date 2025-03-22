@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from models.database import Base
+from models.base import Base
 
 class Area(Base):
     __tablename__ = 'areas'

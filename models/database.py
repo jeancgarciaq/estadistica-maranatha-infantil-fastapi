@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from models.base import Base
 
 # Ruta de la base de datos
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -14,8 +14,16 @@ engine = create_engine(DATABASE_URL)
 # Crea una sesión para interactuar con la base de datos
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Crea una clase base declarativa para los modelos
-Base = declarative_base()
+#Modelos
+from models.areas import Area
+from models.salones import Salon
+from models.aulas import Aula
+from models.donaciones import Donacion
+from models.distribucion import Distribucion
+from models.ensenanza import Ensenanza
+from models.logistica import Logistica
+from models.otras_areas import OtrasAreas
+from models.recepcion import Recepcion
 
 # Función para crear la base de datos si no existe
 def create_database():
