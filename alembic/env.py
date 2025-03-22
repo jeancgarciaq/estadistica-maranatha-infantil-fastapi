@@ -11,7 +11,7 @@ from logging.config import fileConfig
 
 #agregado
 sys.path.append(os.path.join(os.getcwd(), 'models'))
-from models.database import Base
+from models.base import Base
 
 
 # this is the Alembic Config object, which provides
