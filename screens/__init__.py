@@ -4,8 +4,8 @@ from .ayuda_screen import AyudaScreen
 from .distribuciones_screen import DistribucionesScreen
 from .donaciones_screen import DonacionesScreen
 from .ensenanza_screen import EnsenanzaScreen
-from .estadistica_screen import EstadistaScreen
-from .logistica_Screen import LogisticaScreen
+from .estadistica_screen import EstadisticaScreen
+from .logistica_screen import LogisticaScreen
 from .menu_screen import MenuScreen
 from .otrasareas_screen import OtrasAreasScreen
 from .recepcion_screen import RecepcionScreen
