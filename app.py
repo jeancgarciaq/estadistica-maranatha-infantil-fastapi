@@ -5,6 +5,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
 from controllers import AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController
+from models.database import get_db, SessionLocal
 from models.salones import Salon
 from models.database import get_db
 from sqlalchemy.orm import Session
@@ -19,10 +20,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 
 class MenuScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        Builder.load_file('views/menu.kv')
+        super().__init__(**kwargs)
 
 class AreasScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/areas.kv')
         super().__init__(**kwargs)
         self.controlador = AreasController(self)
     
@@ -88,7 +92,8 @@ class AreasScreen(Screen):
         popup.open()
 
 class SalonesScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/salones.kv')
         super().__init__(**kwargs)
         self.controlador = SalonesController(self)
 
@@ -129,7 +134,8 @@ class SalonesScreen(Screen):
         popup.open()
 
 class AulasScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/aulas.kv')
         super().__init__(**kwargs)
         self.controlador = AulasController(self)
     
@@ -279,10 +285,13 @@ class AulasScreen(Screen):
         popup.open()
 
 class EstadisticaScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        Builder.load_file('views/estadistica.kv')
+        super().__init__(**kwargs)
 
 class DonacionesScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/donaciones.kv')
         super().__init__(**kwargs)
         self.controlador = DonacionesController(self)
 
@@ -453,9 +462,11 @@ class DonacionesScreen(Screen):
 
 class DistribucionesScreen(Screen):
 
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/distribucion.kv')
         super().__init__(**kwargs)
-        self.controlador = DistribucionesController(self)
+        #self.controlador = DistribucionesController(self)
+        self.controlador = controlador
 
     def on_pre_enter(self, *args):
         donaciones = self.controlador.listar_donaciones()
@@ -535,7 +546,8 @@ class DistribucionesScreen(Screen):
         popup.open()
 
 class LogisticaScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/logistica.kv')
         super().__init__(**kwargs)
         self.controlador = LogisticaController(self)
 
@@ -629,7 +641,8 @@ class LogisticaScreen(Screen):
         popup.open()
 
 class OtrasAreasScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/otras_areas.kv')
         super().__init__(**kwargs)
         self.controlador = OtrasAreasController(self)
 
@@ -729,7 +742,8 @@ class OtrasAreasScreen(Screen):
         popup.open()
 
 class EnsenanzaScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/ensenanza.kv')
         super().__init__(**kwargs)
         self.controlador = EnsenanzaController(self)
 
@@ -787,7 +801,8 @@ class EnsenanzaScreen(Screen):
         popup.open()
 
 class RecepcionScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, controlador, **kwargs):
+        Builder.load_file('views/recepcion.kv')
         super().__init__(**kwargs)
         self.controlador = RecepcionController(self)
 
@@ -831,47 +846,68 @@ class RecepcionScreen(Screen):
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
-
+    
 class ReporteScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        Builder.load_file('views/reporte.kv')
+        super().__init__(**kwargs)
 
 class AyudaScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        Builder.load_file('views/ayuda.kv')
+        super().__init__(**kwargs)
 
 class EmiApp(App):
     def build(self):
         #Icono
         self.icon = 'kids.ico'
-        # Vistas de la aplicación
-        Builder.load_file('views/menu.kv')
-        Builder.load_file('views/areas.kv')
-        Builder.load_file('views/salones.kv')
-        Builder.load_file('views/aulas.kv')
-        Builder.load_file('views/estadistica.kv')
-        Builder.load_file('views/donaciones.kv')
-        Builder.load_file('views/distribucion.kv')
-        Builder.load_file('views/logistica.kv')
-        Builder.load_file('views/otras_areas.kv')
-        Builder.load_file('views/ensenanza.kv')
-        Builder.load_file('views/recepcion.kv')
-        Builder.load_file('views/reporte.kv')
-        Builder.load_file('views/ayuda.kv')
+        
+        # Inicialización de la sesión de SQLAlchemy
+        self.session = SessionLocal()
 
         #Manejador de las ventanas
         sm = ScreenManager()
-        sm.add_widget(MenuScreen(name='menu'))
-        sm.add_widget(AreasScreen(name='areas'))
-        sm.add_widget(SalonesScreen(name='salones'))
-        sm.add_widget(AulasScreen(name='aulas'))
-        sm.add_widget(EstadisticaScreen(name='estadistica'))
-        sm.add_widget(DonacionesScreen(name='donaciones'))
-        sm.add_widget(DistribucionesScreen(name='distribucion'))
-        sm.add_widget(LogisticaScreen(name='logistica'))
-        sm.add_widget(OtrasAreasScreen(name='otras_areas'))
-        sm.add_widget(EnsenanzaScreen(name='ensenanza'))
-        sm.add_widget(RecepcionScreen(name='recepcion'))
-        sm.add_widget(ReporteScreen(name='reporte'))
-        sm.add_widget(AyudaScreen(name='ayuda'))
+
+        # Inicialización de los controladores con la sesión
+        areas_controller = AreasController(self.session)
+        salones_controller = SalonesController(self.session)
+        aulas_controller = AulasController(self.session)
+        donaciones_controller = DonacionesController(self.session)
+        ensenanza_controller = EnsenanzaController(self.session)
+        logistica_controller = LogisticaController(self.session)
+        otrasareas_controller = OtrasAreasController(self.session)
+        recepcion_controller = RecepcionController(self.session)
+        distribuciones_controller = DistribucionesController(self.session)
+
+        # Inicialización de las vistas con los controladores
+        menu_screen = MenuScreen(name='menu')
+        areas_screen = AreasScreen(areas_controller, name='areas')
+        salones_screen = SalonesScreen(salones_controller, name='salones')
+        aulas_screen = AulasScreen(aulas_controller, name='aulas')
+        estadistica_screen = EstadisticaScreen(name='estadistica')
+        donaciones_screen = DonacionesScreen(donaciones_controller, name='donaciones')
+        distribuciones_screen = DistribucionesScreen(distribuciones_controller, name='distribucion')
+        logistica_screen = LogisticaScreen(logistica_controller, name='logistica')
+        otrasareas_screen = OtrasAreasScreen(otrasareas_controller, name='otrasareas')
+        ensenanza_screen = EnsenanzaScreen(ensenanza_controller, name='ensenanza')
+        recepcion_screen = RecepcionScreen(recepcion_controller, name='recepcion')
+        reporte_screen = ReporteScreen(name='reporte')
+        ayuda_screen = AyudaScreen(name='ayuda')
+
+        # Widget
+        sm.add_widget(menu_screen)
+        sm.add_widget(areas_screen)
+        sm.add_widget(salones_screen)
+        sm.add_widget(aulas_screen)
+        sm.add_widget(estadistica_screen)
+        sm.add_widget(donaciones_screen)
+        sm.add_widget(distribuciones_screen)
+        sm.add_widget(logistica_screen)
+        sm.add_widget(otrasareas_screen)
+        sm.add_widget(ensenanza_screen)
+        sm.add_widget(recepcion_screen)
+        sm.add_widget(reporte_screen)
+        sm.add_widget(ayuda_screen)
 
         return sm
 
