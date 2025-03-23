@@ -7,18 +7,7 @@ from kivy.core.window import Window
 from kivy.lang import Builder
 
 # Importar pantallas separadas
-from screens.menu_screen import MenuScreen
-from screens.areas_screen import AreasScreen
-from screens.salones_screen import SalonesScreen
-from screens.estadistica_screen import EstadisticaScreen
-from screens.donaciones_screen import DonacionesScreen
-from screens.distribuciones_screen import DistribucionesScreen
-from screens.logistica_screen import LogisticaScreen
-from screens.otras_areas_screen import OtrasAreasScreen
-from screens.ensenanza_screen import EnsenanzaScreen
-from screens.recepcion_screen import RecepcionScreen
-from screens.reporte_screen import ReporteScreen
-from screens.ayuda_screen import AyudaScreen
+from screens import MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen
 
 # Cargar archivos KV
 Builder.load_file('styles/app.kv')
