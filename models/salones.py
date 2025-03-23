@@ -9,4 +9,4 @@ class Salon(Base):
     salon = Column(String)
     edad = Column(String)
     
-    distribuciones = relationship("Distribucion", back_populates="salon")
+    distribuciones = relationship("Distribucion", back_populates="salones")

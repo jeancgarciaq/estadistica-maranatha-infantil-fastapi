@@ -12,5 +12,5 @@ class Donacion(Base):
     equipo = Column(String)
     fecha = Column(Date)
 
-    distribuciones = relationship("Distribucion", back_populates="donacion")
+    distribuciones = relationship("Distribucion", back_populates="donaciones")
         
