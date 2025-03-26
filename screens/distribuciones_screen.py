@@ -13,15 +13,33 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+from kivy.clock import Clock
+import traceback
 
 class DistribucionesScreen(Screen):
 
     def __init__(self, controlador, **kwargs):
-        Builder.load_file('views/distribucion.kv')
+        try:
+            Builder.load_file('views/distribucion.kv')
+        except Exception as e:
+            print(f"⚠️ Error al cargar distribucion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
 
     def on_pre_enter(self, *args):
+        Clock.schedule_once(self.cargar_donaciones, 1)  # 📌 Esperar a que Kivy termine de cargar
+
+    def cargar_donaciones(self, dt):
+        if not self.ids:
+            Clock.schedule_once(self.cargar_donaciones, 0.1)
+            return
+        print("Contenido de self.ids:", self.ids)
+        if 'donacion_spinner' not in self.ids:
+            print("⚠️ Error: 'donacion_spinner' no está en self.ids. Verifica el archivo KV.")
+            return #Añadido
+        if 'salones_seleccionados' not in self.ids:
+            print("⚠️ Error: 'salones_seleccionados' no está en self.ids. Verifica el archivo KV.")
+            return #Añadido
         donaciones = self.controlador.listar_donaciones()
         self.ids.donacion_spinner.values = [donacion.descripcion for donacion in donaciones]
         salones = self.controlador.obtener_salones()
