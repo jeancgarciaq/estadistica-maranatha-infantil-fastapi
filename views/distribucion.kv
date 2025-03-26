@@ -1,4 +1,4 @@
-<DistribucionScreen>:
+<DistribucionesScreen>:
     name: 'distribucion'
     BoxLayout:
         orientation: 'vertical'
@@ -75,13 +75,13 @@
                     size_hint_y: None
                     height: 50
                     on_press: root.mostrar_popup_lista()
-        # Lista de distribuciones (opcional)
-        ScrollView:
-            GridLayout:
-                id: lista_distribuciones
-                cols: 2 # Donación, Salones
-                size_hint_y: None
-                height: self.minimum_height
+                # Lista de distribuciones (opcional)
+                ScrollView:
+                    GridLayout:
+                        id: lista_distribuciones
+                        cols: 2 # Donación, Salones
+                        size_hint_y: None
+                        height: self.minimum_height
         Button:
             text: 'Volver al Menú'
             font_size: 28
