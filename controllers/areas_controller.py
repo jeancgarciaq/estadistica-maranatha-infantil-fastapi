@@ -1,8 +1,12 @@
 import logging
 from models.areas import Area
-from models.database import get_db
+from models.database import SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -17,16 +21,17 @@ class AreasController:
             self.vista.mostrar_error("El nombre del área es obligatorio.")
             return
 
-        db: Session = next(get_db())
+        db = SessionLocal()
         try:
             with db.begin():
-                area = Area(nombre=nombre)
+                area = Area(area=nombre)  # Corregido: antes usaba "nombre=nombre"
                 db.add(area)
                 logger.info(f"Área creada: {nombre}")
         except SQLAlchemyError as e:
             logger.error(f"Error al crear área: {e}")
             self.vista.mostrar_error("Error al crear área. Inténtalo de nuevo.")
         finally:
+            db.close()
             self.listar_areas()
 
     def actualizar_area(self, id, nombre):
@@ -34,12 +39,12 @@ class AreasController:
             self.vista.mostrar_error("El nombre del área es obligatorio.")
             return
 
-        db: Session = next(get_db())
+        db = SessionLocal()
         try:
             with db.begin():
                 area = db.query(Area).filter(Area.id == id).first()
                 if area:
-                    area.nombre = nombre
+                    area.area = nombre  # Corregido: antes usaba "nombre"
                     logger.info(f"Área actualizada: {nombre}")
                 else:
                     self.vista.mostrar_error("Área no encontrada.")
@@ -47,39 +52,87 @@ class AreasController:
             logger.error(f"Error al actualizar área: {e}")
             self.vista.mostrar_error("Error al actualizar área. Inténtalo de nuevo.")
         finally:
+            db.close()
             self.listar_areas()
 
     def eliminar_area(self, id):
-        db: Session = next(get_db())
+        db = SessionLocal()
         try:
             with db.begin():
                 area = db.query(Area).filter(Area.id == id).first()
                 if area:
                     db.delete(area)
-                    logger.info(f"Área eliminada: {area.nombre}")
+                    logger.info(f"Área eliminada: {area.area}")
                 else:
                     self.vista.mostrar_error("Área no encontrada.")
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar área: {e}")
             self.vista.mostrar_error("Error al eliminar área. Inténtalo de nuevo.")
         finally:
+            db.close()
             self.listar_areas()
 
     def listar_areas(self):
         db: Session = next(get_db())
         try:
             areas = db.query(Area).all()
-            self.vista.actualizar_lista_areas(areas)
-            logger.info("Áreas listadas.")
+            if not areas:  # Si la lista está vacía
+                self.vista.mostrar_mensaje("No hay áreas registradas.")
+            else:
+                self.vista.actualizar_lista_areas(areas)
+            return areas  # Ahora devuelve la lista de áreas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
+            return []
+
 
     def obtener_area(self, id):
-        db: Session = next(get_db())
+        db = SessionLocal()
         try:
-            return db.query(Area).filter(Area.id == id).first()
+            area = db.query(Area).filter(Area.id == id).first()
+            return area
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener área: {e}")
             self.vista.mostrar_error("Error al obtener área. Inténtalo de nuevo.")
             return None
+        finally:
+            db.close()
+
+    def mostrar_popup_lista(self):
+        areas = self.controlador.listar_areas()  # Obtener las áreas
+
+        if not areas:  # Si la lista está vacía, no se muestra el popup
+            return  # O puedes mostrar el mensaje aquí si prefieres que sea una sola línea de código
+
+        # Crear el GridLayout y añadir las áreas
+        lista_areas_popup = GridLayout(cols=2, size_hint_y=None)
+        lista_areas_popup.bind(minimum_height=lista_areas_popup.setter('height'))
+
+        for area in areas:
+            lista_areas_popup.add_widget(Label(text=str(area.id)))
+            lista_areas_popup.add_widget(Label(text=area.nombre))
+
+        # Crear el ScrollView para mostrar la lista
+        scrollview = ScrollView(size_hint=(1, 1))
+        scrollview.add_widget(lista_areas_popup)
+
+        # Botón para cerrar el popup
+        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+
+        # Crear el Popup
+        popup_content = BoxLayout(orientation='vertical')
+        popup_content.add_widget(scrollview)
+        popup_content.add_widget(close_button)
+
+        popup = Popup(title='Lista de Áreas', content=popup_content, size_hint=(None, None), size=(400, 400))
+
+        # Cerrar el popup al presionar el botón
+        close_button.bind(on_press=popup.dismiss)
+
+        # Mostrar el popup
+        popup.open()
+
+    def mostrar_mensaje(self, mensaje):
+        popup = Popup(title='Información', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
