@@ -1,6 +1,24 @@
 <ReporteScreen>:
     name: 'reporte'
-    Label:
-        text: 'Vista de Reporte'
-        font_size: 32
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Recepción de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        Button:
+            text: 'Volver al Menú'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
+            on_press: root.manager.current = 'menu'
