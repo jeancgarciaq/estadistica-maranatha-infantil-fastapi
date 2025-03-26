@@ -27,7 +27,7 @@ class DistribucionesController:
             donacion = self.session.query(Donacion).filter_by(descripcion=donacion_descripcion).first()
             for salon_nombre, cantidad, unidad in salones_distribucion:
                 salon = self.session.query(Salon).filter_by(nombre=salon_nombre).first()
-                distribucion = Distribucion(donacion=donacion, salon=salon, cantidad=cantidad, unidad=unidad)
+                distribucion = Distribucion(donacion_id=donacion.id, salon_id=salon.id, cantidad=cantidad, unidad=unidad)
                 self.session.add(distribucion)
             self.session.commit()
         except Exception as e:
@@ -35,4 +35,4 @@ class DistribucionesController:
             raise e
 
     def listar_distribuciones(self):
-        return self.session.query(Distribucion).options(joinedload(Distribucion.donacion), joinedload(Distribucion.salon)).all()
+        return self.session.query(Distribucion).options(joinedload(Distribucion.donaciones), joinedload(Distribucion.salones)).all()
