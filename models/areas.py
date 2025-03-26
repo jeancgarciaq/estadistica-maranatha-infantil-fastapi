@@ -5,4 +5,7 @@ class Area(Base):
     __tablename__ = 'areas'
 
     id = Column(Integer, primary_key=True, index=True)
-    area = Column(String)
+    area = Column(String, nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"<Area(id={self.id}, area='{self.area}')>"
