@@ -11,12 +11,23 @@ from controllers import AreasController
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+import logging
+
+# Configuración de logging
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class AreasScreen(Screen):
-    def __init__(self, **kwargs):
-        Builder.load_file('views/areas.kv')
+    def __init__(self, controlador, **kwargs):
+        # Cargar el archivo KV dentro del try-except
+        try:
+            Builder.load_file('views/areas.kv')
+        except Exception as e:
+            print(f"Error al cargar areas.kv: {e}")
         super().__init__(**kwargs)
+        # Crear el controlador como atributo
         self.controlador = AreasController(self)
+
 
     def obtener_datos_formulario(self):
         area_nombre = self.ids.area_nombre.text
