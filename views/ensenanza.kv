@@ -2,10 +2,25 @@
     name: 'ensenanzas'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Enseñanza de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
         # Formulario
         ScrollView:
+            size_hint_y: 1
             GridLayout:
                 cols: 2
+                spacing: 10
+                padding: 10
                 size_hint_y: None
                 height: self.minimum_height
                 Label:
@@ -17,19 +32,13 @@
                 TextInput:
                     id: ensenanza_capitan
                 Label:
-                    text: 'Fecha (YYYY-MM-DD):'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: ensenanza_fecha
-                Label:
                     text: 'Subcapitán:'
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 30
+                TextInput:
+                    id: ensenanza_subcapitan
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
                     font_size: 20
@@ -38,46 +47,52 @@
                     height: 30
                 TextInput:
                     id: ensenanza_fecha
-                TextInput:
-                    id: ensenanza_subcapitan
-                TextInput:
-                    id: ensenanza_id
+                Label:
+                    text: 'ID Enseñanza:'
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 30
-                Button:
-                    text: 'Crear'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.crear_ensenanza(ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
-                Button:
-                    text: 'Actualizar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.actualizar_ensenanza(ensenanza_id.text, ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
-                Button:
-                    text: 'Eliminar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.eliminar_ensenanza(ensenanza_id.text)
-                Button:
-                    text: 'Listar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.listar_ensenanzas()
+                TextInput:
+                    id: ensenanza_id
+        #Contenedor de botones 
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            padding: 10        
+            Button:
+                text: 'Crear'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.crear_ensenanza(ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+            Button:
+                text: 'Actualizar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.actualizar_ensenanza(ensenanza_id.text, ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+            Button:
+                text: 'Eliminar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.eliminar_ensenanza(ensenanza_id.text)
+            Button:
+                text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.listar_ensenanzas()
         # Lista de enseñanzas
         ScrollView:
             GridLayout:
@@ -86,7 +101,7 @@
                 size_hint_y: None
                 height: self.minimum_height
         Button:
-            text: 'Inicio'
+            text: 'Volver al Menú'
             font_size: 28
             background_normal: ''
             background_color: (0, 119/255, 194/255, 1)
