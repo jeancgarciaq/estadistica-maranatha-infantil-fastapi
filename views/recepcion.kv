@@ -2,12 +2,28 @@
     name: 'recepciones'
     BoxLayout:
         orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Recepción de Maranatha Infantil'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
         # Formulario
         ScrollView:
+            size_hint_y: 1
             GridLayout:
                 cols: 2
+                spacing: 10
+                padding: 10
                 size_hint_y: None
                 height: self.minimum_height
+                row_default_height: 30
                 Label:
                     text: 'Nombre:'
                     font_size: 20
@@ -32,38 +48,44 @@
                     height: 30
                 TextInput:
                     id: recepcion_id
-                Button:
-                    text: 'Crear'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.crear_recepcion(recepcion_nombre.text)
-                Button:
-                    text: 'Actualizar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.actualizar_recepcion(recepcion_id.text, recepcion_nombre.text)
-                Button:
-                    text: 'Eliminar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.eliminar_recepcion(recepcion_id.text)
-                Button:
-                    text: 'Listar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.controlador.listar_recepciones()
+        #Contenedor de botones
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            padding: 10
+            Button:
+                text: 'Crear'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.crear_recepcion(recepcion_nombre.text)
+            Button:
+                text: 'Actualizar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.actualizar_recepcion(recepcion_id.text, recepcion_nombre.text)
+            Button:
+                text: 'Eliminar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.eliminar_recepcion(recepcion_id.text)
+            Button:
+                text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: root.controlador.listar_recepciones()
         # Lista de recepciones
         ScrollView:
             GridLayout:
@@ -73,4 +95,9 @@
                 height: self.minimum_height
         Button:
             text: 'Volver al Menú'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
             on_press: root.manager.current = 'menu'
