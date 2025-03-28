@@ -61,7 +61,7 @@ class EmiApp(App):
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
-            ListAreasScreen(name='list_areas'),  # Add the new screen
+            ListAreasScreen(controlador=controllers["areas"], name='lista_areas'),  
         ]
 
         # Agregar pantallas al manejador
