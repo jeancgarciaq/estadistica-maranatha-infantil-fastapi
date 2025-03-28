@@ -98,14 +98,18 @@ class AreasController:
         db = SessionLocal()
         try:
             areas = db.query(Area).all()
-            self.vista.manager.get_screen('areas_list').actualizar_lista_areas(areas)
-            self.vista.manager.current = 'areas_list'
+            # Check if 'areas_list' screen exists
+            if 'areas_list' in self.vista.manager.screen_names:
+                self.vista.manager.get_screen('areas_list').actualizar_lista_areas(areas)
+                self.vista.manager.current = 'areas_list'
+            else:
+                logger.error("Screen 'areas_list' not found in ScreenManager.")
+                self.vista.mostrar_error("Pantalla 'areas_list' no encontrada.")
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
         finally:
             db.close()
-
 
     def obtener_area(self, id):
         db = SessionLocal()
