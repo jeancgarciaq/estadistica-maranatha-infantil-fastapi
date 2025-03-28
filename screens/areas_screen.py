@@ -7,7 +7,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
-from controllers import AreasController
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
