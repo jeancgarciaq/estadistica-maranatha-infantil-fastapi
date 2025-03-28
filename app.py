@@ -11,10 +11,15 @@ from controllers import (
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
     LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen )
+    AulasScreen, ListAreasScreen ) 
+import logging
 
 class EmiApp(App):    
     def build(self):
+        # Configure logging
+        logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        
         Window.clearcolor = (20/255, 40/255, 80/255, 1)
         
         # Icono
@@ -22,6 +27,7 @@ class EmiApp(App):
         
         # Inicialización de la sesión de SQLAlchemy
         self.session = SessionLocal()
+        logger.debug("SQLAlchemy session initialized.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
@@ -38,6 +44,7 @@ class EmiApp(App):
             "recepcion": RecepcionController(self.session),
             "distribuciones": DistribucionesController(self.session),
         }
+        logger.debug("Controllers initialized: %s", list(controllers.keys()))
 
         # Creación de pantallas
         screens = [
@@ -54,17 +61,20 @@ class EmiApp(App):
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
+            ListAreasScreen(name='list_areas'),  # Add the new screen
         ]
 
         # Agregar pantallas al manejador
         for screen in screens:
             sm.add_widget(screen)
+            logger.debug("Screen added: %s", screen.name)
 
         return sm
 
     def on_stop(self):
         """ Cierra la sesión de la base de datos al salir de la aplicación. """
         self.session.close()
+        logging.getLogger(__name__).debug("SQLAlchemy session closed.")
 
 if __name__ == '__main__':
     EmiApp().run()
