@@ -1,13 +1,18 @@
 {
     "cSpell.words": [
+        "areas",
         "Areas",
         "Distribucion",
         "Donacion",
         "Ensenanza",
+        "Estadistica",
+        "Inicialización",
         "kivy",
         "Logistica",
+        "Manejador",
         "Recepcion",
         "Salon",
-        "screenmanager"
+        "screenmanager",
+        "scrollview"
     ]
 }
