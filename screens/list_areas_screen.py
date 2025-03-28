@@ -1,5 +1,5 @@
 import logging
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -50,4 +50,9 @@ class ListAreasScreen(Screen):
     def volver(self, instance):
         """Regresa a la pantalla de áreas"""
         self.manager.current = 'areas'
+
+# Initialize ScreenManager and add ListAreasScreen
+screen_manager = ScreenManager()
+list_areas_screen = ListAreasScreen(controlador=None)
+screen_manager.add_widget(list_areas_screen)
 
