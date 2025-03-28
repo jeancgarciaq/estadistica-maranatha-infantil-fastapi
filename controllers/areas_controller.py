@@ -19,14 +19,15 @@ logger = logging.getLogger(__name__)
 class ListAreasScreen(Screen):
     def __init__(self, areas, **kwargs):
         super().__init__(**kwargs)
-        self.name = 'list_areas'
+        self.name = 'lista_areas'
         self.areas = areas
+        self.ids = {'lista_areas': GridLayout(cols=2, size_hint_y=None)}
 
     def on_pre_enter(self):
-        self.ids.lista_areas.clear_widgets()
+        self.ids['lista_areas'].clear_widgets()
         for area in self.areas:
-            self.ids.lista_areas.add_widget(Label(text=str(area.id)))
-            self.ids.lista_areas.add_widget(Label(text=area.area))
+            self.ids['lista_areas'].add_widget(Label(text=str(area.id)))
+            self.ids['lista_areas'].add_widget(Label(text=area.area))
 
 class AreasController:
     def __init__(self, vista):
@@ -88,22 +89,23 @@ class AreasController:
             db.close()
             self.listar_areas()
 
+    def listar_areas_button_handler(self):
+        """Handler for the 'List' button in the areas view."""
+        self.listar_areas()
+
     def listar_areas(self):
+        print("🟢 Se ejecutó listar_areas()")
         db = SessionLocal()
         try:
             areas = db.query(Area).all()
-            if not areas:
-                self.vista.mostrar_mensaje("No hay áreas registradas.")
-            else:
-                # Open the new window for listing areas
-                list_areas_screen = ListAreasScreen(areas)
-                self.vista.manager.add_widget(list_areas_screen)
-                self.vista.manager.current = 'list_areas'
+            self.vista.manager.get_screen('areas_list').actualizar_lista_areas(areas)
+            self.vista.manager.current = 'areas_list'
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
         finally:
             db.close()
+
 
     def obtener_area(self, id):
         db = SessionLocal()
