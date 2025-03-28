@@ -9,11 +9,24 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.screenmanager import Screen
 
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+class ListAreasScreen(Screen):
+    def __init__(self, areas, **kwargs):
+        super().__init__(**kwargs)
+        self.name = 'list_areas'
+        self.areas = areas
+
+    def on_pre_enter(self):
+        self.ids.lista_areas.clear_widgets()
+        for area in self.areas:
+            self.ids.lista_areas.add_widget(Label(text=str(area.id)))
+            self.ids.lista_areas.add_widget(Label(text=area.area))
 
 class AreasController:
     def __init__(self, vista):
@@ -82,12 +95,13 @@ class AreasController:
             if not areas:
                 self.vista.mostrar_mensaje("No hay áreas registradas.")
             else:
-                self.vista.actualizar_lista_areas(areas)
-            return areas
+                # Open the new window for listing areas
+                list_areas_screen = ListAreasScreen(areas)
+                self.vista.manager.add_widget(list_areas_screen)
+                self.vista.manager.current = 'list_areas'
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
-            return []
         finally:
             db.close()
 
