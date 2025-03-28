@@ -7,6 +7,9 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -73,19 +76,20 @@ class AreasController:
             self.listar_areas()
 
     def listar_areas(self):
-        db: Session = next(get_db())
+        db = SessionLocal()
         try:
             areas = db.query(Area).all()
-            if not areas:  # Si la lista está vacía
+            if not areas:
                 self.vista.mostrar_mensaje("No hay áreas registradas.")
             else:
                 self.vista.actualizar_lista_areas(areas)
-            return areas  # Ahora devuelve la lista de áreas
+            return areas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
             return []
-
+        finally:
+            db.close()
 
     def obtener_area(self, id):
         db = SessionLocal()
@@ -100,7 +104,7 @@ class AreasController:
             db.close()
 
     def mostrar_popup_lista(self):
-        areas = self.controlador.listar_areas()  # Obtener las áreas
+        areas = self.listar_areas()  # Obtener las áreas
 
         if not areas:  # Si la lista está vacía, no se muestra el popup
             return  # O puedes mostrar el mensaje aquí si prefieres que sea una sola línea de código
@@ -111,7 +115,7 @@ class AreasController:
 
         for area in areas:
             lista_areas_popup.add_widget(Label(text=str(area.id)))
-            lista_areas_popup.add_widget(Label(text=area.nombre))
+            lista_areas_popup.add_widget(Label(text=area.area))
 
         # Crear el ScrollView para mostrar la lista
         scrollview = ScrollView(size_hint=(1, 1))
