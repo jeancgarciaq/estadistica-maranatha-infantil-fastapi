@@ -1,0 +1,29 @@
+<ListAreasScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Lista de Áreas'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        ScrollView:
+            GridLayout:
+                id: lista_areas
+                cols: 2  # ID and Name
+                size_hint_y: None
+                height: self.minimum_height
+        Button:
+            text: 'Cerrar'
+            font_size: 28
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            size_hint_y: None
+            height: 50
+            on_press: app.root.current = 'areas'
