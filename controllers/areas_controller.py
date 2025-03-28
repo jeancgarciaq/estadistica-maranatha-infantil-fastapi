@@ -119,40 +119,6 @@ class AreasController:
         finally:
             db.close()
 
-    def mostrar_popup_lista(self):
-        areas = self.listar_areas()  # Obtener las áreas
-
-        if not areas:  # Si la lista está vacía, no se muestra el popup
-            return  # O puedes mostrar el mensaje aquí si prefieres que sea una sola línea de código
-
-        # Crear el GridLayout y añadir las áreas
-        lista_areas_popup = GridLayout(cols=2, size_hint_y=None)
-        lista_areas_popup.bind(minimum_height=lista_areas_popup.setter('height'))
-
-        for area in areas:
-            lista_areas_popup.add_widget(Label(text=str(area.id)))
-            lista_areas_popup.add_widget(Label(text=area.area))
-
-        # Crear el ScrollView para mostrar la lista
-        scrollview = ScrollView(size_hint=(1, 1))
-        scrollview.add_widget(lista_areas_popup)
-
-        # Botón para cerrar el popup
-        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
-
-        # Crear el Popup
-        popup_content = BoxLayout(orientation='vertical')
-        popup_content.add_widget(scrollview)
-        popup_content.add_widget(close_button)
-
-        popup = Popup(title='Lista de Áreas', content=popup_content, size_hint=(None, None), size=(400, 400))
-
-        # Cerrar el popup al presionar el botón
-        close_button.bind(on_press=popup.dismiss)
-
-        # Mostrar el popup
-        popup.open()
-
     def mostrar_mensaje(self, mensaje):
         popup = Popup(title='Información', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
