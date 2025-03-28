@@ -10,7 +10,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from controllers import AreasController
 import logging
+
 
 # Configuración de logging
 logging.basicConfig(level=logging.ERROR)
