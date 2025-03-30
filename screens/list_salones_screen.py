@@ -11,6 +11,9 @@ class ListSalonesScreen(Screen):
         self.controlador = controlador
         self.cargar_salones()
 
+    def on_pre_enter(self):
+        self.cargar_salones()
+
     def cargar_salones(self):
         lista_salones_grid = self.ids.lista_salones
         lista_salones_grid.clear_widgets()
