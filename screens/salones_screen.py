@@ -3,20 +3,24 @@ kivy.require('2.3.1')
 
 from kivy.uix.screenmanager import Screen
 from controllers import SalonesController
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
 from kivy.lang import Builder
-from controllers import SalonesController
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+import logging
+
+# Configuración de logging
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class SalonesScreen(Screen):
     def __init__(self, controlador, **kwargs):
-        Builder.load_file('views/salones.kv')
+        try:
+            Builder.load_file('views/salones.kv')
+        except Exception as e:
+            print(f"Error al cargar salones.kv: {e}")
         super().__init__(**kwargs)
+        # Crear el controlador como atributo
         self.controlador = SalonesController(self)
 
     def obtener_datos_formulario(self):
