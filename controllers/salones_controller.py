@@ -72,7 +72,7 @@ class SalonesController:
 
     def mostrar_lista_salones(self):
         try:
-            self.vista.current = "lista_salones"
+            self.vista.manager.current = "lista_salones"  # Cambia la ventana actual
             logger.info("Ventana de lista de salones desplegada.")
         except Exception as e:
             logger.error(f"Error al mostrar la ventana de lista de salones: {e}")
