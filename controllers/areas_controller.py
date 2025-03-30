@@ -93,21 +93,22 @@ class AreasController:
         """Handler for the 'List' button in the areas view."""
         self.listar_areas()
 
-    def listar_areas(self):
-        print("🟢 Se ejecutó listar_areas()")
+    def listar_areas(self, vista):
+        """Actualizar el GridLayout de la vista actual con la lista de áreas."""
         db = SessionLocal()
         try:
             areas = db.query(Area).all()
-            # Check if 'areas_list' screen exists
-            if 'areas_list' in self.vista.manager.screen_names:
-                self.vista.manager.get_screen('areas_list').actualizar_lista_areas(areas)
-                self.vista.manager.current = 'areas_list'
+            lista_areas = vista.ids['lista_areas']
+            lista_areas.clear_widgets()  # Limpiar widgets previos
+            if areas:
+                for area in areas:
+                    lista_areas.add_widget(Label(text=str(area.id), size_hint_y=None, height=40))
+                    lista_areas.add_widget(Label(text=area.area, size_hint_y=None, height=40))
             else:
-                logger.error("Screen 'areas_list' not found in ScreenManager.")
-                self.vista.mostrar_error("Pantalla 'areas_list' no encontrada.")
+                lista_areas.add_widget(Label(text="No hay áreas", size_hint_y=None, height=40))
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
-            self.vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
+            vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
         finally:
             db.close()
 
