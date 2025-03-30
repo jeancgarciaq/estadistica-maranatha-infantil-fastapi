@@ -10,14 +10,16 @@ from kivy.uix.button import Button
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Cargar el archivo KV una sola vez
+Builder.load_file("views/list_areas.kv")
+
 class ListAreasScreen(Screen):
     """Screen for displaying the list of areas."""
         
     def __init__(self, controlador, **kwargs):
         super().__init__(**kwargs)
         logger.info("Initializing ListAreasScreen")
-        Builder.load_file("views/list_areas.kv")
-        self.controlador = controlador
+        self.controlador = controlador  # Asignar el controlador correctamente
         self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         self.title = Label(text="Lista de Áreas", size_hint=(1, 0.1), font_size='20sp', bold=True)
@@ -39,13 +41,13 @@ class ListAreasScreen(Screen):
 
     def actualizar_lista_areas(self, areas):
         """Actualiza la lista de áreas en la vista"""
-        self.areas_container.clear_widgets()
-
+        self.ids.lista_areas.clear_widgets()  # Usar el ID definido en el archivo KV
         if not areas:
-            self.areas_container.add_widget(Label(text="No hay áreas registradas", font_size='18sp'))
+            self.ids.lista_areas.add_widget(Label(text="No hay áreas registradas", font_size='18sp'))
         else:
             for area in areas:
-                self.areas_container.add_widget(Label(text=f"{area.id}: {area.area}", font_size='16sp'))
+                self.ids.lista_areas.add_widget(Label(text=f"{area.id}", size_hint_y=None, height=40))
+                self.ids.lista_areas.add_widget(Label(text=area.area, size_hint_y=None, height=40))
 
     def volver(self, instance):
         """Regresa a la pantalla de áreas"""
