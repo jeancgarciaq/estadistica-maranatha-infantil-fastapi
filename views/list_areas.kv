@@ -40,9 +40,7 @@
                     background_color: (0, 119/255, 194/255, 1)
                     size_hint: 1, None  # Ajusta el ancho dinámicamente
                     height: 50
-                    on_press: 
-                        print("Botón 'Listar' presionado")
-                        app.areas_controller.listar_areas(self)
+                    on_press: root.controlador.listar_areas(root)  # Pass the root view to the controller
                 Button:
                     text: 'Cerrar'
                     font_size: 28
