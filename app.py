@@ -17,7 +17,14 @@ import logging
 class EmiApp(App):    
     def build(self):
         # Configure logging
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler("app.log"),
+                logging.StreamHandler()
+            ]
+        )
         logger = logging.getLogger(__name__)
         
         Window.clearcolor = (20/255, 40/255, 80/255, 1)
@@ -32,7 +39,7 @@ class EmiApp(App):
         # Inicialización de los controladores con la sesión
         controllers = {
             "areas": AreasController(self.session),
-            "salones": SalonesController(self),  # Pasa la referencia de la aplicación
+            "salones": SalonesController(self.session),
             "aulas": AulasController(self.session),
             "donaciones": DonacionesController(self.session),
             "ensenanza": EnsenanzaController(self.session),
@@ -45,7 +52,8 @@ class EmiApp(App):
 
         # Asignar el controlador de áreas como atributo de la aplicación
         self.areas_controller = controllers["areas"]
-        logger.debug("AreasController assigned to EmiApp.areas_controller")
+        self.salones_controller = controllers["salones"]  # Add salones controller as an attribute
+        logger.debug("AreasController and SalonesController assigned to EmiApp.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
