@@ -71,13 +71,13 @@
                 height: 50
                 on_press: root.controlador.eliminar_salon(salon_id.text)
             Button:
-                text: 'Listar'
+                text: 'Ver Lista'
                 font_size: 28
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.listar_salones()
+                on_press: root.manager.current = 'lista_salones'
         # Lista de salones
         ScrollView:
             GridLayout:
