@@ -1,0 +1,41 @@
+<ListSalonesScreen>:
+    name: 'lista_salones'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Lista de Salones'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        ScrollView:
+            GridLayout:
+                id: lista_salones
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 10
+                padding: 10
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            padding: 10
+            Button:
+                text: 'Listar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: root.cargar_salones()
+            Button:
+                text: 'Volver'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: root.manager.current = 'salones'
