@@ -16,29 +16,6 @@ from kivy.uix.screenmanager import Screen
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class ListAreasScreen(Screen):
-    def __init__(self, areas, **kwargs):
-        super().__init__(**kwargs)
-        self.name = 'lista_areas'
-        self.areas = areas
-        self.ids = {'lista_areas': GridLayout(cols=2, size_hint_y=None)}
-
-    def on_pre_enter(self):
-        self.ids['lista_areas'].clear_widgets()
-        for area in self.areas:
-            self.ids['lista_areas'].add_widget(Label(text=str(area.id)))
-            self.ids['lista_areas'].add_widget(Label(text=area.area))
-
-    def actualizar_lista_areas(self, areas):
-        lista_areas = self.ids['lista_areas']
-        lista_areas.clear_widgets()  # Limpiar widgets previos
-        if areas:
-            for area in areas:
-                lista_areas.add_widget(Label(text=str(area.id), size_hint_y=None, height=40))
-                lista_areas.add_widget(Label(text=area.area, size_hint_y=None, height=40))
-        else:
-            lista_areas.add_widget(Label(text="No hay áreas", size_hint_y=None, height=40))
-
 class AreasController:
     def __init__(self, vista):
         self.vista = vista
