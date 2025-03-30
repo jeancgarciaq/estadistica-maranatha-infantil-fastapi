@@ -15,5 +15,8 @@ class ListSalonesScreen(Screen):
         lista_salones_grid = self.ids.lista_salones
         lista_salones_grid.clear_widgets()
         salones = self.controlador.obtener_todos_los_salones()
-        for salon in salones:
-            lista_salones_grid.add_widget(Label(text=f"{salon.salon} ({salon.edad})", size_hint_y=None, height=40))
+        if not salones:
+            lista_salones_grid.add_widget(Label(text="No hay salones disponibles.", size_hint_y=None, height=40))
+        else:
+            for salon in salones:
+                lista_salones_grid.add_widget(Label(text=f"{salon.salon} ({salon.edad})", size_hint_y=None, height=40))
