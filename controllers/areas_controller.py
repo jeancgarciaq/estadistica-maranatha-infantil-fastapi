@@ -29,6 +29,16 @@ class ListAreasScreen(Screen):
             self.ids['lista_areas'].add_widget(Label(text=str(area.id)))
             self.ids['lista_areas'].add_widget(Label(text=area.area))
 
+    def actualizar_lista_areas(self, areas):
+        lista_areas = self.ids['lista_areas']
+        lista_areas.clear_widgets()  # Limpiar widgets previos
+        if areas:
+            for area in areas:
+                lista_areas.add_widget(Label(text=str(area.id), size_hint_y=None, height=40))
+                lista_areas.add_widget(Label(text=area.area, size_hint_y=None, height=40))
+        else:
+            lista_areas.add_widget(Label(text="No hay áreas", size_hint_y=None, height=40))
+
 class AreasController:
     def __init__(self, vista):
         self.vista = vista
@@ -98,14 +108,7 @@ class AreasController:
         db = SessionLocal()
         try:
             areas = db.query(Area).all()
-            lista_areas = vista.ids['lista_areas']
-            lista_areas.clear_widgets()  # Limpiar widgets previos
-            if areas:
-                for area in areas:
-                    lista_areas.add_widget(Label(text=str(area.id), size_hint_y=None, height=40))
-                    lista_areas.add_widget(Label(text=area.area, size_hint_y=None, height=40))
-            else:
-                lista_areas.add_widget(Label(text="No hay áreas", size_hint_y=None, height=40))
+            vista.actualizar_lista_areas(areas)  # Llamar al método de la vista para actualizar la lista
         except SQLAlchemyError as e:
             logger.error(f"Error al listar áreas: {e}")
             vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
