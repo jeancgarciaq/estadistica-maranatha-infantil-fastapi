@@ -71,6 +71,7 @@ class SalonesController:
             return []
 
     def mostrar_lista_salones(self):
+        print('El botón Ver Lista fue presionado.')
         try:
             self.vista.manager.current = "lista_salones"  # Cambia la ventana actual
             logger.info("Ventana de lista de salones desplegada.")
