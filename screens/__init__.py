@@ -12,3 +12,4 @@ from .recepcion_screen import RecepcionScreen
 from .reporte_screen import ReporteScreen
 from .salones_screen import SalonesScreen
 from .list_areas_screen import ListAreasScreen
+from .list_salones_screen import ListSalonesScreen
