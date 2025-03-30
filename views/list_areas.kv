@@ -32,7 +32,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.listar_areas()
+                on_press: app.areas_controller.listar_areas(self)
             Button:
                 text: 'Cerrar'
                 font_size: 28
