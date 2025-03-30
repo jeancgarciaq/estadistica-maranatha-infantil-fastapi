@@ -11,7 +11,7 @@ from controllers import (
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
     LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen, ListAreasScreen ) 
+    AulasScreen, ListAreasScreen, ListSalonesScreen ) 
 import logging
 
 class EmiApp(App):    
@@ -66,6 +66,7 @@ class EmiApp(App):
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
             ListAreasScreen(controlador=controllers["areas"], name='lista_areas'),  
+            ListSalonesScreen(controlador=controllers["salones"], name='lista_salones'),
         ]
 
         # Agregar pantallas al manejador
