@@ -50,9 +50,9 @@ class EmiApp(App):
         }
         logger.debug("Controllers initialized: %s", list(controllers.keys()))
 
-        # Asignar el controlador de áreas como atributo de la aplicación
+        # Asignar los controladores de áreas, salones como atributo de la aplicación
         self.areas_controller = controllers["areas"]
-        self.salones_controller = controllers["salones"]  # Add salones controller as an attribute
+        self.salones_controller = controllers["salones"]  
         logger.debug("AreasController and SalonesController assigned to EmiApp.")
 
         # Manejador de las ventanas
