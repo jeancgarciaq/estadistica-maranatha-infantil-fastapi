@@ -27,21 +27,27 @@
             padding: 10
             size_hint_y: None
             height: self.minimum_height  # Ajusta dinámicamente el tamaño del contenedor
-            Button: 
-                text: 'Listar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint: 1, None  # Ajusta el ancho dinámicamente
-                height: 50
-                on_press: 
-                    print("Botón 'Listar' presionado")
-                    app.areas_controller.listar_areas(self)
-            Button:
-                text: 'Cerrar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint: 1, None  # Ajusta el ancho dinámicamente
-                height: 50
-                on_press: app.root.current = 'areas'
+            GridLayout:
+                cols: 2
+                spacing: 10
+                padding: 10
+                size_hint_y: None
+                height: self.minimum_height
+                Button: 
+                    text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None  # Ajusta el ancho dinámicamente
+                    height: 50
+                    on_press: 
+                        print("Botón 'Listar' presionado")
+                        app.areas_controller.listar_areas(self)
+                Button:
+                    text: 'Cerrar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None  # Ajusta el ancho dinámicamente
+                    height: 50
+                    on_press: app.root.current = 'areas'
