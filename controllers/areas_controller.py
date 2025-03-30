@@ -81,26 +81,24 @@ class AreasController:
         self.listar_areas()
 
     def listar_areas(self, vista):
-        """Actualizar el GridLayout de la vista actual con la lista de áreas."""
-        db = SessionLocal()
-        try:
-            areas = db.query(Area).all()
-            vista.actualizar_lista_areas(areas)  # Llamar al método de la vista para actualizar la lista
-        except SQLAlchemyError as e:
-            logger.error(f"Error al listar áreas: {e}")
-            vista.mostrar_error("Error al listar áreas. Inténtalo de nuevo.")
-        finally:
-            db.close()
+        """Fetches areas and updates the view."""
+        areas = self.obtener_areas()  # Fetch areas from the database
+        if hasattr(vista, 'actualizar_lista_areas'):
+            vista.actualizar_lista_areas(areas)  # Update the view with the areas
+        else:
+            raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
 
-    def obtener_area(self, id):
+    def obtener_areas(self):
+        """Fetches all areas from the database."""
         db = SessionLocal()
         try:
-            area = db.query(Area).filter(Area.id == id).first()
-            return area
+            areas = db.query(Area).all()  # Fetch all areas
+            logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
+            return areas
         except SQLAlchemyError as e:
-            logger.error(f"Error al obtener área: {e}")
-            self.vista.mostrar_error("Error al obtener área. Inténtalo de nuevo.")
-            return None
+            logger.error(f"Error al obtener áreas: {e}")
+            self.vista.mostrar_error("Error al obtener áreas. Inténtalo de nuevo.")
+            return []
         finally:
             db.close()
 
