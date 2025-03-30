@@ -29,9 +29,6 @@ class EmiApp(App):
         self.session = SessionLocal()
         logger.debug("SQLAlchemy session initialized.")
 
-        # Manejador de las ventanas
-        sm = ScreenManager()
-
         # Inicialización de los controladores con la sesión
         controllers = {
             "areas": AreasController(self.session),
@@ -45,6 +42,13 @@ class EmiApp(App):
             "distribuciones": DistribucionesController(self.session),
         }
         logger.debug("Controllers initialized: %s", list(controllers.keys()))
+
+        # Asignar el controlador de áreas como atributo de la aplicación
+        self.areas_controller = controllers["areas"]
+        logger.debug("AreasController assigned to EmiApp.areas_controller")
+
+        # Manejador de las ventanas
+        sm = ScreenManager()
 
         # Creación de pantallas
         screens = [
