@@ -1,6 +1,7 @@
 import logging
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
+from kivy.uix.label import Label  # Add this import
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
