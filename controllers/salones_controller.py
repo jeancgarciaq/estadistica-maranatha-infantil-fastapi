@@ -69,3 +69,11 @@ class SalonesController:
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener salones: {e}")
             return []
+
+    def mostrar_lista_salones(self):
+        try:
+            self.vista.current = "lista_salones"
+            logger.info("Ventana de lista de salones desplegada.")
+        except Exception as e:
+            logger.error(f"Error al mostrar la ventana de lista de salones: {e}")
+            self.vista.mostrar_error("Error al mostrar la lista de salones. Inténtalo de nuevo.")
