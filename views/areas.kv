@@ -37,6 +37,10 @@
             TextInput:
                 id: area_nombre
                 height: 50
+        #Contenedor de botones
+        BoxLayout:
+            spacing: 10
+            padding: 10
             Button:
                 text: 'Crear'
                 font_size: 28
@@ -76,13 +80,6 @@
                 size_hint_y: None
                 height: 50
                 on_press: root.manager.current = 'lista_areas'
-        # Lista de áreas
-        ScrollView:
-            GridLayout:
-                id: lista_areas
-                cols: 3  # Nombre, Editar, Eliminar
-                size_hint_y: None
-                height: self.minimum_height
         Button:
             text: 'Volver al Menú'
             font_size: 28
@@ -91,3 +88,4 @@
             size_hint_y: None
             height: 50
             on_press: root.manager.current = 'menu'
+
