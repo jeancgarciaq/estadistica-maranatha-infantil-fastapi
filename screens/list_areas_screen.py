@@ -26,7 +26,7 @@ class ListAreasScreen(Screen):
         lista_areas = self.ids.lista_areas  # Acceder al GridLayout por su ID
         lista_areas.clear_widgets()  # Limpiar widgets previos
         if not areas:
-            lista_areas.add_widget(Label(text="No hay áreas registradas", font_size='18sp'))
+            lista_areas.add_widget(Label(text="No hay áreas registradas", font_size='18sp', size_hint_y=None, height=40))
         else:
             for area in areas:
                 lista_areas.add_widget(Label(text=f"{area.id}", size_hint_y=None, height=40))
