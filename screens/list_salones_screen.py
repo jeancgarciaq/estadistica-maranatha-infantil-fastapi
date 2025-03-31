@@ -19,6 +19,7 @@ class ListSalonesScreen(Screen):
         super().__init__(**kwargs)
         # Crear el controlador como atributo
         self.controlador = controlador
+        self.controlador.vista = self  # Set the screen as the vista
         logger.info("Initializing ListSalonesScreen")
         self.cargar_salones()
 
@@ -29,9 +30,19 @@ class ListSalonesScreen(Screen):
         """Actualiza la lista de salones en la vista"""
         lista_salones_grid = self.ids.lista_salones
         lista_salones_grid.clear_widgets()
-        salones = self.controlador.obtener_todos_los_salones()
+        salones = self.controlador.listar_salones()
         if not salones:
             lista_salones_grid.add_widget(Label(text="No hay salones disponibles.", size_hint_y=None, height=40))
         else:
             for salon in salones:
                 lista_salones_grid.add_widget(Label(text=f"{salon.salon} ({salon.edad})", size_hint_y=None, height=40))
+
+    def actualizar_lista_salones(self, salones):
+        """Actualiza la lista de salones en la vista."""
+        lista_salones_grid = self.ids.lista_salones
+        lista_salones_grid.clear_widgets()
+        if not salones:
+            lista_salones_grid.add_widget(Label(text="No hay salones disponibles.", size_hint_y=None, height=40))
+        else:
+            for salon in salones:
+                lista_salones_grid.add_widget(Label(text=f"{salon.nombre} ({salon.edad})", size_hint_y=None, height=40))
