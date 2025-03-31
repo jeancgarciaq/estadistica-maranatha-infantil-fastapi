@@ -76,32 +76,39 @@ class AreasController:
             db.close()
             self.listar_areas()
 
-    def listar_areas_button_handler(self):
-        """Handler for the 'List' button in the areas view."""
-        self.listar_areas()
-
     def listar_areas(self, vista):
-        """Fetches areas and updates the view."""
-        areas = self.obtener_areas()  # Fetch areas from the database
-        if hasattr(vista, 'actualizar_lista_areas'):
-            vista.actualizar_lista_areas(areas)  # Update the view with the areas
-        else:
-            raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
-
-    def obtener_areas(self):
-        """Fetches all areas from the database."""
+        """Fetches areas from the database and updates the view."""
         db = SessionLocal()
         try:
             areas = db.query(Area).all()  # Fetch all areas
             logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
-            return areas
+            if hasattr(vista, 'actualizar_lista_areas'):
+                vista.actualizar_lista_areas(areas)  # Update the view with the areas
+            else:
+                raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener áreas: {e}")
             self.vista.mostrar_error("Error al obtener áreas. Inténtalo de nuevo.")
-            return []
         finally:
             db.close()
 
-    def mostrar_mensaje(self, mensaje):
-        popup = Popup(title='Información', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
-        popup.open()
+    def listar_areas_button_handler(self):
+        """Handler for the 'List' button in the areas view."""
+        self.listar_areas(self.vista)
+
+    def obtener_area(self, id):
+        """Retrieve a single area by its ID."""
+        db = SessionLocal()
+        try:
+            area = db.query(Area).filter(Area.id == id).first()
+            if area:
+                logger.info(f"Área encontrada: {area.area}")  # Replace 'area' with the actual field name
+                return area
+            else:
+                logger.warning(f"Área con ID {id} no encontrada.")
+                return None
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener el área con ID {id}: {e}")
+            return None
+        finally:
+            db.close()
