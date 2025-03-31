@@ -112,3 +112,5 @@ class AreasController:
             return None
         finally:
             db.close()
+            self.listar_areas()
+
