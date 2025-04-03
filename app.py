@@ -61,7 +61,7 @@ class EmiApp(App):
         # Creación de pantallas
         screens = [
             MenuScreen(name='menu'),
-            AreasScreen(controllers["areas"], name='areas'),
+            AreasScreen(controllers["areas"], vista="areas_vista", name='areas'),
             SalonesScreen(controllers["salones"], name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
             EstadisticaScreen(name='estadistica'),
@@ -73,7 +73,7 @@ class EmiApp(App):
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
-            ListAreasScreen(controlador=controllers["areas"], name='lista_areas'),  
+            ListAreasScreen(controlador=controllers["areas"], vista="lista_areas_vista", name='lista_areas'),  
             ListSalonesScreen(controlador=controllers["salones"], name='lista_salones'),
         ]
 
