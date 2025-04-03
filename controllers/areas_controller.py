@@ -36,7 +36,7 @@ class AreasController:
             self.vista.mostrar_error("Error al crear área. Inténtalo de nuevo.")
         finally:
             db.close()
-            self.listar_areas()
+            self.listar_areas(self.vista) 
 
     def actualizar_area(self, id, nombre):
         if not nombre:
@@ -57,7 +57,7 @@ class AreasController:
             self.vista.mostrar_error("Error al actualizar área. Inténtalo de nuevo.")
         finally:
             db.close()
-            self.listar_areas()
+            self.listar_areas(self.vista) 
 
     def eliminar_area(self, id):
         db = SessionLocal()
@@ -74,16 +74,16 @@ class AreasController:
             self.vista.mostrar_error("Error al eliminar área. Inténtalo de nuevo.")
         finally:
             db.close()
-            self.listar_areas()
+            self.listar_areas(self.vista)
 
     def listar_areas(self, vista):
         """Fetches areas from the database and updates the view."""
         db = SessionLocal()
         try:
-            areas = db.query(Area).all()  # Fetch all areas
+            areas = db.query(Area).all()
             logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
             if hasattr(vista, 'actualizar_lista_areas'):
-                vista.actualizar_lista_areas(areas)  # Update the view with the areas
+                vista.actualizar_lista_areas(areas)
             else:
                 raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
         except SQLAlchemyError as e:
@@ -102,7 +102,7 @@ class AreasController:
         try:
             area = db.query(Area).filter(Area.id == id).first()
             if area:
-                logger.info(f"Área encontrada: {area.area}")  # Replace 'area' with the actual field name
+                logger.info(f"Área encontrada: {area.area}")
                 return area
             else:
                 logger.warning(f"Área con ID {id} no encontrada.")
