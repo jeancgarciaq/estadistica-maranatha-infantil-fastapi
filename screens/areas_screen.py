@@ -19,15 +19,16 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 class AreasScreen(Screen):
-    def __init__(self, controlador, **kwargs):
+    def __init__(self, controlador, vista, **kwargs):
         # Cargar el archivo KV dentro del try-except
         try:
             Builder.load_file('views/areas.kv')
         except Exception as e:
             print(f"Error al cargar areas.kv: {e}")
         super().__init__(**kwargs)
-        # Crear el controlador como atributo
+        # Pass 'self' as the 'vista' to the controller
         self.controlador = AreasController(self)
+        self.vista = self
 
 
     def obtener_datos_formulario(self):
@@ -56,4 +57,8 @@ class AreasScreen(Screen):
 
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
+    
+    def mostrar_exito(self, mensaje):
+        popup = Popup(title='Éxito', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
