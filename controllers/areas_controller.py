@@ -29,7 +29,7 @@ class AreasController:
         area_creada = False
         try:
             with db.begin():
-                area = Area(area=nombre)  # Corregido: antes usaba "nombre=nombre"
+                area = Area(area=nombre)
                 db.add(area)
                 logger.info(f"Área creada: {nombre}")
                 area_creada = True
@@ -39,9 +39,9 @@ class AreasController:
         finally:
             db.close()
             if area_creada:
-                self.vista.mostrar_error("Área creada exitosamente.")
+                self.vista.mostrar_exito("Área creada exitosamente.")
             else:
-                self.vista.manager.current = 'lista_areas'  # Switch to the list_areas.kv view
+                self.vista.manager.current = 'lista_areas'
 
     def actualizar_area(self, id, nombre):
         if not nombre:
@@ -54,7 +54,7 @@ class AreasController:
             with db.begin():
                 area = db.query(Area).filter(Area.id == id).first()
                 if area:
-                    area.area = nombre  # Corregido: antes usaba "nombre"
+                    area.area = nombre  
                     logger.info(f"Área actualizada: {nombre}")
                     area_actualizada = True
                 else:
@@ -65,9 +65,9 @@ class AreasController:
         finally:
             db.close()
             if area_actualizada:
-                self.vista.mostrar_error("Área actualizada exitosamente.")
+                self.vista.mostrar_exito("Área actualizada exitosamente.")
             else:
-                self.vista.manager.current = 'lista_areas'  # Switch to the list_areas.kv view
+                self.vista.manager.current = 'lista_areas' 
 
     def eliminar_area(self, id):
         db = SessionLocal()
@@ -87,9 +87,9 @@ class AreasController:
         finally:
             db.close()
             if area_eliminada:
-                self.vista.mostrar_error("Área eliminada exitosamente.")
+                self.vista.mostrar_exito("Área eliminada exitosamente.")
             else:
-                self.vista.manager.current = 'lista_areas'  # Switch to the list_areas.kv view
+                self.vista.manager.current = 'lista_areas'  
 
     def listar_areas(self, vista):
         """Fetches areas from the database and updates the view."""
@@ -101,9 +101,11 @@ class AreasController:
                 vista.actualizar_lista_areas(areas)
             else:
                 raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
+            return areas
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener áreas: {e}")
             self.vista.mostrar_error("Error al obtener áreas. Inténtalo de nuevo.")
+            return []
         finally:
             db.close()
 
