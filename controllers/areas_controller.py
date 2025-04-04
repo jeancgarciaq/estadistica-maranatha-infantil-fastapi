@@ -35,7 +35,7 @@ class AreasController:
                 area_creada = True
         except SQLAlchemyError as e:
             logger.error(f"Error al crear área: {e}")
-            self.vista.mostrar_error("Error al crear área. Inténtalo de nuevo.")
+            self.vista.mostrar_error(f"Error al crear área: {e}. Inténtalo de nuevo.")
         finally:
             db.close()
             if area_creada:
@@ -61,7 +61,7 @@ class AreasController:
                     self.vista.mostrar_error("Área no encontrada.")
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar área: {e}")
-            self.vista.mostrar_error("Error al actualizar área. Inténtalo de nuevo.")
+            self.vista.mostrar_error(f"Error al actualizar área: {e}. Inténtalo de nuevo.")
         finally:
             db.close()
             if area_actualizada:
@@ -83,7 +83,7 @@ class AreasController:
                     self.vista.mostrar_error("Área no encontrada.")
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar área: {e}")
-            self.vista.mostrar_error("Error al eliminar área. Inténtalo de nuevo.")
+            self.vista.mostrar_error(f"Error al eliminar área: {e}. Inténtalo de nuevo.")
         finally:
             db.close()
             if area_eliminada:
@@ -104,7 +104,7 @@ class AreasController:
             return areas
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener áreas: {e}")
-            self.vista.mostrar_error("Error al obtener áreas. Inténtalo de nuevo.")
+            self.vista.mostrar_error(f"Error al obtener áreas: {e}. Inténtalo de nuevo.")
             return []
         finally:
             db.close()
@@ -123,9 +123,11 @@ class AreasController:
                 return area
             else:
                 logger.warning(f"Área con ID {id} no encontrada.")
+                self.vista.mostrar_error(f"Error al encontrar área, no existe.")
                 return None
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener el área con ID {id}: {e}")
+            self.vista.mostrar_error(f"Error al obtener el área con ID {id}: {e}.")
             return None
         finally:
             db.close()
