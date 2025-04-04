@@ -62,7 +62,7 @@ class EmiApp(App):
         screens = [
             MenuScreen(name='menu'),
             AreasScreen(controllers["areas"], vista="areas_vista", name='areas'),
-            SalonesScreen(controllers["salones"], name='salones'),
+            SalonesScreen(controllers["salones"], vista="salones_vista", name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
             EstadisticaScreen(name='estadistica'),
             DonacionesScreen(controllers["donaciones"], name='donaciones'),
@@ -74,7 +74,7 @@ class EmiApp(App):
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
             ListAreasScreen(controlador=controllers["areas"], vista="lista_areas_vista", name='lista_areas'),  
-            ListSalonesScreen(controlador=controllers["salones"], name='lista_salones'),
+            ListSalonesScreen(controlador=controllers["salones"], vista="lista_salones_vista", name='lista_salones'),
         ]
 
         # Agregar pantallas al manejador
