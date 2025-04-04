@@ -9,8 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SalonesController:
-    def __init__(self, session, vista=None):
-        self.session = session
+    def __init__(self, vista=None):
         self.vista = vista 
 
     def crear_salon(self, salon, edad):
@@ -93,7 +92,7 @@ class SalonesController:
         db = SessionLocal()
         try:
             with db.begin():
-                salones = self.session.query(Salon).all()  
+                salones = db.query(Salon).all()  
                 if self.vista:
                     self.vista.actualizar_lista_salones(salones) 
                 logger.info("Salones listados correctamente.")
