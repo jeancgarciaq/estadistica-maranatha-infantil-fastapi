@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 class SalonesScreen(Screen):
-    def __init__(self, controlador, **kwargs):
+    def __init__(self, controlador, vista, **kwargs):
         try:
             Builder.load_file('views/salones.kv')
         except Exception as e:
@@ -22,6 +22,7 @@ class SalonesScreen(Screen):
         super().__init__(**kwargs)
         # Crear el controlador como atributo
         self.controlador = SalonesController(self)
+        self.vista = self
 
     def obtener_datos_formulario(self):
         salon_nombre = self.ids.salon_nombre.text
@@ -57,4 +58,8 @@ class SalonesScreen(Screen):
 
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()
+    
+    def mostrar_exito(self, mensaje):
+        popup = Popup(title='Éxito', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
         popup.open()
