@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SalonesController:
-    def __init__(self, vista=None):
+    def __init__(self, vista):
         self.vista = vista 
 
     def crear_salon(self, salon, edad):
@@ -94,22 +94,22 @@ class SalonesController:
             if eliminar_salon:
                 self.vista.mostrar_exito("Salón eliminado exitosamente.")
 
-    def listar_salones(self, from_button=False):
+    def listar_salones(self, vista):
         """
         Método para listar los salones y manejar errores.
         """
         db = SessionLocal()
         try:
-            salones = db.query(Salon).all()  
+            salones = db.query(Salon).all()
             logger.info(f"{len(salones)} salones obtenidos de la base de datos.")
-            if hasattr(vista, 'actualizar_lista_salones'):
+            if hasattr(vista, 'actualizar_lista_salones'):  # Usa la vista pasada como argumento
                 vista.actualizar_lista_salones(salones)
             else:
                 raise AttributeError("The provided view does not have 'actualizar_lista_salones' method.")
             return salones
         except SQLAlchemyError as e:
             logger.error(f"Error al listar salones: {e}")
-            self.vista.mostrar_error(f"Error al listar salones {e}. Inténtalo de nuevo.")
+            vista.mostrar_error(f"Error al listar salones {e}. Inténtalo de nuevo.")
             return []
         finally:
             db.close()
