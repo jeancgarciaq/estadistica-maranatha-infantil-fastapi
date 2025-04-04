@@ -17,25 +17,35 @@
         ScrollView:
             GridLayout:
                 id: lista_salones
-                cols: 1
+                cols: 3 # ID, Salon and Edad
                 size_hint_y: None
                 height: self.minimum_height
-                spacing: 10
-                padding: 10
+                row_default_height: 40
+                row_force_default: True
+        #Contenedor de botones
         BoxLayout:
-            size_hint_y: None
-            height: 50
+            orientation: 'vertical'
             spacing: 10
             padding: 10
-            Button:
-                text: 'Listar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                on_release: root.cargar_salones()
-            Button:
-                text: 'Volver'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                on_press: root.manager.current = 'salones'
+            size_hint_y: None
+            height: self.minimum_height
+            GridLayout:
+                cols: 2
+                spacing: 10
+                padding: 10
+                size_hint_y: None
+                height: self.minimum_height
+                Button:
+                    text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None
+                    on_release: root.cargar_salones()
+                Button:
+                    text: 'Cerrar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None
+                    on_press: root.manager.current = 'salones'
