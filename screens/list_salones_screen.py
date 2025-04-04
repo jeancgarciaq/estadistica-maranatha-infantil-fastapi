@@ -44,7 +44,7 @@ class ListSalonesScreen(Screen):
     def cargar_salones(self):
         """Consultando y llenando la lista salones."""
         try:
-            salones = self.controlador.listar_salones(self.vista)
+            salones = self.controlador.listar_salones(self)  # Pasa 'self' como vista
             if salones is None:
                 logger.warning("El método listar_salones devolvió None. Verifique el controlador.")
             else:
@@ -52,7 +52,6 @@ class ListSalonesScreen(Screen):
             self.actualizar_lista_salones(salones or [])
         except Exception as e:
             logger.error(f"Error consultando salones: {e}")
-            self.mostrar_error(f"Error consultando salones: {e}")
             self.actualizar_lista_salones([])
     
     def on_enter(self):
@@ -60,8 +59,7 @@ class ListSalonesScreen(Screen):
         self.cargar_salones()
 
     def volver(self, instance):
-        """Regresa a la pantalla de áreas"""
+        """Regresa a la pantalla de salones"""
         self.manager.current = 'salones'
-    
 
-    
+
