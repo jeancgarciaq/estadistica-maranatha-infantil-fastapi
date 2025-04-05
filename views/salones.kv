@@ -74,6 +74,21 @@
                 height: 50
                 on_press: root.controlador.eliminar_salon(salon_id.text)
             Button:
+                text: "Buscar"
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press:
+                    root.controlador.obtener_salon(int(salon_id.text)) if salon_id.text.isdigit() else root.mostrar_error("ID inválido")
+        # Contenedor de Botones
+        BoxLayout:
+            size_hint_y: None
+            height: 50 # Ajusta la altura según sea necesario
+            spacing: 10
+            padding: 10
+            Button:
                 text: 'Ver Lista'
                 font_size: 28
                 background_normal: ''
@@ -81,12 +96,6 @@
                 size_hint_y: None
                 height: 50
                 on_press: root.manager.current = 'lista_salones'
-        # Contenedor de Botones
-        BoxLayout:
-            size_hint_y: None
-            height: 50 # Ajusta la altura según sea necesario
-            spacing: 10
-            padding: 10
             Button:
                 text: 'Gestionar Aulas'
                 font_size: 28
