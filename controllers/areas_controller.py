@@ -107,22 +107,35 @@ class AreasController:
         """Handler for the 'List' button in the areas view."""
         self.listar_areas(self.vista)
 
-    def obtener_area(self, id):
-        """Retrieve a single area by its ID."""
+    def obtener_area(self, id=None, nombre=None):
+        """Retrieve a single area by its ID or name."""
+        if not id and not nombre:
+            self.vista.mostrar_error("Debe proporcionar un ID o un nombre para buscar el área.")
+            return None
+
         db = SessionLocal()
         try:
-            area = db.query(Area).filter(Area.id == id).first()
+            query = db.query(Area)
+            if id:
+                area = query.filter(Area.id == id).first()
+            elif nombre:
+                area = query.filter(Area.area == nombre).first()
+
             if area:
                 logger.info(f"Área encontrada: {area.area}")
                 self.mostrar_area(f"Área encontrada: {area.area}")
                 return area
             else:
-                logger.warning(f"Área con ID {id} no encontrada.")
-                self.vista.mostrar_error(f"Error al encontrar área: {id}, no existe.")
+                if id:
+                    logger.warning(f"Área no encontrada. ID: {id}")
+                    self.vista.mostrar_error(f"Error al encontrar área: No existe un área con ID {id}.")
+                elif nombre:
+                    logger.warning(f"Área no encontrada. Nombre: {nombre}")
+                    self.vista.mostrar_error(f"Error al encontrar área: No existe un área con nombre '{nombre}'.")
                 return None
         except SQLAlchemyError as e:
-            logger.error(f"Error al obtener el área con ID {id}: {e}")
-            self.vista.mostrar_error(f"Error al obtener el área con ID {id}: {e}.")
+            logger.error(f"Error al obtener el área. ID: {id}, Nombre: {nombre}, Error: {e}")
+            self.vista.mostrar_error(f"Error al obtener el área: {e}.")
             return None
         finally:
             db.close()
