@@ -118,11 +118,11 @@ class AreasController:
                 return area
             else:
                 logger.warning(f"Área con ID {id} no encontrada.")
-                self.vista.mostrar_ernor(f"Error al encontrar área: {id}, no existe.")
+                self.vista.mostrar_error(f"Error al encontrar área: {id}, no existe.")
                 return None
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener el área con ID {id}: {e}")
-            self.vista.mostrar_ernor(f"Error al obtener el área con ID {id}: {e}.")
+            self.vista.mostrar_error(f"Error al obtener el área con ID {id}: {e}.")
             return None
         finally:
             db.close()
@@ -170,47 +170,4 @@ class AreasController:
         close_button.bind(on_release=popup.dismiss)
         popup.open()
 
-    def mostrar_ernor(self, mensaje):
-        """Display a popup with the error message."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)  # Updated background color
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
-
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
-
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)  # Updated text color to white
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
-
-        popup = Popup(
-            title="Error",  
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),  # Updated title text color to white
-            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
-
-
+    
