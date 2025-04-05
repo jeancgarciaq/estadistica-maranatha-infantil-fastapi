@@ -40,7 +40,6 @@ class AreasController:
             db.close()
             if area_creada:
                 self.vista.mostrar_exito("Área creada exitosamente.")
-                self.clear_fields()
 
     def actualizar_area(self, id, nombre):
         if not nombre:
@@ -65,8 +64,7 @@ class AreasController:
             db.close()
             if area_actualizada:
                 self.vista.mostrar_exito("Área actualizada exitosamente.")
-                self.clear_fields()
-
+                
     def eliminar_area(self, id):
         db = SessionLocal()
         area_eliminada = False
@@ -86,7 +84,6 @@ class AreasController:
             db.close()
             if area_eliminada:
                 self.vista.mostrar_exito("Área eliminada exitosamente.")
-                self.clear_fields()
 
     def listar_areas(self, vista):
         """Método para listar las áreas y manejar errores.."""
@@ -118,7 +115,6 @@ class AreasController:
             if area:
                 logger.info(f"Área encontrada: {area.area}")
                 self.mostrar_area(f"Área encontrada: {area.area}")
-                self.clear_fields()
                 return area
             else:
                 logger.warning(f"Área con ID {id} no encontrada.")
@@ -173,12 +169,5 @@ class AreasController:
         )
         close_button.bind(on_release=popup.dismiss)
         popup.open()
-
-    def clear_fields(self):
-        """ Clears the fields in the areas.kv view. """
-        if hasattr(self.vista, 'clear_fields'):
-            self.vista.clear_fields()
-        else:
-            logger.warning("La vista no tiene un método 'clear_fields'.")
 
 
