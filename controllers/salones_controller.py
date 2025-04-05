@@ -13,7 +13,6 @@ class SalonesController:
         self.vista = vista 
 
     def crear_salon(self, salon, edad):
-
         # Validación de datos
         if not salon:
             self.vista.mostrar_error("El nombre del salón es obligatorio.")
@@ -36,6 +35,7 @@ class SalonesController:
             db.close()
             if salon_creado:
                 self.vista.mostrar_exito("Salón creado exitosamente.")
+                self.clear_fields()
 
     def actualizar_salon(self, id, salon, edad):
         # Validación de datos
@@ -68,6 +68,7 @@ class SalonesController:
             db.close()
             if salon_actualizado:
                 self.vista.mostrar_exito("Salón actualizado exitosamente.")
+                self.clear_fields()
 
     def eliminar_salon(self, id):
         # Validación de datos
@@ -93,6 +94,7 @@ class SalonesController:
             db.close()
             if eliminar_salon:
                 self.vista.mostrar_exito("Salón eliminado exitosamente.")
+                self.clear_fields()
 
     def listar_salones(self, vista):
         """
@@ -137,6 +139,8 @@ class SalonesController:
             return None
         finally:
             db.close()
+            if salon:
+                self.clear_fields()
     
     def mostrar_salon(self, mensaje):
         """Display a popup with the area message."""
@@ -180,4 +184,10 @@ class SalonesController:
         )
         close_button.bind(on_release=popup.dismiss)
         popup.open()
-        
+
+    def clear_fields(self):
+        """ Clears the fields in the salones.kv view. """
+        if hasattr(self.vista, 'clear_fields'):
+            self.vista.clear_fields()
+        else:
+            logger.warning("La vista no tiene un método 'clear_fields'.")
