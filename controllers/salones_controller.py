@@ -117,22 +117,40 @@ class SalonesController:
         """Handler for the 'List' button in the salones view."""
         self.listar_salones(self.vista)
 
-    def obtener_salon(self, id):
-        """Retrieve a single salon by its ID."""
+    def obtener_salon(self, id=None, salon=None, edad=None):
+        """Retrieve a single salon by its ID or name."""
+        if not id and not salon and not edad:
+            self.vista.mostrar_error("Debe proporcionar un ID o un nombre de salón o una edad de salón para buscar.")
+            return None
+
         db = SessionLocal()
         try:
-            salon = db.query(Salon).filter(Salon.id == id).first()
-            if salon:
-                logger.info(f"Salón encontrado: {salon.nombre}")
-                self.mostrar_salon(f"Salón encontrado: {salon.nombre}")
-                return salon
+            query = db.query(Salon)
+            if id:
+                res_salon = query.filter(Salon.id == id).first()
+            elif salon:
+                res_salon = query.filter(Salon.salon == salon).first()
+            elif edad:
+                res_salon = query.filter(Salon.edad == edad).first()
+            
+            if res_salon:
+                logger.info(f"Salón encontrado: {salon.salon} - {salon.edad}")
+                self.mostrar_salon(f"Salón encontrado: {salon.salon} - {salon.edad}")
+                return res_salon
             else:
-                logger.warning(f"Salón con ID {id} no encontrado.")
-                self.vista.mostrar_error(f"Error al encontrar salón: {id}, no existe.")
+                if id:
+                    logger.warning(f"Salón no encontrado. ID: {id}")
+                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con ID {id}.")
+                elif salon:
+                    logger.warning(f"Salón no encontrado. Nombre: {salon}")
+                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con nombre '{salon}'.")
+                elif edad:
+                    logger.warning(f"Salón no encontrado. Edad: {edad}")
+                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con edad '{edad}'.")
                 return None
         except SQLAlchemyError as e:
-            logger.error(f"Error al obtener el salón con ID {id}: {e}")
-            self.vista.mostrar_error(f"Error al obtener el salón con ID {id}: {e}.")
+            logger.error(f"Error al obtener el salón: {e}")
+            self.vista.mostrar_error(f"Error al obtener el salón con ID: {id} - Nombbre: {salon} y Edad: {edad}. Error: {e}.")
             return None
         finally:
             db.close()
