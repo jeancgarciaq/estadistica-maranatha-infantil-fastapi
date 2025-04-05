@@ -56,9 +56,10 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.crear_salon(salon_salon.text, salon_edad.text)
-                salon_salon.text=''
-                salon_edad.text=''
+                on_press:
+                    root.controlador.crear_salon(salon_salon.text, salon_edad.text)
+                    salon_salon.text = ''
+                    salon_edad.text = ''
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -66,10 +67,11 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.actualizar_salon(salon_id.text, salon_salon.text, salon_edad.text)
-                salon_id.text=''
-                salon_salon.text=''
-                salon_edad.text=''
+                on_press: 
+                    root.controlador.actualizar_salon(salon_id.text, salon_salon.text, salon_edad.text)
+                    salon_id.text=''
+                    salon_salon.text=''
+                    salon_edad.text=''
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -77,8 +79,9 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.eliminar_salon(salon_id.text)
-                salon_id.text=''
+                on_press: 
+                    root.controlador.eliminar_salon(salon_id.text)
+                    salon_id.text=''
             Button:
                 text: "Buscar"
                 font_size: 28
@@ -87,8 +90,10 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.obtener_salon(int(salon_id.text)) if salon_id.text.isdigit() else root.mostrar_error("ID inválido")
+                    root.controlador.obtener_salon(salon_id.text, salon_salon.text, salon_edad.text)
                     salon_id.text=''
+                    salon_salon.text=''
+                    salon_edad.text=''
         # Contenedor de Botones
         BoxLayout:
             size_hint_y: None
