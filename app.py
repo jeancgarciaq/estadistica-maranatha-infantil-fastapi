@@ -11,7 +11,7 @@ from controllers import (
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
     LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen, ListAreasScreen, ListSalonesScreen ) 
+    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen ) 
 import logging
 
 class EmiApp(App):    
