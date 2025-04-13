@@ -75,6 +75,7 @@ class EmiApp(App):
             AyudaScreen(name='ayuda'),
             ListAreasScreen(controlador=controllers["areas"], vista="lista_areas_vista", name='lista_areas'),  
             ListSalonesScreen(controlador=controllers["salones"], vista="lista_salones_vista", name='lista_salones'),
+            ListAulasScreen(controlador=controllers["aulas"], vista="lista_aulas_vista", name='lista_aulas'),
         ]
 
         # Agregar pantallas al manejador
