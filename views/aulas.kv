@@ -151,14 +151,13 @@
                 height: 50
                 on_press: root.eliminar_aula()
             Button:
-                text: 'Listar'
+                text: 'Ver Lista'
                 font_size: 28
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                # Llama a la función para mostrar el popup
-                on_press: root.mostrar_popup_lista()
+                on_press: root.manager.current = 'lista_aulas'
         # Botón Volver al Menú
         Button:
             text: 'Volver al Menú'
