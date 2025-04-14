@@ -14,34 +14,43 @@ class DonacionesController:
     def __init__(self, vista):
         self.vista = vista
 
-    def crear_donacion(self, cantidad, descripcion, unidad, equipo, fecha, salones_ids):
-        db: Session = next(get_db())
+    def crear_donacion(self, cantidad, descripcion, unidad, equipo, fecha):
+        #Validacion de datos sencilla
+        if not cantidad or not descripcion or not unidad or not equipo or not fecha:
+            self.vista.mostrar_error("Todos los campos son obligatorios.")
+            return
+        db: SessionLocal()
+        donacion_creada = False
         try:
             with db.begin():
                 fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
-                nueva_donacion = Donacion(
+                donacion = Donacion(
                     cantidad=float(cantidad),
                     descripcion=descripcion,
                     unidad=unidad,
+                    equipo=equipo,
                     fecha=fecha_obj,
-                    equipo=equipo
                 )
-                for salon_id in salones_ids:
-                    salon = db.query(Salon).filter(Salon.id == salon_id).first()
-                    if salon:
-                        nueva_donacion.salones.append(salon)
-                db.add(nueva_donacion)
-                logger.info(f"Donación creada: {nueva_donacion.id}")
+                db.add(donacion)
+                logger.info(f"Donación creada: {donacion.id}")
+                donacion_creada = True
         except ValueError:
             self.vista.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
         except SQLAlchemyError as e:
             logger.error(f"Error al crear donación: {e}")
             self.vista.mostrar_error("Error al crear donación. Inténtalo de nuevo.")
         finally:
-            self.vista.listar_donaciones()
+            db.close()
+            if donacion_creada:
+                self.vista.mostrar_exito("Donación creada exitosamente.")
 
-    def actualizar_donacion(self, donacion_id, cantidad, descripcion, unidad, equipo, fecha, salones_ids):
-        db: Session = next(get_db())
+    def actualizar_donacion(self, donacion_id, cantidad, descripcion, unidad, equipo, fecha):
+        # Validación de datos
+        if not donacion_id or not cantidad or not descripcion or not unidad or not equipo or not fecha:
+            self.vista.mostrar_error("Todos los campos son obligatorios.")
+            return
+            
+        db: SessionLocal()
         try:
             with db.begin():
                 donacion = db.query(Donacion).filter(Donacion.id == donacion_id).first()
