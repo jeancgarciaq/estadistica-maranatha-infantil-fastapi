@@ -44,6 +44,14 @@ class AulasController:
         if not fecha:
             self.vista.mostrar_error("La fecha del aula es obligatoria.")
             return
+        
+        # Validar que el salón exista
+        db = SessionLocal()
+        salon = db.query(Salon).filter(Salon.id == id_salon).first()
+        if not salon:
+            self.vista.mostrar_error("El salón asociado no existe.")
+            db.close()
+            return
 
         db = SessionLocal()
         aula_creada = False
@@ -51,17 +59,18 @@ class AulasController:
             with db.begin():
                 # ... (Creación de aula)
                 aula = Aula(
-                    auxiliar=auxiliar,
-                    capitan=capitan,
-                    colaborador=colaborador,
-                    condicion=condicion,
-                    edad=edad,
-                    maestra=maestra,
-                    ninos=ninos,
-                    ninas=ninas,
-                    subcapitan=subcapitan,
-                    fecha=fecha,
+                    auxiliar = auxiliar,
+                    capitan = capitan,
+                    colaborador = colaborador,
+                    condicion = condicion,
+                    edad = edad,
+                    maestra = maestra,
+                    ninos = ninos,
+                    ninas = ninas,
+                    subcapitan = subcapitan,
+                    fecha = datetime.strptime(fecha, '%Y-%m-%d').date(),
                 )
+                db.add(aula)
                 logger.info(f"Aula creada: {aula.id}")
                 aula_creada = True
         except SQLAlchemyError as e:
@@ -73,7 +82,7 @@ class AulasController:
                 self.vista.mostrar_exito("Aula creada exitosamente.")
 
     def actualizar_aula(self, id, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, fecha, id_salon):
-        # ... (Validación de datos)
+        # Validación de datos
         if not auxiliar:
             self.vista.mostrar_error("El auxiliar del aula es obligatorio.")
             return
@@ -105,13 +114,20 @@ class AulasController:
             self.vista.mostrar_error("La fecha del aula es obligatoria.")
             return
 
+        # Validar que el salón exista
         db = SessionLocal()
-        aula_actualizada = False
         try:
+            salon = db.query(Salon).filter(Salon.id == id_salon).first()
+            if not salon:
+                self.vista.mostrar_error("El salón asociado no existe.")
+                return
+
+            aula_actualizada = False
             with db.begin():
-                # ... (Actualización de aula)
+                # Buscar el aula
                 aula = db.query(Aula).filter(Aula.id == id).first()
                 if aula:
+                    # Actualizar los atributos del aula
                     aula.auxiliar = auxiliar
                     aula.capitan = capitan
                     aula.colaborador = colaborador
@@ -121,7 +137,8 @@ class AulasController:
                     aula.ninos = ninos
                     aula.ninas = ninas
                     aula.subcapitan = subcapitan
-                    aula.fecha = fecha
+                    aula.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    aula.id_salon = id_salon
                     aula_actualizada = True
                     logger.info(f"Aula actualizada: {aula.id}")
                 else:
@@ -131,29 +148,35 @@ class AulasController:
             self.vista.mostrar_error("Error al actualizar aula. Inténtalo de nuevo.")
         finally:
             db.close()
-            if aula_actualizada:
-                self.vista.mostrar_exito("Aula actualizada exitosamente.")
 
-    def eliminar_aula(self, id):
-        db = SessionLocal()
-        aula_eliminada = False
-        try:
-            with db.begin():
-                # ... (Eliminación de aula)
-                aula = db.query(Aula).filter(Aula.id == id).first()
-                if aula:
-                    db.delete(aula)
-                    aula_eliminada = True
-                    logger.info(f"Aula eliminada: {aula.id}")
-                else:
-                    self.vista.mostrar_error("Aula no encontrada.")
-        except SQLAlchemyError as e:
-            logger.error(f"Error al eliminar aula: {e}")
-            self.vista.mostrar_error("Error al eliminar aula. Inténtalo de nuevo.")
-        finally:
-            db.close()
-            if aula_eliminada:
-                self.vista.mostrar_exito("Aula eliminada exitosamente.")
+        if aula_actualizada:
+            self.vista.mostrar_exito("Aula actualizada exitosamente.")
+
+        def eliminar_aula(self, id):
+            # Validación de ID
+            if not id:
+                self.vista.mostrar_error("El ID del aula es obligatorio.")
+                return
+
+            db = SessionLocal()
+            aula_eliminada = False
+            try:
+                with db.begin():
+                    # ... (Eliminación de aula)
+                    aula = db.query(Aula).filter(Aula.id == id).first()
+                    if aula:
+                        db.delete(aula)
+                        aula_eliminada = True
+                        logger.info(f"Aula eliminada: {aula.id}")
+                    else:
+                        self.vista.mostrar_error("Aula no encontrada.")
+            except SQLAlchemyError as e:
+                logger.error(f"Error al eliminar aula: {e}")
+                self.vista.mostrar_error("Error al eliminar aula. Inténtalo de nuevo.")
+            finally:
+                db.close()
+                if aula_eliminada:
+                    self.vista.mostrar_exito("Aula eliminada exitosamente.")
 
     def listar_aulas(self):
         db: SessionLocal()
@@ -249,3 +272,7 @@ class AulasController:
         )
         close_button.bind(on_release=popup.dismiss)
         popup.open()
+    
+    def get_db_session(self):
+        """Obtener una nueva Sesión de Base de Datos."""
+        return SessionLocal()
