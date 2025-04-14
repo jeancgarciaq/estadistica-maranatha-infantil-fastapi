@@ -174,6 +174,22 @@ class AulasScreen(Screen):
         finally:
             db.close()
 
+        # Verificar si no hay salones registrados
+        if not salones:
+            popup = Popup(
+                title='Sin Salones',
+                content=Label(
+                    text='No hay salones registrados.',
+                    size_hint=(1, 1),
+                    halign='center',
+                    valign='middle'
+                ),
+                size_hint=(None, None),
+                size=(400, 200)
+            )
+            popup.open()
+            return
+
         # Crear el contenido del popup
         popup_layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
         scroll_view = ScrollView(size_hint=(1, 0.8))
