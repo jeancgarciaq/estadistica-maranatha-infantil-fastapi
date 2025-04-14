@@ -54,6 +54,7 @@ class AulasController:
         if not salon:
             self.vista.mostrar_error("El salón asociado no existe.")
             db.close()
+            logging.info("Conexión a la base de datos cerrada.")
             return
 
         db = SessionLocal()
@@ -81,6 +82,7 @@ class AulasController:
             self.vista.mostrar_error("Error al crear aula. Inténtalo de nuevo.")
         finally:
             db.close()
+            logging.info("Conexión a la base de datos cerrada.")
             if aula_creada:
                 self.vista.mostrar_exito("Aula creada exitosamente.")
 
@@ -151,7 +153,7 @@ class AulasController:
             self.vista.mostrar_error("Error al actualizar aula. Inténtalo de nuevo.")
         finally:
             db.close()
-
+            logger.info("Conexión a la base de datos cerrada.")
         if aula_actualizada:
             self.vista.mostrar_exito("Aula actualizada exitosamente.")
 
@@ -178,11 +180,12 @@ class AulasController:
                 self.vista.mostrar_error("Error al eliminar aula. Inténtalo de nuevo.")
             finally:
                 db.close()
+                logger.info("Conexión a la base de datos cerrada.")
                 if aula_eliminada:
                     self.vista.mostrar_exito("Aula eliminada exitosamente.")
 
     def listar_aulas(self):
-        db: SessionLocal()
+        db = SessionLocal()
         try:
             aulas = db.query(Aula).all()
             logger.info(f"{len(aulas)} aulas obtenidas de la base de datos.")
@@ -197,12 +200,14 @@ class AulasController:
             return []
         finally:
             db.close()
+            logger.info("Conexión a la base de datos cerrada.")
     
     def listar_aulas_button_handler(self):
         """Método para manejar el evento de listar aulas."""
         self.listar_aulas(self.vista)
 
     def obtener_aula(self, id=None, fecha=None):
+        # Validación de ID y fecha
         if not id and not fecha:
             self.vista.mostrar_error("Debes proporcionar un ID o una fecha para obtener el aula.")
             return None
@@ -232,6 +237,7 @@ class AulasController:
             return None
         finally:
             db.close()
+            logger.info("Conexión a la base de datos cerrada.")
     
     def mostrar_aula(self, mensaje):
         """Display a popup with the aula message."""
