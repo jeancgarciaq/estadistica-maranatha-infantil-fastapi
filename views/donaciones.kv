@@ -120,7 +120,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.mostrar_popup_lista()  # Llama a la función para mostrar el popup
+                on_press: root.manager.current = 'lista_donaciones'
         # Botón Inicio
         Button:
             text: 'Volver al Menú'
