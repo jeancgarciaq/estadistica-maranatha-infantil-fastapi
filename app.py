@@ -11,12 +11,14 @@ from controllers import (
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
     LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen ) 
+    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen ) 
 import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 class EmiApp(App):    
     def build(self):
-        # Configure logging
         logging.basicConfig(
             level=logging.DEBUG,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,7 +27,6 @@ class EmiApp(App):
                 logging.StreamHandler()
             ]
         )
-        logger = logging.getLogger(__name__)
         
         Window.clearcolor = (20/255, 40/255, 80/255, 1)
         
@@ -34,7 +35,7 @@ class EmiApp(App):
         
         # Inicialización de la sesión de SQLAlchemy
         self.session = SessionLocal()
-        logger.debug("SQLAlchemy session initialized.")
+        logger.debug("SQLAlchemy sesión inicializada.")
 
         # Inicialización de los controladores con la sesión
         controllers = {
@@ -48,12 +49,14 @@ class EmiApp(App):
             "recepcion": RecepcionController(self.session),
             "distribuciones": DistribucionesController(self.session),
         }
-        logger.debug("Controllers initialized: %s", list(controllers.keys()))
+        logger.debug("Controladores inicializados: %s", list(controllers.keys()))
 
-        # Asignar los controladores de áreas, salones como atributo de la aplicación
+        # Asignar los controladores como atributos de la aplicación
         self.areas_controller = controllers["areas"]
-        self.salones_controller = controllers["salones"]  
-        logger.debug("AreasController and SalonesController assigned to EmiApp.")
+        self.salones_controller = controllers["salones"]
+        self.aulas_controller = controllers["aulas"]
+        self.donaciones_controller = controllers["donaciones"]  
+        logger.debug("AreasController, SalonesController, AulasController y DonacionesController fueron asignados a EmiApp.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
@@ -76,19 +79,24 @@ class EmiApp(App):
             ListAreasScreen(controlador=controllers["areas"], vista="lista_areas_vista", name='lista_areas'),  
             ListSalonesScreen(controlador=controllers["salones"], vista="lista_salones_vista", name='lista_salones'),
             ListAulasScreen(controlador=controllers["aulas"], vista="lista_aulas_vista", name='lista_aulas'),
+            ListDonacionesScreen(controlador=controllers["donaciones"], vista="lista_donaciones_vista", name='lista_donaciones'),
         ]
 
         # Agregar pantallas al manejador
         for screen in screens:
-            sm.add_widget(screen)
-            logger.debug("Screen added: %s", screen.name)
+            try:
+                sm.add_widget(screen)
+                logger.debug("Screen added: %s", screen.name)
+            except Exception as e:
+                logger.error(f"Error al agregar la pantalla {screen.name}: {e}")
 
         return sm
 
     def on_stop(self):
         """ Cierra la sesión de la base de datos al salir de la aplicación. """
-        self.session.close()
-        logging.getLogger(__name__).debug("SQLAlchemy session closed.")
+        if hasattr(self, 'session') and self.session:
+            self.session.close()
+            logger.debug("SQLAlchemy session closed.")
 
 if __name__ == '__main__':
     EmiApp().run()
