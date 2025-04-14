@@ -1,8 +1,11 @@
 import logging
 from models.aulas import Aula
-from models.database import get_db
+from models.database import SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from models.salones import Salon 
+from datetime import datetime
+from kivy.uix.boxlayout import BoxLayout
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
