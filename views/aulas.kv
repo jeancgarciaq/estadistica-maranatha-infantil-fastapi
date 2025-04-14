@@ -120,6 +120,20 @@
                     height: 30
                 TextInput:
                     id: aula_id_salon
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: 30
+                    TextInput:
+                        id: aula_id_salon
+                    Button:
+                        text: 'Seleccionar'
+                        font_size: 16
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        size_hint_y: None
+                        height: 50
+                        on_press: root.mostrar_popup_salones()
         # Contenedor de Botones
         BoxLayout:
             size_hint_y: None
