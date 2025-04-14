@@ -12,6 +12,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+from models.salones import Salon
 
 class AulasScreen(Screen):
     def __init__(self, controlador, **kwargs):
@@ -159,7 +160,75 @@ class AulasScreen(Screen):
         # Mostrar el popup
         popup.open()
 
-
     def mostrar_error(self, mensaje):
         popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
+        popup.open()   
+
+    def mostrar_popup_salones(self):
+        db = self.controlador.get_db_session()
+        try:
+            salones = db.query(Salon).all()
+        except Exception as e:
+            self.mostrar_error(f"Error al obtener salones: {e}")
+            return
+        finally:
+            db.close()
+
+        # Crear el contenido del popup
+        popup_layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
+        scroll_view = ScrollView(size_hint=(1, 0.8))
+        salones_grid = GridLayout(cols=2, size_hint_y=None, spacing=10, padding=10)
+        salones_grid.bind(minimum_height=salones_grid.setter('height'))
+
+        for salon in salones:
+            # Estilo para las etiquetas
+            salon_label = Label(
+                text=f"ID: {salon.id} - {salon.salon}",
+                size_hint_y=None,
+                height=30,
+                font_size=18,
+                color=(1, 1, 1, 1)  # Texto blanco
+            )
+            salones_grid.add_widget(salon_label)
+
+            # Estilo para los botones
+            select_button = Button(
+                text="Seleccionar",
+                size_hint_y=None,
+                height=30,
+                font_size=16,
+                background_normal='',
+                background_color=(0, 119/255, 194/255, 1)  # Azul consistente con el estilo
+            )
+            select_button.bind(on_press=lambda btn, salon_id=salon.id: self.seleccionar_salon(salon_id))
+            salones_grid.add_widget(select_button)
+
+        scroll_view.add_widget(salones_grid)
+        popup_layout.add_widget(scroll_view)
+
+        # Botón de cerrar con estilo
+        close_button = Button(
+            text="Cerrar",
+            size_hint=(1, 0.2),
+            height=50,
+            font_size=18,
+            background_normal='',
+            background_color=(0, 119/255, 194/255, 1)  # Azul consistente con el estilo
+        )
+        close_button.bind(on_press=lambda *args: popup.dismiss())
+        popup_layout.add_widget(close_button)
+
+        # Crear el popup con estilo consistente
+        popup = Popup(
+            title="Seleccionar Salón",
+            title_align="center",
+            title_size=20,
+            title_color=(1, 1, 1, 1),  # Título en blanco
+            content=popup_layout,
+            size_hint=(0.8, 0.8),
+            background_color=(0.102, 0.2, 0.396, 1)  # Fondo azul oscuro
+        )
         popup.open()
+
+    def seleccionar_salon(self, salon_id):
+        self.ids.aula_id_salon.text = str(salon_id)
