@@ -28,6 +28,7 @@
         "Salon",
         "Screen",
         "screenmanager",
-        "scrollview"
+        "scrollview",
+        "Styled"
     ]
 }
