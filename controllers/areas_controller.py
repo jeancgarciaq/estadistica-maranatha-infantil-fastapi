@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AreasController(BaseController):
-    def __init__(self, vista):
-        super().__init__(vista, Area)
+    def __init__(self, vista=None, session=None):
+        super().__init__(vista, Area, session)
 
     def crear_area(self, nombre):
         if not nombre:
