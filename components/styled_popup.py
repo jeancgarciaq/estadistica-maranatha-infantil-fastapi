@@ -51,10 +51,10 @@ class StyledPopup(Popup):
         # Crear el popup
         popup = StyledPopup(
             title=titulo,
-            content=popup_layout,
             size_hint=(0.8, 0.4),
             auto_dismiss=False  # Evitar que se cierre automáticamente
         )
+        popup.content = popup_layout  # Asignar el layout como contenido del popup
 
         # Vincular el botón "Cerrar" al método dismiss del popup
         close_button.bind(on_release=popup.dismiss)
