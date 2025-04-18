@@ -1,3 +1,4 @@
+from base_controller import BaseController
 from .areas_controller import AreasController
 from .aulas_controller import AulasController
 from .donaciones_controller import DonacionesController
