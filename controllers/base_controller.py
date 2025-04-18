@@ -8,8 +8,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class BaseController:
-    def __init__(self, vista):
+    def __init__(self, vista=None, model=None, session=None):
+        """
+        Clase base para controladores.
+        :param vista: Vista asociada al controlador.
+        :param model: Modelo SQLAlchemy asociado al controlador.
+        :param session: Sesión de base de datos opcional.
+        """
         self.vista = vista
+        self.model = model
+        self.session = session or SessionLocal()  # Usar la sesión proporcionada o crear una nueva
 
     def get_db_session(self):
         """Obtiene una nueva sesión de base de datos."""
