@@ -1,35 +1,16 @@
-import kivy
-kivy.require('2.3.1')
-
 from kivy.uix.screenmanager import Screen
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.scrollview import ScrollView
 from kivy.lang import Builder
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from components.styled_popup import StyledPopup
-from controllers import AreasController
-import logging
-
-
-# Configuración de logging
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
+from controllers.areas_controller import AreasController
 
 class AreasScreen(Screen):
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, **kwargs):
         # Cargar el archivo KV dentro del try-except
         try:
             Builder.load_file('views/areas.kv')
         except Exception as e:
             print(f"Error al cargar areas.kv: {e}")
         super().__init__(**kwargs)
-        # Pass 'self' as the 'vista' to the controller
         self.controlador = AreasController(self)
-        self.vista = self
 
 
     def obtener_datos_formulario(self):
