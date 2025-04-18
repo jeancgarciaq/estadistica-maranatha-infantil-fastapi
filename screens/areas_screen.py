@@ -10,6 +10,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from components.styled_popup import StyledPopup
 from controllers import AreasController
 import logging
 
@@ -36,7 +37,7 @@ class AreasScreen(Screen):
 
         # Validación básica
         if not area_nombre:
-            self.mostrar_error("El nombre del área es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
             return None
 
         return {"area": area_nombre}
@@ -55,88 +56,18 @@ class AreasScreen(Screen):
             self.ids.area_nombre.text = area.nombre
             self.ids.area_id.text = str(area.id)
 
-    def mostrar_error(self, mensaje):
-        """Desplegar un popup con el mensaje de error."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
+    def buscar_area(self):
+        """Obtiene los datos del formulario y llama al método buscar_area del controlador."""
+        area_id = self.ids.area_id.text.strip()  # ID del área
+        area_nombre = self.ids.area_nombre.text.strip()  # Nombre del área
 
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
+        # Validar que al menos uno de los campos esté lleno
+        if not area_id and not area_nombre:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
+            return
 
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
+        # Convertir el ID a entero si es posible
+        area_id = int(area_id) if area_id.isdigit() else None
 
-        popup = Popup(
-            title="Error",  
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),
-            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
-    
-    def mostrar_exito(self, mensaje):
-        """Display a popup with the area message."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
-
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
-
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
-
-        popup = Popup(
-            title="Éxito",
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),
-            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
+        # Llamar al método buscar_area del controlador
+        self.controlador.buscar_area(id=area_id, nombre=area_nombre)
