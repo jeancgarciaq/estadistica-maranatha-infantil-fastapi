@@ -8,30 +8,17 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    Label:
-        id: popup_title
-        text: "Información"
-        size_hint: (1, 0.2)
-        color: (1, 1, 1, 1)  # Texto blanco
-        font_size: 24
-        bold: True
-    ScrollView:
-        size_hint: (1, 0.6)
-        GridLayout:
-            id: popup_content
-            cols: 2
-            size_hint_y: None
-            height: self.minimum_height
-            row_default_height: 30
-            row_force_default: True
-            spacing: 10
-            padding: 10
+    GridLayout:
+        id: popup_content
+        cols: 2
+        size_hint_y: None
+        height: self.minimum_height
+        row_default_height: 30
+        row_force_default: True
     Button:
-        id: close_button
         text: "Cerrar"
-        size_hint: (1, 0.2)
+        size_hint_y: None
+        height: 50
         background_normal: ''
         background_color: (0, 119/255, 194/255, 1)  # Azul claro
-        font_size: 20
-        bold: True
-        height: 50
+        on_release: root.controlador.dismiss_popup()
