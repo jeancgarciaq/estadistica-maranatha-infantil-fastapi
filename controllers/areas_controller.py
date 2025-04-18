@@ -1,25 +1,14 @@
-import logging
+from controllers.base_controller import BaseController
 from models.areas import Area
-from models.database import SessionLocal
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.screenmanager import Screen
-from kivy.uix.widget import Widget
 from components.styled_popup import StyledPopup
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class AreasController:
+class AreasController(BaseController):
     def __init__(self, vista):
-        self.vista = vista
+        super().__init__(vista, Area)
 
     def crear_area(self, nombre):
         if not nombre:
@@ -114,72 +103,23 @@ class AreasController:
         """Handler for the 'List' button in the areas view."""
         self.listar_areas(self.vista)
 
-    def obtener_area(self, id=None, nombre=None):
-        """Retrieve a single area by its ID or name."""
-        if not id and not nombre:
-            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
-            return None
-
-        db = SessionLocal()
-        try:
-            query = db.query(Area)
-            if id:
-                area = query.filter(Area.id == id).first()
-            elif nombre:
-                area = query.filter(Area.area == nombre).first()
-
-            if area:
-                logger.info(f"Área encontrada: {area.area}")
-                StyledPopup.mostrar_popup("Información", f"Área encontrada: {area.area}", tipo="info")
-                return area
-            else:
-                if id:
-                    logger.warning(f"Área no encontrada. ID: {id}")
-                    StyledPopup.mostrar_popup("Error", f"Error al encontrar área: No existe un área con ID {id}.", tipo="error")
-                elif nombre:
-                    logger.warning(f"Área no encontrada. Nombre: {nombre}")
-                    StyledPopup.mostrar_popup("Error", f"Error al encontrar área: No existe un área con nombre '{nombre}'.", tipo="error")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener el área. ID: {id}, Nombre: {nombre}, Error: {e}")
-            StyledPopup.mostrar_popup("Error", f"Error al obtener el área: {e}.", tipo="error")
-            return None
-        finally:
-            db.close()
-            logger.info("Conexión cerrada")
-    
     def buscar_area(self, id=None, nombre=None):
-        """Busca un área por ID o nombre y muestra la información en un popup."""
-        if not id and not nombre:
-            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
-            return
-
-        db = SessionLocal()
-        try:
-            query = db.query(Area)
+        """
+        Busca un área por ID o nombre y muestra la información en un popup.
+        :param id: ID del área a buscar.
+        :param nombre: Nombre del área a buscar.
+        """
+        area = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="area")
+        if area:
+            # Mostrar la información del área en un popup
+            StyledPopup.mostrar_popup(
+                "Información del Área",
+                f"ID: {area.id}\nNombre: {area.area}",
+                tipo="info"
+            )
+        else:
+            # Mostrar un mensaje de error si no se encuentra el área
             if id:
-                area = query.filter(Area.id == id).first()
+                StyledPopup.mostrar_popup("Error", f"No existe un área con ID {id}.", tipo="error")
             elif nombre:
-                area = query.filter(Area.area == nombre).first()
-
-            if area:
-                logger.info(f"Área encontrada: {area.area}")
-                # Mostrar la información del área en un popup
-                StyledPopup.mostrar_popup(
-                    "Información del Área",
-                    f"ID: {area.id}\nNombre: {area.area}",
-                    tipo="info"
-                )
-            else:
-                if id:
-                    logger.warning(f"Área no encontrada. ID: {id}")
-                    StyledPopup.mostrar_popup("Error", f"No existe un área con ID {id}.", tipo="error")
-                elif nombre:
-                    logger.warning(f"Área no encontrada. Nombre: {nombre}")
-                    StyledPopup.mostrar_popup("Error", f"No existe un área con nombre '{nombre}'.", tipo="error")
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener el área. ID: {id}, Nombre: {nombre}, Error: {e}")
-            StyledPopup.mostrar_popup("Error", f"Error al obtener el área: {e}.", tipo="error")
-        finally:
-            db.close()
-            logger.info("Conexión cerrada")
+                StyledPopup.mostrar_popup("Error", f"No existe un área con nombre '{nombre}'.", tipo="error")
