@@ -90,7 +90,7 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.obtener_area(area_id.text if area_id.text.isdigit() else None, area_nombre.text if area_nombre.text else None)
+                    on_press: root.buscar_area()
                     area_id.text=''
                     area_nombre.text=''
         Button:
