@@ -11,6 +11,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.screenmanager import Screen
 from kivy.uix.widget import Widget
+from components.styled_popup import StyledPopup
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +23,7 @@ class AreasController:
 
     def crear_area(self, nombre):
         if not nombre:
-            self.vista.mostrar_error("El nombre del área es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
             return
 
         db = SessionLocal()
@@ -35,15 +36,19 @@ class AreasController:
                 area_creada = True
         except SQLAlchemyError as e:
             logger.error(f"Error al crear área: {e}")
-            self.vista.mostrar_error(f"Error al crear área: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al crear área: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
             if area_creada:
-                self.vista.mostrar_exito("Área creada exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Área creada exitosamente.", tipo="success")
 
     def actualizar_area(self, id, nombre):
+        #Validar los datos
+        if not id:
+            StyledPopup.mostrar_popup("Error", "El id del área es obligatorio.", tipo="error")
+            return
         if not nombre:
-            self.vista.mostrar_error("El nombre del área es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
             return
 
         db = SessionLocal()
@@ -56,14 +61,14 @@ class AreasController:
                     logger.info(f"Área actualizada: {nombre}")
                     area_actualizada = True
                 else:
-                    self.vista.mostrar_error("Área no encontrada.")
+                    StyledPopup.mostrar_popup("Error", "Área no encontrada.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar área: {e}")
-            self.vista.mostrar_error(f"Error al actualizar área: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al actualizar área: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
             if area_actualizada:
-                self.vista.mostrar_exito("Área actualizada exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Área actualizada exitosamente.", tipo="success")
                 
     def eliminar_area(self, id):
         db = SessionLocal()
@@ -76,14 +81,15 @@ class AreasController:
                     logger.info(f"Área eliminada: {area.area}")
                     area_eliminada = True
                 else:
-                    self.vista.mostrar_error("Área no encontrada.")
+                    StyledPopup.mostrar_popup("Error", "Área no encontrada.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar área: {e}")
-            self.vista.mostrar_error(f"Error al eliminar área: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al eliminar área: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
+            logger.info("Conexión cerrada")
             if area_eliminada:
-                self.vista.mostrar_exito("Área eliminada exitosamente.")
+                self.mostrar_popup("Éxito", "Área eliminada exitosamente.", tipo="success")
 
     def listar_areas(self, vista):
         """Método para listar las áreas y manejar errores.."""
@@ -94,14 +100,15 @@ class AreasController:
             if hasattr(vista, 'actualizar_lista_areas'):
                 vista.actualizar_lista_areas(areas)
             else:
-                raise AttributeError("The provided view does not have 'actualizar_lista_areas' method.")
+                raise AttributeError("La vista no tiene un método 'actualizar_lista_areas'.")
             return areas
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener áreas: {e}")
-            self.vista.mostrar_error(f"Error al obtener áreas: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al obtener área: {e}. Inténtalo de nuevo.", tipo="error")
             return []
         finally:
             db.close()
+            logger.info("Conexión cerrada")
 
     def listar_areas_button_handler(self):
         """Handler for the 'List' button in the areas view."""
@@ -110,7 +117,7 @@ class AreasController:
     def obtener_area(self, id=None, nombre=None):
         """Retrieve a single area by its ID or name."""
         if not id and not nombre:
-            self.vista.mostrar_error("Debe proporcionar un ID o un nombre para buscar el área.")
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
             return None
 
         db = SessionLocal()
@@ -123,64 +130,56 @@ class AreasController:
 
             if area:
                 logger.info(f"Área encontrada: {area.area}")
-                self.mostrar_area(f"Área encontrada: {area.area}")
+                StyledPopup.mostrar_popup("Información", f"Área encontrada: {area.area}", tipo="info")
                 return area
             else:
                 if id:
                     logger.warning(f"Área no encontrada. ID: {id}")
-                    self.vista.mostrar_error(f"Error al encontrar área: No existe un área con ID {id}.")
+                    StyledPopup.mostrar_popup("Error", f"Error al encontrar área: No existe un área con ID {id}.", tipo="error")
                 elif nombre:
                     logger.warning(f"Área no encontrada. Nombre: {nombre}")
-                    self.vista.mostrar_error(f"Error al encontrar área: No existe un área con nombre '{nombre}'.")
+                    StyledPopup.mostrar_popup("Error", f"Error al encontrar área: No existe un área con nombre '{nombre}'.", tipo="error")
                 return None
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener el área. ID: {id}, Nombre: {nombre}, Error: {e}")
-            self.vista.mostrar_error(f"Error al obtener el área: {e}.")
+            StyledPopup.mostrar_popup("Error", f"Error al obtener el área: {e}.", tipo="error")
             return None
         finally:
             db.close()
+            logger.info("Conexión cerrada")
+    
+    def buscar_area(self, id=None, nombre=None):
+        """Busca un área por ID o nombre y muestra la información en un popup."""
+        if not id and not nombre:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
+            return
 
-    def mostrar_area(self, mensaje):
-        """Display a popup with the area message."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)  # Updated background color
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
+        db = SessionLocal()
+        try:
+            query = db.query(Area)
+            if id:
+                area = query.filter(Area.id == id).first()
+            elif nombre:
+                area = query.filter(Area.area == nombre).first()
 
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
-
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)  # Updated text color to white
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
-
-        popup = Popup(
-            title="Información del Área",
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),  # Updated title text color to white
-            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
-
-
+            if area:
+                logger.info(f"Área encontrada: {area.area}")
+                # Mostrar la información del área en un popup
+                StyledPopup.mostrar_popup(
+                    "Información del Área",
+                    f"ID: {area.id}\nNombre: {area.area}",
+                    tipo="info"
+                )
+            else:
+                if id:
+                    logger.warning(f"Área no encontrada. ID: {id}")
+                    StyledPopup.mostrar_popup("Error", f"No existe un área con ID {id}.", tipo="error")
+                elif nombre:
+                    logger.warning(f"Área no encontrada. Nombre: {nombre}")
+                    StyledPopup.mostrar_popup("Error", f"No existe un área con nombre '{nombre}'.", tipo="error")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener el área. ID: {id}, Nombre: {nombre}, Error: {e}")
+            StyledPopup.mostrar_popup("Error", f"Error al obtener el área: {e}.", tipo="error")
+        finally:
+            db.close()
+            logger.info("Conexión cerrada")
