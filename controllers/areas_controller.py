@@ -1,6 +1,7 @@
 from controllers.base_controller import BaseController
 from models.areas import Area
 from components.styled_popup import StyledPopup
+import logging
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
