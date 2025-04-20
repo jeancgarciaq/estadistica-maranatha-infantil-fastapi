@@ -118,7 +118,18 @@ class SalonesController(BaseController):
         :param id: ID del salón a buscar.
         :param nombre: Nombre del salón a buscar.
         """
-        salon = self.buscar_por_id_o_nombre(id=id, nombre=nombre)
+        #Validar datos
+        if not id and not nombre:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el salón.", tipo="error")
+            return
+        if id and not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
+            return
+        if nombre and not isinstance(nombre, str):
+            StyledPopup.mostrar_popup("Error", "El nombre debe ser una cadena de texto.", tipo="error")
+            return
+        # Buscar salon 
+        salon = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="salon")
         if salon:
             # Mostrar la información del salón en un popup
             StyledPopup.mostrar_popup(
