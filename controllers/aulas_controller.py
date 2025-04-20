@@ -1,287 +1,212 @@
-import logging
 from models.aulas import Aula
-from models.database import SessionLocal
-from sqlalchemy.orm import Session
+from models.salones import Salon
 from sqlalchemy.exc import SQLAlchemyError
-from models.salones import Salon 
+from components.styled_popup import StyledPopup
+from controllers.base_controller import BaseController
 from datetime import datetime
-from kivy.uix.boxlayout import BoxLayout
+import logging
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class AulasController:
-    def __init__(self, vista):
+class AulasController(BaseController):
+    def __init__(self, vista=None, session=None):
+        super().__init__(vista, Aula, session)
+        self.session = session
+        logger.info("Inicializando AulasController")
+        if not session:
+            logger.error("No se ha proporcionado una sesión de base de datos.")
+            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
         self.vista = vista
+        logger.info("AulasController inicializado con éxito.")
 
-    def crear_aula(self, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, fecha, id_salon):
-        # ... (Validación de datos)
-        if not auxiliar:
-            self.vista.mostrar_error("El auxiliar del aula es obligatorio.")
-            return
-        if not capitan:
-            self.vista.mostrar_error("El capitán del aula es obligatorio.")
-            return
-        if not colaborador:
-            self.vista.mostrar_error("El colaborador del aula es obligatorio.")
-            return
-        if not condicion:
-            self.vista.mostrar_error("La condición del aula es obligatoria.")
-            return
-        if not edad:
-            self.vista.mostrar_error("La edad del aula es obligatoria.")
-            return
-        if not maestra:
-            self.vista.mostrar_error("La maestra del aula es obligatoria.")
-            return
-        if not ninos:
-            self.vista.mostrar_error("El número de niños del aula es obligatorio.")
-            return
-        if not ninas:
-            self.vista.mostrar_error("El número de niñas del aula es obligatorio.")
-            return
-        if not subcapitan:
-            self.vista.mostrar_error("El subcapitán del aula es obligatorio.")
-            return
-        if not fecha:
-            self.vista.mostrar_error("La fecha del aula es obligatoria.")
-            return
-        
-        # Validar que el salón exista
-        db = SessionLocal()
-        salon = db.query(Salon).filter(Salon.id == id_salon).first()
-        if not salon:
-            self.vista.mostrar_error("El salón asociado no existe.")
-            db.close()
-            logging.info("Conexión a la base de datos cerrada.")
+    def crear_aula(self, datos):
+        """
+        Crea un aula con los datos proporcionados.
+        :param datos: Diccionario con los datos del aula.
+        """
+        # Validar los datos
+        errores = self.validar_datos(datos)
+        if errores:
+            StyledPopup.mostrar_popup("Error", "\n".join(errores), tipo="error")
             return
 
-        db = SessionLocal()
+        db = self.get_db_session()
         aula_creada = False
         try:
             with db.begin():
-                # ... (Creación de aula)
-                aula = Aula(
-                    auxiliar = auxiliar,
-                    capitan = capitan,
-                    colaborador = colaborador,
-                    condicion = condicion,
-                    edad = edad,
-                    maestra = maestra,
-                    ninos = ninos,
-                    ninas = ninas,
-                    subcapitan = subcapitan,
-                    fecha = datetime.strptime(fecha, '%Y-%m-%d').date(),
-                )
+                aula = Aula(**datos)
                 db.add(aula)
                 logger.info(f"Aula creada: {aula.id}")
                 aula_creada = True
         except SQLAlchemyError as e:
             logger.error(f"Error al crear aula: {e}")
-            self.vista.mostrar_error("Error al crear aula. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al crear aula: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
-            logging.info("Conexión a la base de datos cerrada.")
             if aula_creada:
-                self.vista.mostrar_exito("Aula creada exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Aula creada exitosamente.", tipo="success")
 
-    def actualizar_aula(self, id, auxiliar, capitan, colaborador, condicion, edad, maestra, ninos, ninas, subcapitan, fecha, id_salon):
-        # Validación de datos
-        if not auxiliar:
-            self.vista.mostrar_error("El auxiliar del aula es obligatorio.")
-            return
-        if not capitan:
-            self.vista.mostrar_error("El capitán del aula es obligatorio.")
-            return
-        if not colaborador:
-            self.vista.mostrar_error("El colaborador del aula es obligatorio.")
-            return
-        if not condicion:
-            self.vista.mostrar_error("La condición del aula es obligatoria.")
-            return
-        if not edad:
-            self.vista.mostrar_error("La edad del aula es obligatoria.")
-            return
-        if not maestra:
-            self.vista.mostrar_error("La maestra del aula es obligatoria.")
-            return
-        if not ninos:
-            self.vista.mostrar_error("El número de niños del aula es obligatorio.")
-            return
-        if not ninas:
-            self.vista.mostrar_error("El número de niñas del aula es obligatorio.")
-            return
-        if not subcapitan:
-            self.vista.mostrar_error("El subcapitán del aula es obligatorio.")
-            return
-        if not fecha:
-            self.vista.mostrar_error("La fecha del aula es obligatoria.")
+    def actualizar_aula(self, id, datos):
+        """
+        Actualiza un aula existente con los datos proporcionados.
+        :param id: ID del aula a actualizar.
+        :param datos: Diccionario con los datos actualizados del aula.
+        """
+        if not id or not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID del aula es obligatorio y debe ser un número entero.", tipo="error")
             return
 
-        # Validar que el salón exista
-        db = SessionLocal()
+        errores = self.validar_datos(datos)
+        if errores:
+            StyledPopup.mostrar_popup("Error", "\n".join(errores), tipo="error")
+            return
+
+        db = self.get_db_session()
+        aula_actualizada = False
         try:
-            salon = db.query(Salon).filter(Salon.id == id_salon).first()
-            if not salon:
-                self.vista.mostrar_error("El salón asociado no existe.")
-                return
-
-            aula_actualizada = False
             with db.begin():
-                # Buscar el aula
                 aula = db.query(Aula).filter(Aula.id == id).first()
                 if aula:
-                    # Actualizar los atributos del aula
-                    aula.auxiliar = auxiliar
-                    aula.capitan = capitan
-                    aula.colaborador = colaborador
-                    aula.condicion = condicion
-                    aula.edad = edad
-                    aula.maestra = maestra
-                    aula.ninos = ninos
-                    aula.ninas = ninas
-                    aula.subcapitan = subcapitan
-                    aula.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    aula.id_salon = id_salon
-                    aula_actualizada = True
+                    for key, value in datos.items():
+                        setattr(aula, key, value)
                     logger.info(f"Aula actualizada: {aula.id}")
+                    aula_actualizada = True
                 else:
-                    self.vista.mostrar_error("Aula no encontrada.")
+                    StyledPopup.mostrar_popup("Error", "Aula no encontrada.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar aula: {e}")
-            self.vista.mostrar_error("Error al actualizar aula. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al actualizar aula: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
-            logger.info("Conexión a la base de datos cerrada.")
-        if aula_actualizada:
-            self.vista.mostrar_exito("Aula actualizada exitosamente.")
+            if aula_actualizada:
+                StyledPopup.mostrar_popup("Éxito", "Aula actualizada exitosamente.", tipo="success")
 
-        def eliminar_aula(self, id):
-            # Validación de ID
-            if not id:
-                self.vista.mostrar_error("El ID del aula es obligatorio.")
-                return
+    def eliminar_aula(self, id):
+        """
+        Elimina un aula por su ID.
+        :param id: ID del aula a eliminar.
+        """
+        if not id or not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID del aula es obligatorio y debe ser un número entero.", tipo="error")
+            return
 
-            db = SessionLocal()
-            aula_eliminada = False
-            try:
-                with db.begin():
-                    # ... (Eliminación de aula)
-                    aula = db.query(Aula).filter(Aula.id == id).first()
-                    if aula:
-                        db.delete(aula)
-                        aula_eliminada = True
-                        logger.info(f"Aula eliminada: {aula.id}")
-                    else:
-                        self.vista.mostrar_error("Aula no encontrada.")
-            except SQLAlchemyError as e:
-                logger.error(f"Error al eliminar aula: {e}")
-                self.vista.mostrar_error("Error al eliminar aula. Inténtalo de nuevo.")
-            finally:
-                db.close()
-                logger.info("Conexión a la base de datos cerrada.")
-                if aula_eliminada:
-                    self.vista.mostrar_exito("Aula eliminada exitosamente.")
+        db = self.get_db_session()
+        aula_eliminada = False
+        try:
+            with db.begin():
+                aula = db.query(Aula).filter(Aula.id == id).first()
+                if aula:
+                    db.delete(aula)
+                    logger.info(f"Aula eliminada: {aula.id}")
+                    aula_eliminada = True
+                else:
+                    StyledPopup.mostrar_popup("Error", "Aula no encontrada.", tipo="error")
+        except SQLAlchemyError as e:
+            logger.error(f"Error al eliminar aula: {e}")
+            StyledPopup.mostrar_popup("Error", f"Error al eliminar aula: {e}. Inténtalo de nuevo.", tipo="error")
+        finally:
+            db.close()
+            if aula_eliminada:
+                StyledPopup.mostrar_popup("Éxito", "Aula eliminada exitosamente.", tipo="success")
 
-    def listar_aulas(self):
-        db = SessionLocal()
+    def listar_aulas(self, vista):
+        """
+        Lista todas las aulas.
+        """
+        db = self.get_db_session()
         try:
             aulas = db.query(Aula).all()
             logger.info(f"{len(aulas)} aulas obtenidas de la base de datos.")
-            if hasattr(self.vista, 'actualizar_lista'):
-                self.vista.actualizar_lista(aulas)
+            if hasattr(self.vista, 'actualizar_lista_aulas'):
+                self.vista.actualizar_lista_aulas(aulas)
             else:
-                raise AttributeError("La vista no tiene el método 'actualizar_lista'.")
+                raise AttributeError("La vista no tiene un método 'actualizar_lista_aulas'.")
             return aulas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar aulas: {e}")
-            self.vista.mostrar_error("Error al listar aulas. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al listar aulas: {e}. Inténtalo de nuevo.", tipo="error")
             return []
         finally:
             db.close()
-            logger.info("Conexión a la base de datos cerrada.")
+            logger.info("Cierre de la sesión")
     
     def listar_aulas_button_handler(self):
-        """Método para manejar el evento de listar aulas."""
+        """El manejador del botón Listar en la vista aulas."""
         self.listar_aulas(self.vista)
 
-    def obtener_aula(self, id=None, fecha=None):
-        # Validación de ID y fecha
+    def buscar_aula(self, id=None, fecha=None):
+        """
+        Busca un aula por ID o fecha y muestra la información en un popup.
+        :param id: ID del aula a buscar.
+        :param fecha: Fecha del aula a buscar.
+        """
+        # Validar que al menos uno de los campos esté lleno
         if not id and not fecha:
-            self.vista.mostrar_error("Debes proporcionar un ID o una fecha para obtener el aula.")
-            return None
-        db = SessionLocal()
-        try:
-            db.query(Aula)
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o una fecha para buscar el aula.", tipo="error")
+            return
+        if id and not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
+            return
+        if fecha and not isinstance(fecha, str):
+            StyledPopup.mostrar_popup("Error", "El nombre debe ser una cadena de texto.", tipo="error")
+            return
+        if isinstance(fecha, str):
+            try:
+                datetime.strptime(fecha, "%Y-%m-%d")
+            except ValueError:
+                StyledPopup.mostrar_popup("Error", "El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.", type="error")
+            
+        #Buscar Aula
+        aula = self.buscar_por_id_o_fecha(id=id, fecha=fecha, nombre_campo="fecha")
+        if aula:
+            # Mostrar la información del área en un popup
+            StyledPopup.mostrar_popup(
+                "Información del Aula",
+                f"ID: {aula.id}\nFecha: {aula.fecha}",
+                tipo="info"
+            )
+        else:
+            # Mostrar un mensaje de error si no se encuentra el área
             if id:
-                aula = db.query(Aula).filter(Aula.id == id).first()
-            else:
-                aula = db.query(Aula).filter(Aula.fecha == fecha).first()
+                StyledPopup.mostrar_popup("Error", f"No existe un área con ID {id}.", tipo="error")
+            elif fecha:
+                StyledPopup.mostrar_popup("Error", f"No existe un área con fecha '{fecha}'.", tipo="error")
 
-            if aula:
-                logger.info(f"Aula encontrada: {aula.id}")
-                self.mostrar_aula(f"Aula encontrada: {aula.id}, {aula.fecha}")
-                return aula
-            else:
-                if id:
-                    logger.warning(f"Aula con ID {id} no encontrada.")
-                    self.vista.mostrar_error("Aula no encontrada.")
-                elif fecha:
-                    logger.warning(f"Aula con fecha {fecha} no encontrada.")
-                    self.vista.mostrar_error("Aula no encontrada.")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener aula: {e}")
-            self.vista.mostrar_error("Error al obtener aula. Inténtalo de nuevo.")
-            return None
-        finally:
-            db.close()
-            logger.info("Conexión a la base de datos cerrada.")
-    
-    def mostrar_aula(self, mensaje):
-        """Display a popup with the aula message."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)  # Updated background color
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
+    def validar_datos(self, datos):
+        """
+        Valida los datos proporcionados para crear o actualizar un aula.
+        :param datos: Diccionario con los datos del aula.
+        :return: Lista de errores encontrados.
+        """
+        errores = []
+        if not isinstance(datos.get("auxiliar"), int):
+            errores.append("El campo 'auxiliar' debe ser un número entero.")
+        if not isinstance(datos.get("capitan"), int):
+            errores.append("El campo 'capitan' debe ser un número entero.")
+        if not isinstance(datos.get("colaborador"), int):
+            errores.append("El campo 'colaborador' debe ser un número entero.")
+        if not isinstance(datos.get("condicion"), str):
+            errores.append("El campo 'condicion' debe ser una cadena de texto.")
+        if not isinstance(datos.get("edad"), str):
+            errores.append("El campo 'edad' debe ser una cadena de texto.")
+        if not isinstance(datos.get("maestra"), int):
+            errores.append("El campo 'maestra' debe ser un número entero.")
+        if not isinstance(datos.get("ninos"), int):
+            errores.append("El campo 'ninos' debe ser un número entero.")
+        if not isinstance(datos.get("ninas"), int):
+            errores.append("El campo 'ninas' debe ser un número entero.")
+        if not isinstance(datos.get("subcapitan"), int):
+            errores.append("El campo 'subcapitan' debe ser un número entero.")
+        if not isinstance(datos.get("fecha"), str):
+            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
+        else:
+            try:
+                datetime.strptime(datos["fecha"], '%Y-%m-%d')
+            except ValueError:
+                errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
+        if not isinstance(datos.get("id_salon"), int):
+            errores.append("El campo 'id_salon' debe ser un número entero.")
+        return errores
 
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
-
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)  # Updated text color to white
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
-
-        popup = Popup(
-            title="Información del Aula",
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),  # Updated title text color to white
-            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
-    
-    def get_db_session(self):
-        """Obtener una nueva Sesión de Base de Datos."""
-        return SessionLocal()
