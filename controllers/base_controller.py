@@ -91,3 +91,40 @@ class BaseController:
         finally:
             db.close()
             logger.info("Conexión cerrada.")
+
+    def buscar_por_id_o_fecha(self, id=None, fecha=None, nombre_campo="nombre"):
+        """
+        Busca un registro por ID o fecha:
+        :param id: El ID del registro a buscar
+        :param fecha: La fecha del registro a buscar
+        :param nombre_campo: Nombre del campo en el modelo para buscar por nombre.
+        :return: El registro encontrado o None
+        """
+        #Validacion sencilla
+        if not id and not fecha:
+            logger.warning("Debe proporcionar un id o fecha a buscar")
+            return None
+        
+        db = self.get_db_session()
+        try:
+            query = db.query(self.model)
+            if id:
+                registro = query.filter(self.model.id == id).first()
+            elif fecha:
+                registro = query.filter(getattr(self.model, nombre_campo) == fecha).first()
+
+            if registro:
+                logger.info(f"Registro encontrado: {registro}")
+                return registro
+            else:
+                logger.warning(f"No se encontró un registro con {'ID ' + str(id) if id else nombre_campo + ' ' + fecha}.")
+                return None
+        except SQLAlchemyError as e:
+            logger.error(f"Error al buscar registro. ID: {id}, Fecha: {fecha}, Error: {e}")
+            return None
+        finally:
+            db.close()
+            logger.info("Conexión cerrada.")
+
+
+    
