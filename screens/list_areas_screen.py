@@ -2,7 +2,6 @@ import logging
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.uix.label import Label
-from controllers import AreasController
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -10,13 +9,12 @@ logger = logging.getLogger(__name__)
 
 class ListAreasScreen(Screen):
     """Pantalla para desplegar la lista de areas."""
-        
     def __init__(self, controlador, vista, **kwargs):
         """Inicializando ListAreasScreen."""
         try:
             Builder.load_file("views/list_areas.kv")
         except Exception as e:
-            logger.error(f"Error cargando list_areas.kv: {e}")
+            logger.error(f"Error cargando la vista de áreas: {e}")
         super().__init__(**kwargs)
         logger.info("Inicializado ListAreasScreen")
         # Asignar el controlador correctamente
