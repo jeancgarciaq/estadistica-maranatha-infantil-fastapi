@@ -40,8 +40,8 @@ class EmiApp(App):
         # Inicialización de los controladores con la sesión
         controllers = {
             "areas": AreasController(session=self.session),
-            "salones": SalonesController(self.session),
-            "aulas": AulasController(self.session),
+            "salones": SalonesController(session=self.session),
+            "aulas": AulasController(session=self.session),
             "donaciones": DonacionesController(self.session),
             "ensenanza": EnsenanzaController(self.session),
             "logistica": LogisticaController(self.session),
