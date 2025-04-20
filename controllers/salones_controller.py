@@ -1,198 +1,134 @@
 import logging
+from controllers.base_controller import BaseController
 from models.salones import Salon
-from models.database import SessionLocal
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from components.styled_popup import StyledPopup
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class SalonesController:
-    def __init__(self, vista):
-        self.vista = vista 
+class SalonesController(BaseController):
+    def __init__(self, vista=None, session=None):
+        super().__init__(vista, Salon, session)
 
-    def crear_salon(self, salon, edad):
-        # Validación de datos
-        if not salon:
-            self.vista.mostrar_error("El nombre del salón es obligatorio.")
+    def crear_salon(self, nombre, edad):
+        if not nombre:
+            StyledPopup.mostrar_popup("Error", "El nombre del salón es obligatorio.", tipo="error")
             return
         if not edad:
-            self.vista.mostrar_error("La edad del salón es obligatoria.")
+            StyledPopup.mostrar_popup("Error", "La edad del salón es obligatoria.", tipo="error")
             return
-        db = SessionLocal()
+
+        db = self.get_db_session()  # Usar el método de la clase madre
         salon_creado = False
         try:
             with db.begin():
-                nuevo_salon = Salon(nombre=salon, edad=edad)
-                db.add(nuevo_salon)
-                logger.info(f"Salón creado: {nuevo_salon.id}")
+                salon = Salon(salon=nombre, edad=edad)
+                db.add(salon)
+                logger.info(f"Salón creado: {nombre}")
                 salon_creado = True
         except SQLAlchemyError as e:
             logger.error(f"Error al crear salón: {e}")
-            self.vista.mostrar_error(f"Error al crear salón: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al crear salón: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
             if salon_creado:
-                self.vista.mostrar_exito("Salón creado exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Salón creado exitosamente.", tipo="success")
 
-    def actualizar_salon(self, id, salon, edad):
-        # Validación de datos
+    def actualizar_salon(self, id, nombre, edad):
+        #Validar los datos
         if not id:
-            self.vista.mostrar_error("El ID del salón es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El id del salón es obligatorio.", tipo="error")
             return
-        if not salon:
-            self.vista.mostrar_error("El nombre del salón es obligatorio.")
+        if not nombre:
+            StyledPopup.mostrar_popup("Error", "El nombre del salón es obligatorio.", tipo="error")
             return
         if not edad:
-            self.vista.mostrar_error("La edad del salón es obligatoria.")
+            StyledPopup.mostrar_popup("Error", "La edad del saón es obligatoria.", tipo="error")
             return
 
-        db = SessionLocal()
+        db = self.get_db_session()  # Usar el método de la clase madre
         salon_actualizado = False
         try:
             with db.begin():
-                salon_existente = db.query(Salon).filter(Salon.id == id).first()
-                if not salon_existente:
-                    self.vista.mostrar_error("El salón no existe.")
-                    return
-                salon_existente.nombre = salon
-                salon_existente.edad = edad
-                logger.info(f"Salón actualizado: {salon_existente.id}")
-                salon_actualizado = True
+                salon = db.query(Salon).filter(Salon.id == id).first()
+                if salon:
+                    salon.salon = nombre  
+                    salon.edad = edad
+                    logger.info(f"Salón actualizado: {nombre}")
+                    salon_actualizado = True
+                else:
+                    StyledPopup.mostrar_popup("Error", "Salón no encontrado.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar salón: {e}")
-            self.vista.mostrar_error(f"Error al actualizar salón: {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al actualizar salón: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
             if salon_actualizado:
-                self.vista.mostrar_exito("Salón actualizado exitosamente.")
-
+                StyledPopup.mostrar_popup("Éxito", "Salón actualizado exitosamente.", tipo="success")
+                
     def eliminar_salon(self, id):
-        # Validación de datos
-        if not id:
-            self.vista.mostrar_error("El ID del salón es obligatorio.")
-            return
-
-        db = SessionLocal()
-        eliminar_salon = False
+        db = self.get_db_session()  # Usar el método de la clase madre
+        salon_eliminado = False
         try:
             with db.begin():
-                salon_existente = db.query(Salon).filter(Salon.id == id).first()
-                if not salon_existente:
-                    self.vista.mostrar_error("El salón no existe.")
-                    return
-                db.delete(salon_existente)
-                logger.info(f"Salón eliminado: {salon_existente.id}")
-                self.mostrar_exito(f"Salón eliminado: {salon_existente.id}")
+                salon = db.query(Salon).filter(Salon.id == id).first()
+                if salon:
+                    db.delete(salon)
+                    logger.info(f"Salón eliminada: {area.area}")
+                    salon_eliminado = True
+                else:
+                    StyledPopup.mostrar_popup("Error", "Salón no encontrado.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar salón: {e}")
-            self.vista.mostrar_error(f"Error al eliminar salón {e}. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al eliminar salón: {e}. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
-            if eliminar_salon:
-                self.vista.mostrar_exito("Salón eliminado exitosamente.")
+            logger.info("Conexión cerrada")
+            if salon_eliminado:
+                StyledPopup.mostrar_popup("Éxito", "Salón eliminada exitosamente.", tipo="success")
 
     def listar_salones(self, vista):
-        """
-        Método para listar los salones y manejar errores.
-        """
-        db = SessionLocal()
+        """Método para listar las saloness y manejar errores."""
+        db = self.get_db_session()  # Usar el método de la clase madre
         try:
             salones = db.query(Salon).all()
             logger.info(f"{len(salones)} salones obtenidos de la base de datos.")
-            if hasattr(vista, 'actualizar_lista_salones'):  # Usa la vista pasada como argumento
+            if hasattr(vista, 'actualizar_lista_salones'):
                 vista.actualizar_lista_salones(salones)
             else:
-                raise AttributeError("The provided view does not have 'actualizar_lista_salones' method.")
+                raise AttributeError("La vista no tiene un método 'actualizar_lista_salones'.")
             return salones
         except SQLAlchemyError as e:
-            logger.error(f"Error al listar salones: {e}")
-            vista.mostrar_error(f"Error al listar salones {e}. Inténtalo de nuevo.")
+            logger.error(f"Error al obtener salones: {e}")
+            StyledPopup.mostrar_popup("Error", f"Error al obtener salón: {e}. Inténtalo de nuevo.", tipo="error")
             return []
         finally:
             db.close()
-    
+            logger.info("Conexión cerrada")
+
     def listar_salones_button_handler(self):
-        """Handler for the 'List' button in the salones view."""
+        """Manejador para el botón que despliega la vista 'Lista' en salones."""
         self.listar_salones(self.vista)
 
-    def obtener_salon(self, id=None, salon=None, edad=None):
-        """Retrieve a single salon by its ID or name."""
-        if not id and not salon and not edad:
-            self.vista.mostrar_error("Debe proporcionar un ID o un nombre de salón o una edad de salón para buscar.")
-            return None
-
-        db = SessionLocal()
-        try:
-            query = db.query(Salon)
+    def buscar_salon(self, id=None, nombre=None):
+        """
+        Busca un salón por ID o nombre y muestra la información en un popup.
+        :param id: ID del salón a buscar.
+        :param nombre: Nombre del salón a buscar.
+        """
+        salon = self.buscar_por_id_o_nombre(id=id, nombre=nombre)
+        if salon:
+            # Mostrar la información del salón en un popup
+            StyledPopup.mostrar_popup(
+                "Información del Salón",
+                f"ID: {salon.id}\nNombre: {salon.salon}",
+                tipo="info"
+            )
+        else:
+            # Mostrar un mensaje de error si no se encuentra el salón
             if id:
-                res_salon = query.filter(Salon.id == id).first()
-            elif salon:
-                res_salon = query.filter(Salon.salon == salon).first()
-            elif edad:
-                res_salon = query.filter(Salon.edad == edad).first()
-            
-            if res_salon:
-                logger.info(f"Salón encontrado: {salon.salon} - {salon.edad}")
-                self.mostrar_salon(f"Salón encontrado: {salon.salon} - {salon.edad}")
-                return res_salon
-            else:
-                if id:
-                    logger.warning(f"Salón no encontrado. ID: {id}")
-                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con ID {id}.")
-                elif salon:
-                    logger.warning(f"Salón no encontrado. Nombre: {salon}")
-                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con nombre '{salon}'.")
-                elif edad:
-                    logger.warning(f"Salón no encontrado. Edad: {edad}")
-                    self.vista.mostrar_error(f"Error al encontrar salón: No existe un salón con edad '{edad}'.")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener el salón: {e}")
-            self.vista.mostrar_error(f"Error al obtener el salón con ID: {id} - Nombbre: {salon} y Edad: {edad}. Error: {e}.")
-            return None
-        finally:
-            db.close()
-    
-    def mostrar_salon(self, mensaje):
-        """Display a popup with the area message."""
-        class StyledPopup(BoxLayout):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-                with self.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    self.bg_color = Color(0.102, 0.2, 0.396, 1)
-                    self.bg_rect = Rectangle(pos=self.pos, size=self.size)
-                    self.bind(pos=self._update_rect, size=self._update_rect)
-
-            def _update_rect(self, *args):
-                self.bg_rect.pos = self.pos
-                self.bg_rect.size = self.size
-
-        popup_layout = StyledPopup(orientation='vertical', padding=10, spacing=10)
-        popup_label = Label(
-            text=mensaje,
-            size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)
-        )
-        close_button = Button(
-            text="Cerrar",
-            size_hint=(1, 0.2),
-            background_normal='',
-            background_color=(0, 119/255, 194/255, 1),
-            size_hint_y=None,
-            height=50
-        )
-        popup_layout.add_widget(popup_label)
-        popup_layout.add_widget(close_button)
-
-        popup = Popup(
-            title="Información del Salón",
-            title_align="center",
-            title_size=20,
-            title_color=(1, 1, 1, 1),            content=popup_layout,
-            size_hint=(0.8, 0.4)
-        )
-        close_button.bind(on_release=popup.dismiss)
-        popup.open()
+                StyledPopup.mostrar_popup("Error", f"No existe un salón con ID {id}.", tipo="error")
+            elif nombre:
+                StyledPopup.mostrar_popup("Error", f"No existe un salón con nombre '{nombre}'.", tipo="error")
