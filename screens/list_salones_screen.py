@@ -38,8 +38,8 @@ class ListSalonesScreen(Screen):
             for salon in salones:
                 logger.debug(f"Agregando salón: ID={salon.id}, Nombre={salon.salon}, Edad={salon.edad}")
                 lista_salones.add_widget(Label(text=f"{salon.id}", size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=salon.salon, size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=salon.edad, size_hint_y=None, height=40))
+                lista_salones.add_widget(Label(text=f"{salon.salon}", size_hint_y=None, height=40))
+                lista_salones.add_widget(Label(text=f"{salon.edad}", size_hint_y=None, height=40))
             
     def cargar_salones(self):
         """Consultando y llenando la lista salones."""
