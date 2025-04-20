@@ -111,6 +111,18 @@ class AreasController(BaseController):
         :param id: ID del área a buscar.
         :param nombre: Nombre del área a buscar.
         """
+        # Validar que al menos uno de los campos esté lleno
+        if not id and not nombre:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
+            return
+        if id and not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
+            return
+        if nombre and not isinstance(nombre, str):
+            StyledPopup.mostrar_popup("Error", "El nombre debe ser una cadena de texto.", tipo="error")
+            return
+            
+        #Buscar Área
         area = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="area")
         if area:
             # Mostrar la información del área en un popup
