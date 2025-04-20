@@ -2,6 +2,7 @@ from controllers.base_controller import BaseController
 from models.areas import Area
 from components.styled_popup import StyledPopup
 import logging
+from sqlalchemy.exc import SQLAlchemyError
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +17,7 @@ class AreasController(BaseController):
             StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
             return
 
-        db = SessionLocal()
+        db = self.get_db_session()  # Usar el método de la clase madre
         area_creada = False
         try:
             with db.begin():
@@ -41,7 +42,7 @@ class AreasController(BaseController):
             StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
             return
 
-        db = SessionLocal()
+        db = self.get_db_session()  # Usar el método de la clase madre
         area_actualizada = False
         try:
             with db.begin():
@@ -61,7 +62,7 @@ class AreasController(BaseController):
                 StyledPopup.mostrar_popup("Éxito", "Área actualizada exitosamente.", tipo="success")
                 
     def eliminar_area(self, id):
-        db = SessionLocal()
+        db = self.get_db_session()  # Usar el método de la clase madre
         area_eliminada = False
         try:
             with db.begin():
@@ -79,11 +80,11 @@ class AreasController(BaseController):
             db.close()
             logger.info("Conexión cerrada")
             if area_eliminada:
-                self.mostrar_popup("Éxito", "Área eliminada exitosamente.", tipo="success")
+                StyledPopup.mostrar_popup("Éxito", "Área eliminada exitosamente.", tipo="success")
 
     def listar_areas(self, vista):
-        """Método para listar las áreas y manejar errores.."""
-        db = SessionLocal()
+        """Método para listar las áreas y manejar errores."""
+        db = self.get_db_session()  # Usar el método de la clase madre
         try:
             areas = db.query(Area).all()
             logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
