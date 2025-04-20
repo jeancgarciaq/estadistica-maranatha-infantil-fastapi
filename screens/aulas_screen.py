@@ -15,10 +15,14 @@ from kivy.uix.textinput import TextInput
 from models.salones import Salon
 
 class AulasScreen(Screen):
-    def __init__(self, controlador, **kwargs):
-        Builder.load_file('views/aulas.kv')
+    def __init__(self, controlador, vista=None, **kwargs):
+        try:
+            Builder.load_file('views/aulas.kv')
+        except Exception as e:
+            print(f"Error al cargar la vista aulas: {e}")
         super().__init__(**kwargs)
-        self.controlador = AulasController(self)
+        self.controlador = controlador
+        self.vista = vista
     
     def obtener_datos_formulario(self):
         auxiliar = self.ids.aula_auxiliar.text
@@ -119,52 +123,10 @@ class AulasScreen(Screen):
             self.ids.aula_id_salon.text = str(aula.id_salon)
             self.ids.aula_id.text = str(aula.id)
 
-    def mostrar_popup_lista(self):
-        aulas = self.controlador.listar_aulas()  # Obtener la lista de aulas desde el controlador
-
-        # Crear el contenido del popup (lista de aulas)
-        content = ScrollView(
-            GridLayout(
-                cols=10,
-                size_hint_y=None,
-                height=self.minimum_height,
-                id='lista_aulas_popup'
-            )
-        )
-
-        for aula in aulas:
-            content.children[0].add_widget(Label(text=str(aula.id)))
-            content.children[0].add_widget(Label(text=str(aula.auxiliar)))
-            content.children[0].add_widget(Label(text=str(aula.capitan)))
-            content.children[0].add_widget(Label(text=str(aula.colaborador)))
-            content.children[0].add_widget(Label(text=aula.condicion))
-            content.children[0].add_widget(Label(text=aula.edad))
-            content.children[0].add_widget(Label(text=str(aula.maestra)))
-            content.children[0].add_widget(Label(text=str(aula.ninos)))
-            content.children[0].add_widget(Label(text=str(aula.ninas)))
-            content.children[0].add_widget(Label(text=str(aula.subcapitan)))
-            content.children[0].add_widget(Label(text=str(aula.fecha)))
-            
-
-        # Crear el botón de cerrar
-        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
-
-        # Crear el popup
-        popup = Popup(title='Lista de Aulas', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(400, 400))
-        popup.content.add_widget(content)
-        popup.content.add_widget(close_button)
-
-        # Asignar la función de cierre al botón
-        close_button.bind(on_press=popup.dismiss)
-
-        # Mostrar el popup
-        popup.open()
-
-    def mostrar_error(self, mensaje):
-        popup = Popup(title='Error', content=Label(text=mensaje), size_hint=(None, None), size=(400, 200))
-        popup.open()   
-
     def mostrar_popup_salones(self):
+        """
+        Muestra un popup con la lista de salones para seleccionar uno.
+        """
         db = self.controlador.get_db_session()
         try:
             salones = db.query(Salon).all()
@@ -247,4 +209,7 @@ class AulasScreen(Screen):
         popup.open()
 
     def seleccionar_salon(self, salon_id):
+        """
+        Asigna el ID del salón seleccionado al campo de entrada correspondiente.
+        """
         self.ids.aula_id_salon.text = str(salon_id)
