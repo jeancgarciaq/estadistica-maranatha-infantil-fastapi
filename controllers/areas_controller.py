@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 class AreasController(BaseController):
     def __init__(self, vista=None, session=None):
         super().__init__(vista, Area, session)
+        self.session = session
+        logger.info("Inicializando AreasController")
+        if not session:
+            logger.error("No se ha proporcionado una sesión de base de datos.")
+            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
+        self.vista = vista
+        logger.info("AreasController inicializado con éxito.")
 
     def crear_area(self, nombre):
         if not nombre:
@@ -102,7 +109,7 @@ class AreasController(BaseController):
             logger.info("Conexión cerrada")
 
     def listar_areas_button_handler(self):
-        """Handler for the 'List' button in the areas view."""
+        """El manejador del botón Listar en la vista areas."""
         self.listar_areas(self.vista)
 
     def buscar_area(self, id=None, nombre=None):
