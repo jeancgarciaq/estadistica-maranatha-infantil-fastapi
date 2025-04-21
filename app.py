@@ -42,7 +42,7 @@ class EmiApp(App):
             "areas": AreasController(session=self.session),
             "salones": SalonesController(session=self.session),
             "aulas": AulasController(session=self.session),
-            "donaciones": DonacionesController(self.session),
+            "donaciones": DonacionesController(session=self.session),
             "ensenanza": EnsenanzaController(self.session),
             "logistica": LogisticaController(self.session),
             "otrasareas": OtrasAreasController(self.session),
