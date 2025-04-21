@@ -1,9 +1,5 @@
-import kivy
-kivy.require('2.3.1')
-
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from controllers import AulasController
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from datetime import datetime
@@ -12,7 +8,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
-from models.salones import Salon
+from components import StyledPopup
 
 class AulasScreen(Screen):
     def __init__(self, controlador, vista=None, **kwargs):
@@ -213,3 +209,18 @@ class AulasScreen(Screen):
         Asigna el ID del salón seleccionado al campo de entrada correspondiente.
         """
         self.ids.aula_id_salon.text = str(salon_id)
+    
+    def buscar_aula(self):
+        """Obtiene los datos del formulario y llama al método buscar_aula del controlador."""
+        aula_id = self.ids.aula_id.text.strip()  # ID del aula
+
+        # Validar que al menos uno de los campos esté lleno
+        if not aula_id:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID del área.", tipo="error")
+            return
+
+        # Convertir el ID a entero si es posible
+        aula_id = int(aula_id) if aula_id.isdigit() else None
+
+        # Llamar al método buscar_aula del controlador
+        self.controlador.buscar_aula(id=aula_id)
