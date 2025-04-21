@@ -118,18 +118,19 @@
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 30
-                TextInput:
-                    id: aula_id_salon
-                Label:
-                    text: ''
-                Button:
-                    text: 'Seleccionar'
-                    font_size: 16
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.mostrar_popup_salones()
+                BoxLayout:
+                    orientation: 'horizontal'
+                    spacing: 10
+                    TextInput:
+                        id: aula_id_salon
+                    Button:
+                        text: 'Seleccionar'
+                        font_size: 16
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        size_hint_y: None
+                        height: 50
+                        on_press: root.mostrar_popup_salones()
         # Contenedor de Botones
         BoxLayout:
             size_hint_y: None
@@ -176,4 +177,4 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = 'menu'
+            on_press: root.manager.current = 'salones'
