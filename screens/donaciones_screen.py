@@ -1,7 +1,7 @@
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from datetime import datetime
-from .components import StyledPopup
+from components import StyledPopup
 
 class DonacionesScreen(Screen):
     def __init__(self, controlador, vista=None, **kwargs):
