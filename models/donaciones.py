@@ -25,3 +25,6 @@ class Donacion(Base):
 
     distribuciones = relationship("Distribucion", back_populates="donaciones")
 
+
+    def __repr__(self):
+        return f"<Donacion(id={self.id}, donacion='{self.descripcion}, cantidad={self.cantidad}, unidad={self.unidad}, equipo={self.equipo}, fecha={self.fecha}')>"
