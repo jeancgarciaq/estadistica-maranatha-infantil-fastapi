@@ -185,7 +185,7 @@
                 height: 50
                 on_press: 
                     root.controlador.eliminar_aula(aula_id.text)
-                    aula_id = ''
+                    aula_id.text = ''
             Button:
                 text: 'Ver Lista'
                 font_size: 28
@@ -203,7 +203,7 @@
                 height: 50
                 on_press:
                     root.buscar_aula()
-                    area_id.text=''
+                    aula_id.text=''
         # Botón Volver al Menú
         Button:
             text: 'Volver al Menú'
