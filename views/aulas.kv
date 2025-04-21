@@ -144,7 +144,18 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.crear_aula()
+                on_press: 
+                    root.controlador.crear_aula(aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_fecha.text)
+                    aula_auxiliar.text = ''
+                    aula_capitan.text = ''
+                    aula_colaborador.text = '' 
+                    aula_condicion.text = ''
+                    aula_edad.text = ''
+                    aula_maestra.text = ''
+                    aula_ninos.text = ''
+                    aula_ninas.text = ''
+                    aula_subcapitan.text = ''
+                    aula_fecha.text = ''
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -152,7 +163,19 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.actualizar_aula()
+                on_press: 
+                    root.controlador.actualizar_aula(aula_id.text, aula_auxiliar.text, aula_capitan.text, aula_colaborador.text, aula_condicion.text, aula_edad.text, aula_maestra.text, aula_ninos.text, aula_ninas.text, aula_subcapitan.text, aula_fecha.text)
+                    aula_id = ''
+                    aula_auxiliar.text = ''
+                    aula_capitan.text = ''
+                    aula_colaborador.text = '' 
+                    aula_condicion.text = ''
+                    aula_edad.text = ''
+                    aula_maestra.text = ''
+                    aula_ninos.text = ''
+                    aula_ninas.text = ''
+                    aula_subcapitan.text = ''
+                    aula_fecha.text = ''
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -160,7 +183,9 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.eliminar_aula()
+                on_press: 
+                    root.controlador.eliminar_aula(aula_id.text)
+                    aula_id = ''
             Button:
                 text: 'Ver Lista'
                 font_size: 28
@@ -169,6 +194,16 @@
                 size_hint_y: None
                 height: 50
                 on_press: root.manager.current = 'lista_aulas'
+            Button:
+                text: "Buscar"
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press:
+                    root.buscar_aula()
+                    area_id.text=''
         # Botón Volver al Menú
         Button:
             text: 'Volver al Menú'
