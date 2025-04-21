@@ -3,9 +3,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.lang import Builder
-from controllers.donaciones_controller import DonacionesController
 import logging
 from datetime import datetime
+from components import StyledPopup
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,13 +18,12 @@ class ListDonacionesScreen(Screen):
         try:
             Builder.load_file('views/list_donaciones.kv')
         except Exception as e:
-            logger.error(f"Error al cargar list_donaciones.kv: {e}")
+            logger.error(f"Error al cargar vista de lista de donaciones: {e}")
         super().__init__(**kwargs)
         logger.info("Inicializando ListDonacionesScreen")
-        self.controlador = DonacionesController(self)
+        self.controlador = controlador
         self.vista = self  
         
-
     def actualizar_lista_donaciones(self, donaciones):
         """Actualiza la lista de donaciones en la vista."""
         logger.debug(f"Datos recibidos para actualizar lista de donaciones: {donaciones}")
@@ -86,7 +85,8 @@ class ListDonacionesScreen(Screen):
                     lista_donaciones.add_widget(Label(text=f"{donacion.fecha}", size_hint_y=None, height=40))
             except Exception as e:
                 logger.error(f"Error inesperado al procesar las donaciones: {e}")
-                self.mostrar_error("Ocurrió un error al procesar las donaciones. Inténtalo de nuevo.")
+                StyledPopup.mostrar_popup("Error", "Ocurrió un error inesperado al procesar las donaciones.", tipo="error")
+
             
     def cargar_donaciones(self):
         """Consultando y llenando la lista donaciones."""
