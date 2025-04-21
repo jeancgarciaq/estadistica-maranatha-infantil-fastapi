@@ -1,16 +1,13 @@
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from controllers.areas_controller import AreasController
 from components.styled_popup import StyledPopup
-from kivy.uix.screenmanager import Screen
-from kivy.lang import Builder
 
 class AreasScreen(Screen):
     def __init__(self, controlador, vista=None, **kwargs):
         try:
             Builder.load_file('views/areas.kv')
         except Exception as e:
-            print(f"Error al cargar areas.kv: {e}")
+            print(f"Error al cargar la vista áreas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
         self.vista = vista
