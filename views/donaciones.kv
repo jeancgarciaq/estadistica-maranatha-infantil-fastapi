@@ -85,7 +85,13 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.crear_donacion()
+                on_press: 
+                    root.controlador.crear_donacion(donacion_descripcion.text, donacion_cantidad.text, donacion_unidad.text, donacion_equipo.text, donacion_fecha.text)
+                    donacion_descripcion.text = ''
+                    donacion_cantidad.text = ''
+                    donacion_unidad.text = ''
+                    donacion_equipo.text = ''
+                    donacion_fecha.text = ''
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -93,7 +99,14 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.actualizar_donacion()
+                on_press: 
+                    root.controlador.actualizar_donacion(donacion_id.text, donacion_descripcion.text, donacion_cantidad.text, donacion_unidad.text, donacion_equipo.text, donacion_fecha.text)
+                    donacion_id.text = ''
+                    donacion_descripcion.text = ''
+                    donacion_cantidad.text = ''
+                    donacion_unidad.text = ''
+                    donacion_equipo.text = ''
+                    donacion_fecha.text = ''
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -101,7 +114,9 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.eliminar_donacion()
+                on_press: 
+                    root.controlador.eliminar_donacion(donacion_id.text)
+                    donacion_id.text = ''
             Button:
                 text: 'Listar'
                 font_size: 28
@@ -110,6 +125,16 @@
                 size_hint_y: None
                 height: 50
                 on_press: root.manager.current = 'lista_donaciones'
+            Button:
+                text: 'Buscar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                size_hint_y: None
+                height: 50
+                on_press: 
+                    root.buscar_donacion()
+                    donacion_id.text=''
         # Botón Inicio
         Button:
             text: 'Volver al Menú'
