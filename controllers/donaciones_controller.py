@@ -1,81 +1,75 @@
 import logging
 from models.donaciones import Donacion
-from models.database import SessionLocal
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from kivy.lang import Builder
-from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
 from components.styled_popup import StyledPopup
+from controllers import BaseController
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class DonacionesController:
-    def __init__(self, vista):
+class DonacionesController(BaseController):
+    def __init__(self, vista=None, session=None):
+        super().__init__(vista, Donacion, session)
+        self.session = session
+        logger.info("Inicializando DonacionesController")
+        if not session:
+            logger.error("No se ha proporcionado una sesión de base de datos.")
+            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
         self.vista = vista
+        logger.info("DonacionesController inicializado con éxito.")
 
-    def crear_donacion(self, cantidad, descripcion, unidad, equipo, fecha):
+    def crear_donacion(self, datos):
         """Crea una nueva donación en la base de datos."""
-        # Validación de datos
-        if not cantidad or not descripcion or not unidad or not equipo or not fecha:
-            self.vista.mostrar_error("Todos los campos son obligatorios.")
+        # Validar los datos
+        errores = self.validar_datos(datos)
+        if errores:
+            StyledPopup.mostrar_popup("Error", "\n".join(errores), tipo="error")
             return
 
-        try:
-            cantidad = float(cantidad)
-            fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-        except ValueError:
-            self.vista.mostrar_error("Formato de datos incorrecto. Verifique la cantidad y la fecha.")
-            return
-
-        db = None
+        db = self.get_db_session()
         donacion_creada = False
         try:
-            db = SessionLocal()
             with db.begin():
-                donacion = Donacion(
-                    cantidad=cantidad,
-                    descripcion=descripcion,
-                    unidad=unidad,
-                    equipo=equipo,
-                    fecha=fecha,
-                )
+                donacion = Donacion(**datos)
                 db.add(donacion)
                 logger.info(f"Donación creada: {donacion.id}")
                 donacion_creada = True
         except SQLAlchemyError as e:
             logger.error(f"Error al crear donación: {e}")
-            self.vista.mostrar_error("Error al crear donación. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", "Error al crear donación. Inténtalo de nuevo.", tipo="error")
         finally:
             if db:
                 db.close()
             if donacion_creada:
-                self.vista.mostrar_exito("Donación creada exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Donación creada exitosamente.", tipo="exito")
+                logger.info("Conexión a la base de datos cerrada.")
 
-    def actualizar_donacion(self, donacion_id, cantidad, descripcion, unidad, equipo, fecha):
-        # Validación de datos
-        if not donacion_id or not cantidad or not descripcion or not unidad or not equipo or not fecha:
-            self.vista.mostrar_error("Todos los campos son obligatorios.")
+    def actualizar_donacion(self, id, datos):
+        # Validar los datos
+        if not id or not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID de la donación es obligatorio y debe ser un número entero.", tipo="error")
+            return
+
+        errores = self.validar_datos(datos)
+        if errores:
+            StyledPopup.mostrar_popup("Error", "\n".join(errores), tipo="error")
             return
             
-        db = SessionLocal()
+        db = self.get_db_session()
         donacion_actualizada = False
         try:
             with db.begin():
-                donacion = db.query(Donacion).filter(Donacion.id == donacion_id).first()
+                donacion = db.query(Donacion).filter(Donacion.id == id).first()
                 if donacion:
-                    donacion.cantidad = float(cantidad)
-                    donacion.descripcion = descripcion
-                    donacion.unidad = unidad
-                    donacion.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    donacion.equipo = equipo
-                    donacion_actualizada = True
+                    for key, value in datos.items():
+                        setattr(donacion, key, value)
                     logger.info(f"Donación actualizada: {donacion.id}")
+                    aula_actualizada = True
                 else:
-                    self.vista.mostrar_error("Donación no encontrada.")
+                    StyledPopup.mostrar_popup("Error", "Aula no encontrada.", tipo="error")
         except ValueError:
             self.vista.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
         except SQLAlchemyError as e:
@@ -87,48 +81,46 @@ class DonacionesController:
             if donacion_actualizada:
                 self.vista.mostrar_exito("Donación actualizada exitosamente.")
 
-    def eliminar_donacion(self, donacion_id):
+    def eliminar_donacion(self, id):
         # Validación de datos
-        if not donacion_id:
-            self.vista.mostrar_error("ID de donación es obligatorio.")
+        if not id or not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID de la donación es obligatorio y debe ser un número entero.", tipo="error")
             return
 
-        db = SessionLocal()
+        db = self.get_db_session()
         donacion_eliminada = False
         try:
             with db.begin():
-                donacion = db.query(Donacion).filter(Donacion.id == donacion_id).first()
+                donacion = db.query(Donacion).filter(Donacion.id == id).first()
                 if donacion:
                     db.delete(donacion)
                     donacion_eliminada = True
-                    logger.info(f"Donación eliminada: {donacion_id}")
+                    logger.info(f"Donación eliminada: {id}")
                 else:
-                    self.vista.mostrar_error("Donación no encontrada.")
+                    StyledPopup.mostrar_popup("Error", "Donación no encontrada.", tipo="error")
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar donación: {e}")
-            self.vista.mostrar_error("Error al eliminar donación. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", "Error al eliminar donación. Inténtalo de nuevo.", tipo="error")
         finally:
             db.close()
             logger.info("Conexión a la base de datos cerrada.")
             if donacion_eliminada:
-                self.vista.mostrar_exito("Donación eliminada exitosamente.")
+                StyledPopup.mostrar_popup("Éxito", "Donación eliminada exitosamente.", tipo="exito")
 
-    def listar_donaciones(self):
+    def listar_donaciones(self, vista):
         """Obtiene la lista de donaciones desde la base de datos."""
-        db = None
+        db = self.get_db_session()
         try:
-            db = SessionLocal()
             donaciones = db.query(Donacion).all()
             logger.info(f"{len(donaciones)} donaciones obtenidas de la base de datos.")
-            if hasattr(self.vista, 'actualizar_lista_donaciones'):
-                self.vista.actualizar_lista_donaciones(donaciones)
+            if hasattr(vista, 'actualizar_lista_donaciones'):
+                vista.actualizar_lista_donaciones(donaciones)
             else:
                 raise AttributeError("La vista no tiene el método 'actualizar_lista_donaciones'.")
             return donaciones
         except SQLAlchemyError as e:
             logger.error(f"Error al listar donaciones: {e}")
-            if hasattr(self.vista, 'mostrar_error'):
-                self.vista.mostrar_error("Error al listar donaciones. Inténtalo de nuevo.")
+            StyledPopup.mostrar_popup("Error", f"Error al listar donaciones: {e}. Inténtalo de nuevo.", tipo="error")
             return []
         finally:
             if db:
@@ -139,57 +131,50 @@ class DonacionesController:
         """Método para manejar el evento de listar donaciones."""
         self.listar_donaciones(self.vista)
     
-    def obtener_donacion(self, id=None, fecha=None):
-        if not id and not fecha:
-            self.vista.mostrar_error("Debes proporcionar un ID o una fecha para obtener la donación.")
-            return None
-        db = SessionLocal()
-        try:
-            db.query(Donacion)
-            if id:
-                donacion = db.query(Donacion).filter(Donacion.id == id).first()
-            else:
-                donacion = db.query(Donacion).filter(Donacion.fecha == fecha).first()
+    #Buscar Donación
+    def buscar_donacion(self, id=None, nombre=None):
+        # Validar que al menos uno de los campos esté lleno
+        if not id:
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o una fecha para buscar el aula.", tipo="error")
+            return
+        if id and not isinstance(id, int):
+            StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
+            return
+        
 
-            if donacion:
-                logger.info(f"Donación encontrada: {donacion.id}")
-                self.mostrar_popup(f"Donación encontrada: {donacion.id}, {donacion.fecha}")
-                return donacion
-            else:
-                if id:
-                    logger.warning(f"Donación con ID {id} no encontrada.")
-                    self.vista.mostrar_error("Donación no encontrada.")
-                elif fecha:
-                    logger.warning(f"Donación con fecha {fecha} no encontrada.")
-                    self.vista.mostrar_error("Donación no encontrada.")
-                return None
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener donación: {e}")
-            self.vista.mostrar_error("Error al obtener donación. Inténtalo de nuevo.")
-            return None
-        finally:
-            db.close()
-            logger.info("Conexión a la base de datos cerrada.")
-    
-    def mostrar_popup(self, mensaje, titulo="Información"):
-        """Muestra un popup con un mensaje."""
-        try:
-            popup_content = StyledPopup()
-            if isinstance(mensaje, dict):
-                # Si el mensaje es un diccionario, mostrar pares clave-valor
-                popup_content.set_content(mensaje)
-            else:
-                # Si el mensaje es un texto, mostrarlo directamente
-                popup_content.ids.popup_label.text = mensaje
-
-            popup = Popup(
-                title=titulo,
-                content=popup_content,
-                size_hint=(0.8, 0.4),
-                title_align="center",
-                title_color=(1, 1, 1, 1),  # Título en blanco
+        donacion = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="fecha")
+        if donacion:
+            # Mostrar la información de la donación en un popup
+            StyledPopup.mostrar_popup(
+                "Información de la Donacion",
+                f"ID: {donacion.id}\nDescripción: {donacion.descripcion}\nFecha: {donacion.fecha}",
+                tipo="info"
             )
-            popup_content.ids.close_button.bind(on_release=popup.dismiss)  # Vincular el botón de cerrar
-            popup.open()
-        except Exception as e:
-            logger.error(f"Error al mostrar el popup: {e}")
+        else:
+            # Mostrar un mensaje de error si no se encuentra la donación
+            if id:
+                StyledPopup.mostrar_popup("Error", f"No existe una donación con ID {id}.", tipo="error")
+    
+    def validar_datos(self, datos):
+        """
+        Valida los datos proporcionados para crear o actualizar un aula.
+        :param datos: Diccionario con los datos del aula.
+        :return: Lista de errores encontrados.
+        """
+        errores = []
+        if not isinstance(datos.get("cantidad"), float):
+            errores.append("El campo 'cantidad' debe ser un número.")
+        if not isinstance(datos.get("descripcion"), str):
+            errores.append("El campo 'descripcion' debe ser una cadena de texto.")
+        if not isinstance(datos.get("unidad"), str):
+            errores.append("El campo 'unidad' debe ser una cadena de texto.")
+        if not isinstance(datos.get("fecha"), str):
+            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
+        else:
+            try:
+                datetime.strptime(datos["fecha"], '%Y-%m-%d')
+            except ValueError:
+                errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
+        if not isinstance(datos.get("equipo"), str):
+            errores.append("El campo 'equipo' debe ser un número entero.")
+        return errores
