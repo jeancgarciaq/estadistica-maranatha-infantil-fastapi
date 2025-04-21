@@ -50,6 +50,9 @@ class ListAulasScreen(Screen):
             
     def cargar_aulas(self):
         """Consultando y llenando la lista aulas."""
+        if not self.controlador:
+            logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
+            return
         try:
             aulas = self.controlador.listar_aulas(self) 
             if aulas is None:
