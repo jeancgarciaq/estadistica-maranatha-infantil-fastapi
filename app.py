@@ -68,7 +68,7 @@ class EmiApp(App):
             SalonesScreen(controllers["salones"], vista="salones_vista", name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
             EstadisticaScreen(name='estadistica'),
-            DonacionesScreen(controllers["donaciones"], name='donaciones'),
+            DonacionesScreen(controllers["donaciones"], vista="donaciones_vista", name='donaciones'),
             DistribucionesScreen(controllers["distribuciones"], name='distribucion'),
             LogisticaScreen(controllers["logistica"], name='logistica'),
             OtrasAreasScreen(controllers["otrasareas"], name='otrasareas'),
