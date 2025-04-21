@@ -105,8 +105,16 @@ class ListDonacionesScreen(Screen):
             self.actualizar_lista_donaciones([])
     
     def on_enter(self):
-        """Llamando cuando la pantalla está completa."""
-        self.cargar_donaciones()
+        """Llamado cuando la pantalla está completa."""
+        if not self.controlador:
+            logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
+            return
+        try:
+            # Llama al método listar_donaciones con la vista actual
+            self.controlador.listar_donaciones(self)
+        except Exception as e:
+            logger.error(f"Error consultando donaciones: {e}")
+            self.actualizar_lista_donaciones([])
 
     def volver(self, instance):
         """Regresa a la pantalla de donaciones"""
