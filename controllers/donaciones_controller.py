@@ -132,17 +132,17 @@ class DonacionesController(BaseController):
         self.listar_donaciones(self.vista)
     
     #Buscar Donación
-    def buscar_donacion(self, id=None, nombre=None):
+    def buscar_donacion(self, id=None, descripcion=None):
         # Validar que al menos uno de los campos esté lleno
         if not id:
-            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o una fecha para buscar el aula.", tipo="error")
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o una descripción para buscar la donación.", tipo="error")
             return
         if id and not isinstance(id, int):
             StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
             return
         
 
-        donacion = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="fecha")
+        donacion = self.buscar_por_id_o_nombre(id=id, nombre=descripcion, nombre_campo="descripcion")
         if donacion:
             # Mostrar la información de la donación en un popup
             StyledPopup.mostrar_popup(
