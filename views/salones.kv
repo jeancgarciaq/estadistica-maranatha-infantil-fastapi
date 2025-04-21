@@ -90,10 +90,9 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.buscar_salon(salon_id.text, salon_nombre.text)
+                    root.buscar_salon()
                     salon_id.text=''
                     salon_nombre.text=''
-                    salon_edad.text=''
         # Contenedor de Botones
         BoxLayout:
             size_hint_y: None
