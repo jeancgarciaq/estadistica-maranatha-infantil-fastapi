@@ -119,8 +119,8 @@ class AulasController(BaseController):
         try:
             aulas = db.query(Aula).all()
             logger.info(f"{len(aulas)} aulas obtenidas de la base de datos.")
-            if hasattr(self.vista, 'actualizar_lista_aulas'):
-                self.vista.actualizar_lista_aulas(aulas)
+            if hasattr(vista, 'actualizar_lista_aulas'):
+                vista.actualizar_lista_aulas(aulas)
             else:
                 raise AttributeError("La vista no tiene un método 'actualizar_lista_aulas'.")
             return aulas
