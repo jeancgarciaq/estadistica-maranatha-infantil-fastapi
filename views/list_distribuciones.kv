@@ -1,0 +1,53 @@
+<ListDistribucionesScreen>:
+    name: 'lista_distribuciones'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Lista de Distribuciones'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+        ScrollView:
+            GridLayout:
+                id: lista_donaciones  # Cambiado de lista_areas a lista_donaciones
+                cols: 6  # ID, ID Donación, ID Salón, Cantidad, Unidad, Fecha
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 40
+                row_force_default: True
+        # Contenedor de botones
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+            padding: 10
+            size_hint_y: None
+            height: self.minimum_height
+            GridLayout:
+                cols: 2
+                spacing: 10
+                padding: 10
+                size_hint_y: None
+                height: self.minimum_height
+                Button: 
+                    text: 'Listar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None
+                    height: 50
+                    on_press: root.controlador.listar_distribuciones(root)
+                Button:
+                    text: 'Cerrar'
+                    font_size: 28
+                    background_normal: ''
+                    background_color: (0, 119/255, 194/255, 1)
+                    size_hint: 1, None
+                    height: 50
+                    on_press: app.root.current = 'distribuciones'
