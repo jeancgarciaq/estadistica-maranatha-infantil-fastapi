@@ -11,7 +11,7 @@ from controllers import (
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
     LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen ) 
+    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen, ListDistribucionesScreen ) 
 import logging
 
 # Configure logging
@@ -47,7 +47,7 @@ class EmiApp(App):
             "logistica": LogisticaController(self.session),
             "otrasareas": OtrasAreasController(self.session),
             "recepcion": RecepcionController(self.session),
-            "distribuciones": DistribucionesController(self.session),
+            "distribuciones": DistribucionesController(session=self.session),
         }
         logger.debug("Controladores inicializados: %s", list(controllers.keys()))
 
@@ -55,8 +55,9 @@ class EmiApp(App):
         self.areas_controller = controllers["areas"]
         self.salones_controller = controllers["salones"]
         self.aulas_controller = controllers["aulas"]
-        self.donaciones_controller = controllers["donaciones"]  
-        logger.debug("AreasController, SalonesController, AulasController y DonacionesController fueron asignados a EmiApp.")
+        self.donaciones_controller = controllers["donaciones"]
+        self.distribuciones_controller = controllers["distribuciones"]  
+        logger.debug("AreasController, SalonesController, AulasController, DonacionesController y DistribucionesController fueron asignados a EmiApp.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
@@ -69,7 +70,7 @@ class EmiApp(App):
             AulasScreen(controllers["aulas"], name='aulas'),
             EstadisticaScreen(name='estadistica'),
             DonacionesScreen(controllers["donaciones"], vista="donaciones_vista", name='donaciones'),
-            DistribucionesScreen(controllers["distribuciones"], name='distribucion'),
+            DistribucionesScreen(controllers["distribuciones"], vista="distribuciones_vista", name='distribuciones'),
             LogisticaScreen(controllers["logistica"], name='logistica'),
             OtrasAreasScreen(controllers["otrasareas"], name='otrasareas'),
             EnsenanzaScreen(controllers["ensenanza"], name='ensenanza'),
@@ -80,6 +81,7 @@ class EmiApp(App):
             ListSalonesScreen(controlador=controllers["salones"], vista="lista_salones_vista", name='lista_salones'),
             ListAulasScreen(controlador=controllers["aulas"], vista="lista_aulas_vista", name='lista_aulas'),
             ListDonacionesScreen(controlador=controllers["donaciones"], vista="lista_donaciones_vista", name='lista_donaciones'),
+            ListDistribucionesScreen(controlador=controllers["distribuciones"], vista="lista_distribuciones_vista", name='lista_distribuciones'),
         ]
 
         # Agregar pantallas al manejador
