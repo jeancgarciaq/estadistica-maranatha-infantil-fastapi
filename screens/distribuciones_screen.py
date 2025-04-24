@@ -1,117 +1,168 @@
-import kivy
-kivy.require('2.3.1')
-
+import logging
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from controllers import DistribucionesController
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.checkbox import CheckBox
-from datetime import datetime
 from kivy.uix.button import Button
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
 from kivy.clock import Clock
+from components.styled_popup import StyledPopup
+from datetime import datetime
 import traceback
 
-class DistribucionesScreen(Screen):
+# Configuración de logging
+logging.basicConfig(level=logging.DEBUG)  # Cambiar a DEBUG para mayor detalle
+logger = logging.getLogger(__name__)
 
-    def __init__(self, controlador, **kwargs):
+class DistribucionesScreen(Screen):
+    def __init__(self, controlador, vista=None, **kwargs):
         try:
+            logger.debug("Cargando archivo distribucion.kv...")
             Builder.load_file('views/distribucion.kv')
         except Exception as e:
-            print(f"⚠️ Error al cargar distribucion.kv: {e}")
+            logger.error(f"⚠️ Error al cargar distribucion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+        self.vista = vista
+        logger.info("DistribucionesScreen inicializado correctamente.")
 
     def on_pre_enter(self, *args):
-        Clock.schedule_once(self.cargar_donaciones, 1)  # 📌 Esperar a que Kivy termine de cargar
+        """Se ejecuta antes de que la pantalla sea visible."""
+        logger.debug("Ejecutando on_pre_enter...")
+        Clock.schedule_once(self.cargar_datos, 1)
+    
+    def obtener_datos_formulario(self):
+        donacion_id = self.ids.donacion_id.text.strip()
+        salon_id = self.ids.salon_id.text.strip()
+        cantidad = self.ids.donacion_cantidad.text.strip()
+        fecha = self.ids.fecha.text.strip()
 
-    def cargar_donaciones(self, dt):
-        if not self.ids:
-            Clock.schedule_once(self.cargar_donaciones, 0.1)
-            return
-        print("Contenido de self.ids:", self.ids)
-        if 'donacion_spinner' not in self.ids:
-            print("⚠️ Error: 'donacion_spinner' no está en self.ids. Verifica el archivo KV.")
-            return #Añadido
-        if 'salones_seleccionados' not in self.ids:
-            print("⚠️ Error: 'salones_seleccionados' no está en self.ids. Verifica el archivo KV.")
-            return #Añadido
-        donaciones = self.controlador.listar_donaciones()
-        self.ids.donacion_spinner.values = [donacion.descripcion for donacion in donaciones]
-        salones = self.controlador.obtener_salones()
-        self.actualizar_salones(salones)
-        self.actualizar_lista_distribuciones()
+        #Validación básica
+        if not donacion_id:
+            StyledPopup.mostrar_popup("Error", "El ID de donación es obligatorio.", tipo="error")
+            return None
+        if not salon_id:
+            StyledPopup.mostrar_popup("Error", "El ID de salón es obligatorio.", tipo="error")
+            return None
+        if not cantidad:
+            StyledPopup.mostrar_popup("Error", "La cantidad es obligatoria.", tipo="error")
+            return None
+        if not fecha:
+            StyledPopup.mostrar_popup("Error", "La fecha es obligatoria.", tipo="error")
+            return None
+        
+        try:
+            donacion_id = int(donacion_id)
+            salon_id = int(salon_id)
+            cantidad = float(cantidad)
+            fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+        except ValueError:
+            StyledPopup.mostrar_popup("Error", "Formato de fecha incorrecto. Debe ser YYYY-MM-DD.", tipo="error")
+            return None
+        except Exception as e:
+            logger.error(f"⚠️ Error al convertir datos: {e}")
+            StyledPopup.mostrar_popup("Error", "Error al procesar los datos del formulario.", tipo="error")
+            return None
+        return donacion_id, salon_id, cantidad, fecha
 
-    def actualizar_salones(self, salones):
-        self.ids.salones_seleccionados.clear_widgets()
-        for salon in salones:
-            checkbox = CheckBox(active=False)
-            label = Label(text=salon.nombre)
-            cantidad_input = TextInput(hint_text='Cantidad', input_type='float')
-            unidad_input = TextInput(hint_text='Unidad')
-            box_layout = BoxLayout(orientation='horizontal')
-            box_layout.add_widget(checkbox)
-            box_layout.add_widget(label)
-            box_layout.add_widget(cantidad_input)
-            box_layout.add_widget(unidad_input)
-            self.ids.salones_seleccionados.add_widget(box_layout)
+    def listar_distribuciones(self):
+        """Lista todas las distribuciones."""
+        logger.debug("Intentando listar distribuciones...")
+        try:
+            self.controlador.listar_distribuciones()
+            logger.info("Distribuciones listadas correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al listar distribuciones: {e}")
+            traceback.print_exc()
 
-    def obtener_salones_seleccionados(self):
-        salones_distribucion = []
-        for box_layout in self.ids.salones_seleccionados.children:
-            checkbox = box_layout.children[3]
-            label = box_layout.children[2]
-            cantidad_input = box_layout.children[1]
-            unidad_input = box_layout.children[0]
-            if checkbox.active:
-                salones_distribucion.append((label.text, float(cantidad_input.text), unidad_input.text))
-        return salones_distribucion
+    def editar_distribucion(self):
+        """Edita una distribución existente."""
+        logger.debug("Intentando editar distribución...")
+        try:
+            datos = self.obtener_datos_formulario()
+            if datos:
+                self.controlador.editar_distribucion(datos)
+                logger.info("Distribución editada correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al editar distribución: {e}")
+            traceback.print_exc()
 
-    def obtener_donacion_seleccionada(self):
-        return self.ids.donacion_spinner.text
+    def cargar_datos(self, dt):
+        """Carga los datos iniciales necesarios para la pantalla."""
+        logger.debug("Cargando datos iniciales...")
+        try:
+            self.ids.donacion_id.text = ""
+            self.ids.salon_id.text = ""
+            self.ids.donacion_cantidad.text = ""
+            self.ids.fecha.text = datetime.now().strftime("%Y-%m-%d")
+            logger.info("Datos iniciales cargados correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al cargar datos iniciales: {e}")
+            traceback.print_exc()
 
-    def registrar_distribucion(self):
-        donacion_id = self.obtener_donacion_seleccionada()
-        salones_distribucion = self.obtener_salones_seleccionados()
-        self.controlador.registrar_distribucion(donacion_id, salones_distribucion)
-        self.actualizar_lista_distribuciones()
+    def abrir_popup_donacion(self):
+        """Abre un popup para seleccionar una donación."""
+        logger.debug("Abriendo popup para seleccionar donación...")
+        try:
+            layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+            layout.add_widget(Label(text="Seleccionar Donación"))
+            close_button = Button(text="Cerrar", size_hint_y=None, height=50)
+            close_button.bind(on_press=lambda *args: popup.dismiss())
+            popup = Popup(title="Seleccionar Donación", content=layout, size_hint=(0.8, 0.8))
+            popup.open()
+            logger.info("Popup de selección de donación abierto correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al abrir popup de donación: {e}")
+            traceback.print_exc()
 
-    def actualizar_lista_distribuciones(self):
-        distribuciones = self.controlador.listar_distribuciones()
-        self.ids.lista_distribuciones.clear_widgets()
-        for distribucion in distribuciones:
-            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.donacion.descripcion))
-            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.salon.nombre))
-            self.ids.lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad)))
-            self.ids.lista_distribuciones.add_widget(Label(text=distribucion.unidad))
+    def abrir_popup_salon(self):
+        """Abre un popup para seleccionar un salón."""
+        logger.debug("Abriendo popup para seleccionar salón...")
+        try:
+            layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+            layout.add_widget(Label(text="Seleccionar Salón"))
+            close_button = Button(text="Cerrar", size_hint_y=None, height=50)
+            close_button.bind(on_press=lambda *args: popup.dismiss())
+            popup = Popup(title="Seleccionar Salón", content=layout, size_hint=(0.8, 0.8))
+            popup.open()
+            logger.info("Popup de selección de salón abierto correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al abrir popup de salón: {e}")
+            traceback.print_exc()
 
-    def mostrar_popup_lista(self):
-        distribuciones = self.controlador.listar_distribuciones()
+    def guardar_distribucion(self):
+        """Guarda una nueva distribución."""
+        logger.debug("Intentando guardar una nueva distribución...")
+        try:
+            datos = {
+                "donacion_id": self.ids.donacion_id.text.strip(),
+                "salon_id": self.ids.salon_id.text.strip(),
+                "cantidad": self.ids.donacion_cantidad.text.strip(),
+                "fecha": self.ids.fechac.text.strip()
+            }
 
-        content = ScrollView(
-            GridLayout(
-                cols=4,
-                size_hint_y=None,
-                height=self.minimum_height,
-                id='lista_distribuciones_popup'
-            )
-        )
+            # Validar datos
+            if not datos["donacion_id"] or not datos["salon_id"] or not datos["cantidad"] or not datos["fecha"]:
+                logger.warning("Faltan datos obligatorios en el formulario.")
+                StyledPopup.mostrar_popup("Error", "Todos los campos son obligatorios.", tipo="error")
+                return
 
-        for distribucion in distribuciones:
-            content.children[0].add_widget(Label(text=distribucion.donacion.descripcion))
-            content.children[0].add_widget(Label(text=distribucion.salon.nombre))
-            content.children[0].add_widget(Label(text=str(distribucion.cantidad)))
-            content.children[0].add_widget(Label(text=distribucion.unidad))
+            try:
+                datos["donacion_id"] = int(datos["donacion_id"])
+                datos["salon_id"] = int(datos["salon_id"])
+                datos["cantidad"] = float(datos["cantidad"])
+                datos["fecha"] = datetime.strptime(datos["fecha"], "%Y-%m-%d").date()
+            except ValueError as e:
+                logger.error(f"Error al convertir datos: {e}")
+                StyledPopup.mostrar_popup("Error", "ID de donación, ID de salón y cantidad deben ser números válidos.", tipo="error")
+                return
 
-        close_button = Button(text='Cerrar', size_hint_y=None, height=50)
+            # Llamar al controlador para guardar la distribución
+            logger.info(f"Datos validados correctamente: {datos}")
+            self.controlador.crear_distribucion(datos)
+            logger.info("Distribución guardada correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error al guardar distribución: {e}")
+            traceback.print_exc()
 
-        popup = Popup(title='Lista de Distribuciones', content=BoxLayout(orientation='vertical'), size_hint=(None, None), size=(600, 400))
-        popup.content.add_widget(content)
-        popup.content.add_widget(close_button)
-
-        close_button.bind(on_press=popup.dismiss)
-        popup.open()
+    
