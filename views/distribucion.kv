@@ -1,5 +1,5 @@
-<DistribucionesScreen>:
-    name: 'distribucion'
+<DistribucionScreen>:
+    name: 'distribuciones'
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -9,28 +9,38 @@
                 pos: self.pos
                 size: self.size
         Label:
-            text: 'Distribución de Maranatha Infantil'
-            font_size: 30
+            text: 'Distribución de Donaciones'
+            font_size: 36
             color: 1, 1, 1, 1
             size_hint_y: None
             height: 50
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         # Formulario
         ScrollView:
             GridLayout:
                 cols: 2
                 size_hint_y: None
                 height: self.minimum_height
+                padding: 20
+                spacing: 20
                 Label:
                     text: 'Donación:'
                     font_size: 28
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 50
-                Spinner:
-                    id: donacion_spinner
-                    text: 'Seleccionar Donación'
-                    values: []
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: 50
+                    TextInput:
+                        id: donacion_id
+                        hint_text: 'ID de Donación'
+                        readonly: True
+                    Button:
+                        text: 'Seleccionar'
+                        size_hint_x: None
+                        width: 120
+                        on_press: root.abrir_popup_donacion()
                 Label:
                     text: 'Cantidad:'
                     font_size: 28
@@ -54,39 +64,34 @@
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 50
-                GridLayout:
-                    id: salones_seleccionados
-                    cols: 1
-                    size_hint_y: None
-                    height: self.minimum_height
-                Button:
-                    text: 'Registrar Distribución'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
+                BoxLayout:
+                    orientation: 'horizontal'
                     size_hint_y: None
                     height: 50
-                    on_press: root.controlador.registrar_distribucion(root.obtener_donacion_seleccionada(), root.obtener_salones_seleccionados())
-                Button:
-                    text: 'Listar Distribuciones'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint_y: None
-                    height: 50
-                    on_press: root.mostrar_popup_lista()
-                # Lista de distribuciones (opcional)
-                ScrollView:
-                    GridLayout:
-                        id: lista_distribuciones
-                        cols: 2 # Donación, Salones
-                        size_hint_y: None
-                        height: self.minimum_height
-        Button:
-            text: 'Volver al Menú'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
+                    TextInput:
+                        id: salon_id
+                        hint_text: 'ID de Salón'
+                        readonly: True
+                    Button:
+                        text: 'Seleccionar'
+                        size_hint_x: None
+                        width: 120
+                        on_press: root.abrir_popup_salon()
+        # Botones de acción
+        BoxLayout:
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = 'menu'
+            spacing: 10
+            padding: 10
+            Button:
+                text: 'Guardar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: root.guardar_distribucion()
+            Button:
+                text: 'Cancelar'
+                font_size: 28
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: app.root.current = 'menu'
