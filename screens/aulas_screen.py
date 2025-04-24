@@ -25,7 +25,6 @@ class AulasScreen(Screen):
         capitan = self.ids.aula_capitan.text
         colaborador = self.ids.aula_colaborador.text
         condicion = self.ids.aula_condicion.text
-        edad = self.ids.aula_edad.text
         maestra = self.ids.aula_maestra.text
         ninos = self.ids.aula_ninos.text
         ninas = self.ids.aula_ninas.text
@@ -35,51 +34,51 @@ class AulasScreen(Screen):
 
         # Validación básica
         if not auxiliar:
-            self.mostrar_error("El número de auxiliares es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de auxiliares es obligatorio.", tipo="error")
             return None
         if not capitan:
-            self.mostrar_error("El número de capitanes es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de capitanes es obligatorio.", tipo="error")
             return None
         if not colaborador:
-            self.mostrar_error("El número de colaboradores es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de colaboradores es obligatorio.", tipo="error")
             return None
         if not condicion:
-            self.mostrar_error("La condición es obligatoria.")
-            return None
-        if not edad:
-            self.mostrar_error("La edad es obligatoria.")
+            StyledPopup.mostrar_popup("Error", "La condición es obligatoria.", tipo="error")
             return None
         if not maestra:
-            self.mostrar_error("El número de maestras es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de maestras es obligatorio.", tipo="error")
             return None
         if not ninos:
-            self.mostrar_error("El número de niños es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de niños es obligatorio.", tipo="error")
             return None
         if not ninas:
-            self.mostrar_error("El número de niñas es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de niñas es obligatorio.", tipo="error")
             return None
         if not subcapitan:
-            self.mostrar_error("El número de subcapitanes es obligatorio.")
+            StyledPopup.mostrar_popup("Error", "El número de subcapitanes es obligatorio.", tipo="error")
             return None
         if not fecha:
-            self.mostrar_error("La fecha es obligatoria.")
+            StyledPopup.mostrar_popup("Error", "La fecha es obligatoria.", tipo="error")
             return None
         try:
             datetime.strptime(fecha, '%Y-%m-%d').date()
         except ValueError:
-            self.mostrar_error("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
+            StyledPopup.mostrar_popup("Error", "Formato de fecha incorrecto. Debe ser YYYY-MM-DD.", tipo="error")
             return None
 
         try:
             int(auxiliar)
             int(capitan)
             int(colaborador)
+            int(id_salon)
+            int(condicion)
             int(maestra)
             int(ninos)
             int(ninas)
             int(subcapitan)
+            str(fecha)
         except ValueError:
-            self.mostrar_error("Los campos numéricos deben ser números enteros.")
+            StyledPopup.mostrar_popup("Error", "Los campos numéricos deben ser números enteros.", tipo="error")
             return None
 
         return {
@@ -87,7 +86,6 @@ class AulasScreen(Screen):
             "capitan": int(capitan),
             "colaborador": int(colaborador),
             "condicion": condicion,
-            "edad": edad,
             "maestra": int(maestra),
             "ninos": int(ninos),
             "ninas": int(ninas),
@@ -111,7 +109,6 @@ class AulasScreen(Screen):
             self.ids.aula_capitan.text = str(aula.capitan)
             self.ids.aula_colaborador.text = str(aula.colaborador)
             self.ids.aula_condicion.text = aula.condicion
-            self.ids.aula_edad.text = aula.edad
             self.ids.aula_maestra.text = str(aula.maestra)
             self.ids.aula_ninos.text = str(aula.ninos)
             self.ids.aula_ninas.text = str(aula.ninas)
@@ -131,6 +128,8 @@ class AulasScreen(Screen):
             return
         finally:
             db.close()
+            logger.info("Conexión a la base de datos cerrada.")
+        
 
         # Verificar si no hay salones registrados
         if not salones:
