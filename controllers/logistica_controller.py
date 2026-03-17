@@ -1,7 +1,6 @@
 import logging
 from models.logistica import Logistica
-from models.database import get_db
-from sqlalchemy.orm import Session
+from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -10,36 +9,50 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class LogisticaController:
-    def __init__(self, vista):
-        self.vista = vista
+    def __init__(self, session=None):
+        self.session = session
+        logger.info("LogisticaController inicializado.")
+
+    def get_db_session(self):
+        return SessionLocal()
 
     def crear_logistica(self, almacen, capitan, distribucion, hidratacion, pasillo, secretaria, fecha):
+        """
+        Crea un registro de logística.
+        :return: (Exito, Mensaje)
+        """
         if not fecha:
-            self.vista.mostrar_error("La fecha es obligatoria.")
-            return
+            return False, "La fecha es obligatoria."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                logistica = Logistica(almacen=almacen, capitan=capitan, distribucion=distribucion, hidratacion=hidratacion, pasillo=pasillo, secretaria=secretaria, fecha=fecha_date)
+                logistica = Logistica(
+                    almacen=almacen, capitan=capitan, distribucion=distribucion,
+                    hidratacion=hidratacion, pasillo=pasillo, secretaria=secretaria,
+                    fecha=fecha_date
+                )
                 db.add(logistica)
-                logger.info(f"Logística creada: {logistica.id}")
+                logger.info(f"Logística creada.")
+            return True, "Logística creada exitosamente."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al crear logística: {e}")
-            self.vista.mostrar_error("Error al crear logística. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al crear logística: {e}"
         finally:
-            self.listar_logisticas()
+            db.close()
 
     def actualizar_logistica(self, id, almacen, capitan, distribucion, hidratacion, pasillo, secretaria, fecha):
+        """
+        Actualiza un registro de logística.
+        :return: (Exito, Mensaje)
+        """
         if not fecha:
-            self.vista.mostrar_error("La fecha es obligatoria.")
-            return
+            return False, "La fecha es obligatoria."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 logistica = db.query(Logistica).filter(Logistica.id == id).first()
@@ -52,49 +65,65 @@ class LogisticaController:
                     logistica.pasillo = pasillo
                     logistica.secretaria = secretaria
                     logistica.fecha = fecha_date
-                    logger.info(f"Logística actualizada: {logistica.id}")
+                    logger.info(f"Logística actualizada: ID {id}")
+                    return True, "Logística actualizada exitosamente."
                 else:
-                    self.vista.mostrar_error("Logística no encontrada.")
+                    return False, "Logística no encontrada."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar logística: {e}")
-            self.vista.mostrar_error("Error al actualizar logística. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al actualizar logística: {e}"
         finally:
-            self.listar_logisticas()
+            db.close()
 
     def eliminar_logistica(self, id):
-        db: Session = next(get_db())
+        """
+        Elimina un registro de logística.
+        :return: (Exito, Mensaje)
+        """
+        db = self.get_db_session()
         try:
             with db.begin():
                 logistica = db.query(Logistica).filter(Logistica.id == id).first()
                 if logistica:
                     db.delete(logistica)
-                    logger.info(f"Logística eliminada: {logistica.id}")
+                    logger.info(f"Logística eliminada: ID {id}")
+                    return True, "Logística eliminada exitosamente."
                 else:
-                    self.vista.mostrar_error("Logística no encontrada.")
+                    return False, "Logística no encontrada."
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar logística: {e}")
-            self.vista.mostrar_error("Error al eliminar logística. Inténtalo de nuevo.")
+            return False, f"Error al eliminar logística: {e}"
         finally:
-            self.listar_logisticas()
+            db.close()
 
     def listar_logisticas(self):
-        db: Session = next(get_db())
+        """
+        Lista todos los registros de logística.
+        :return: Lista de objetos Logistica.
+        """
+        db = self.get_db_session()
         try:
             logisticas = db.query(Logistica).all()
-            self.vista.actualizar_lista_logisticas(logisticas)
             logger.info("Logísticas listadas.")
+            return logisticas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar logísticas: {e}")
-            self.vista.mostrar_error("Error al listar logísticas. Inténtalo de nuevo.")
+            return []
+        finally:
+            db.close()
 
     def obtener_logistica(self, id):
-        db: Session = next(get_db())
+        """
+        Obtiene un registro de logística por ID.
+        :return: Objeto Logistica o None.
+        """
+        db = self.get_db_session()
         try:
             return db.query(Logistica).filter(Logistica.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener logística: {e}")
-            self.vista.mostrar_error("Error al obtener logística. Inténtalo de nuevo.")
             return None
+        finally:
+            db.close()
