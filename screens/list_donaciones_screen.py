@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 #Clase ListDonacionScreen
 class ListDonacionesScreen(Screen):
     """ Pantalla que muestra una lista de donaciones. """
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/list_donaciones.kv')
         except Exception as e:
@@ -22,8 +22,6 @@ class ListDonacionesScreen(Screen):
         super().__init__(**kwargs)
         logger.info("Inicializando ListDonacionesScreen")
         self.controlador = controlador
-        self.vista = self  
-        
     def actualizar_lista_donaciones(self, donaciones):
         """Actualiza la lista de donaciones en la vista."""
         logger.debug(f"Datos recibidos para actualizar lista de donaciones: {donaciones}")
@@ -110,8 +108,7 @@ class ListDonacionesScreen(Screen):
             logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
             return
         try:
-            # Llama al método listar_donaciones con la vista actual
-            self.controlador.listar_donaciones(self)
+            self.cargar_donaciones()
         except Exception as e:
             logger.error(f"Error consultando donaciones: {e}")
             self.actualizar_lista_donaciones([])
