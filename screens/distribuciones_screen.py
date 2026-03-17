@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)  # Cambiar a DEBUG para mayor detalle
 logger = logging.getLogger(__name__)
 
 class DistribucionesScreen(Screen):
-    def __init__(self, controlador, vista=None, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             logger.debug("Cargando archivo distribucion.kv...")
             Builder.load_file('views/distribucion.kv')
@@ -23,7 +23,6 @@ class DistribucionesScreen(Screen):
             logger.error(f"⚠️ Error al cargar distribucion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
-        self.vista = vista
         logger.info("DistribucionesScreen inicializado correctamente.")
 
     def on_pre_enter(self, *args):
@@ -138,7 +137,7 @@ class DistribucionesScreen(Screen):
                 "donacion_id": self.ids.donacion_id.text.strip(),
                 "salon_id": self.ids.salon_id.text.strip(),
                 "cantidad": self.ids.donacion_cantidad.text.strip(),
-                "fecha": self.ids.fechac.text.strip()
+                "fecha": self.ids.fecha.text.strip()
             }
 
             # Validar datos
