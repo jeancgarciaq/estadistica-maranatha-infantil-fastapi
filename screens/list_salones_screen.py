@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 #Modificando
 class ListSalonesScreen(Screen):
     """ Pantalla que muestra una lista de salones. """
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/list_salones.kv')
         except Exception as e:
@@ -21,7 +21,6 @@ class ListSalonesScreen(Screen):
         logger.info("Initializando ListSalonesScreen")
         # Crear el controlador como atributo
         self.controlador = controlador
-        self.vista = self  
         
 
     def actualizar_lista_salones(self, salones):
@@ -44,7 +43,7 @@ class ListSalonesScreen(Screen):
     def cargar_salones(self):
         """Consultando y llenando la lista salones."""
         try:
-            salones = self.controlador.listar_salones(self)  # Pasa 'self' como vista
+            salones = self.controlador.listar_salones()  
             if salones is None:
                 logger.warning("El método listar_salones devolvió None. Verifique el controlador.")
             else:
