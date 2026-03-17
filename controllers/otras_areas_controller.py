@@ -1,7 +1,6 @@
 import logging
 from models.otras_areas import OtrasAreas
-from models.database import get_db
-from sqlalchemy.orm import Session
+from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -10,36 +9,49 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class OtrasAreasController:
-    def __init__(self, vista):
-        self.vista = vista
+    def __init__(self, session=None):
+        self.session = session
+        logger.info("OtrasAreasController inicializado.")
+
+    def get_db_session(self):
+        return SessionLocal()
 
     def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
+        """
+        Crea un registro de otras áreas.
+        :return: (Exito, Mensaje)
+        """
         if not fecha:
-            self.vista.mostrar_error("La fecha es obligatoria.")
-            return
+            return False, "La fecha es obligatoria."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                otrasareas = OtrasAreas(alabanza=alabanza, protocolo=protocolo, semillitas=semillitas, sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, fecha=fecha_date)
+                otrasareas = OtrasAreas(
+                    alabanza=alabanza, protocolo=protocolo, semillitas=semillitas,
+                    sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, fecha=fecha_date
+                )
                 db.add(otrasareas)
-                logger.info(f"Otras áreas creadas: {otrasareas.id}")
+                logger.info(f"Otras áreas creadas.")
+            return True, "Otras áreas creadas exitosamente."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al crear otras áreas: {e}")
-            self.vista.mostrar_error("Error al crear otras áreas. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al crear otras áreas: {e}"
         finally:
-            self.listar_otrasareas()
+            db.close()
 
     def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
+        """
+        Actualiza un registro de otras áreas.
+        :return: (Exito, Mensaje)
+        """
         if not fecha:
-            self.vista.mostrar_error("La fecha es obligatoria.")
-            return
+            return False, "La fecha es obligatoria."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
@@ -53,49 +65,65 @@ class OtrasAreasController:
                     otrasareas.tv = tv
                     otrasareas.ujier = ujier
                     otrasareas.fecha = fecha_date
-                    logger.info(f"Otras áreas actualizadas: {otrasareas.id}")
+                    logger.info(f"Otras áreas actualizadas: ID {id}")
+                    return True, "Otras áreas actualizadas exitosamente."
                 else:
-                    self.vista.mostrar_error("Otras áreas no encontradas.")
+                    return False, "Otras áreas no encontradas."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar otras áreas: {e}")
-            self.vista.mostrar_error("Error al actualizar otras áreas. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al actualizar otras áreas: {e}"
         finally:
-            self.listar_otrasareas()
+            db.close()
 
     def eliminar_otrasareas(self, id):
-        db: Session = next(get_db())
+        """
+        Elimina un registro de otras áreas.
+        :return: (Exito, Mensaje)
+        """
+        db = self.get_db_session()
         try:
             with db.begin():
                 otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
                 if otrasareas:
                     db.delete(otrasareas)
-                    logger.info(f"Otras áreas eliminadas: {otrasareas.id}")
+                    logger.info(f"Otras áreas eliminadas: ID {id}")
+                    return True, "Otras áreas eliminadas exitosamente."
                 else:
-                    self.vista.mostrar_error("Otras áreas no encontradas.")
+                    return False, "Otras áreas no encontradas."
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar otras áreas: {e}")
-            self.vista.mostrar_error("Error al eliminar otras áreas. Inténtalo de nuevo.")
+            return False, f"Error al eliminar otras áreas: {e}"
         finally:
-            self.listar_otrasareas()
+            db.close()
 
     def listar_otrasareas(self):
-        db: Session = next(get_db())
+        """
+        Lista todos los registros de otras áreas.
+        :return: Lista de objetos OtrasAreas.
+        """
+        db = self.get_db_session()
         try:
             otrasareas = db.query(OtrasAreas).all()
-            self.vista.actualizar_lista_otrasareas(otrasareas)
             logger.info("Otras áreas listadas.")
+            return otrasareas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar otras áreas: {e}")
-            self.vista.mostrar_error("Error al listar otras áreas. Inténtalo de nuevo.")
+            return []
+        finally:
+            db.close()
 
     def obtener_otrasareas(self, id):
-        db: Session = next(get_db())
+        """
+        Obtiene un registro de otras áreas por ID.
+        :return: Objeto OtrasAreas o None.
+        """
+        db = self.get_db_session()
         try:
             return db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener otras áreas: {e}")
-            self.vista.mostrar_error("Error al obtener otras áreas. Inténtalo de nuevo.")
             return None
+        finally:
+            db.close()
