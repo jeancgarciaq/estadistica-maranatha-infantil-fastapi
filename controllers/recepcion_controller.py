@@ -1,89 +1,124 @@
 import logging
 from models.recepcion import Recepcion
-from models.database import get_db
-from sqlalchemy.orm import Session
+from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RecepcionController:
-    def __init__(self, vista):
-        self.vista = vista
+    def __init__(self, session=None):
+        self.session = session
+        logger.info("RecepcionController inicializado.")
 
-    def crear_recepcion(self, nombre):
+    def get_db_session(self):
+        return SessionLocal()
+
+    def crear_recepcion(self, nombre, fecha=None):
+        """
+        Crea un registro de recepción.
+        :return: (Exito, Mensaje)
+        """
         if not nombre:
-            self.vista.mostrar_error("El nombre es obligatorio.")
-            return
+            return False, "El nombre es obligatorio."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
-                recepcion = Recepcion(nombre=nombre, fecha=fecha_date)
+                kwargs = {"nombre": nombre}
+                if fecha:
+                    try:
+                        kwargs["fecha"] = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    except ValueError:
+                        return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+                recepcion = Recepcion(**kwargs)
                 db.add(recepcion)
-                logger.info(f"Recepción creada: {recepcion.id}")
+                logger.info(f"Recepción creada.")
+            return True, "Recepción creada exitosamente."
         except SQLAlchemyError as e:
             logger.error(f"Error al crear recepción: {e}")
-            self.vista.mostrar_error("Error al crear recepción. Inténtalo de nuevo.")
+            return False, f"Error al crear recepción: {e}"
         finally:
-            self.listar_recepciones()
+            db.close()
 
-    def actualizar_recepcion(self, id, nombre, fecha):
+    def actualizar_recepcion(self, id, nombre, fecha=None):
+        """
+        Actualiza un registro de recepción.
+        :return: (Exito, Mensaje)
+        """
         if not nombre:
-            self.vista.mostrar_error("El nombre es obligatorio.")
-            return
-        elif not fecha:
-            self.vista.mostrar_error("La fecha es obligatoria.")
-            return
+            return False, "El nombre es obligatorio."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 recepcion = db.query(Recepcion).filter(Recepcion.id == id).first()
                 if recepcion:
                     recepcion.nombre = nombre
-                    recepcion.fecha = fecha_date
-                    logger.info(f"Recepción actualizada: {recepcion.id}")
+                    if fecha:
+                        try:
+                            recepcion.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                        except ValueError:
+                            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+                    logger.info(f"Recepción actualizada: ID {id}")
+                    return True, "Recepción actualizada exitosamente."
                 else:
-                    self.vista.mostrar_error("Recepción no encontrada.")
+                    return False, "Recepción no encontrada."
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar recepción: {e}")
-            self.vista.mostrar_error("Error al actualizar recepción. Inténtalo de nuevo.")
+            return False, f"Error al actualizar recepción: {e}"
         finally:
-            self.listar_recepciones()
+            db.close()
 
     def eliminar_recepcion(self, id):
-        db: Session = next(get_db())
+        """
+        Elimina un registro de recepción.
+        :return: (Exito, Mensaje)
+        """
+        db = self.get_db_session()
         try:
             with db.begin():
                 recepcion = db.query(Recepcion).filter(Recepcion.id == id).first()
                 if recepcion:
                     db.delete(recepcion)
-                    logger.info(f"Recepción eliminada: {recepcion.id}")
+                    logger.info(f"Recepción eliminada: ID {id}")
+                    return True, "Recepción eliminada exitosamente."
                 else:
-                    self.vista.mostrar_error("Recepción no encontrada.")
+                    return False, "Recepción no encontrada."
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar recepción: {e}")
-            self.vista.mostrar_error("Error al eliminar recepción. Inténtalo de nuevo.")
+            return False, f"Error al eliminar recepción: {e}"
         finally:
-            self.listar_recepciones()
+            db.close()
 
     def listar_recepciones(self):
-        db: Session = next(get_db())
+        """
+        Lista todos los registros de recepción.
+        :return: Lista de objetos Recepcion.
+        """
+        db = self.get_db_session()
         try:
             recepciones = db.query(Recepcion).all()
-            self.vista.actualizar_lista_recepciones(recepciones)
             logger.info("Recepciones listadas.")
+            return recepciones
         except SQLAlchemyError as e:
             logger.error(f"Error al listar recepciones: {e}")
-            self.vista.mostrar_error("Error al listar recepciones. Inténtalo de nuevo.")
+            return []
+        finally:
+            db.close()
 
     def obtener_recepcion(self, id):
-        db: Session = next(get_db())
+        """
+        Obtiene un registro de recepción por ID.
+        :return: Objeto Recepcion o None.
+        """
+        db = self.get_db_session()
         try:
             return db.query(Recepcion).filter(Recepcion.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener recepción: {e}")
-            self.vista.mostrar_error("Error al obtener recepción. Inténtalo de nuevo.")
             return None
+        finally:
+            db.close()
