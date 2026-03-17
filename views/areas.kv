@@ -51,8 +51,7 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.crear_area(area_nombre.text)
-                    area_nombre.text=''
+                    root.crear_area(area_nombre.text)
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -61,9 +60,7 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.actualizar_area(area_id.text, area_nombre.text)
-                    area_id.text=''
-                    area_nombre.text=''
+                    root.actualizar_area(area_id.text, area_nombre.text)
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -72,8 +69,7 @@
                 size_hint_y: None
                 height: 50
                 on_press:
-                    root.controlador.eliminar_area(area_id.text)
-                    area_id.text=''
+                    root.eliminar_area(area_id.text)
             Button:
                 text: 'Ver Lista'
                 font_size: 28
@@ -91,8 +87,6 @@
                 height: 50
                 on_press:
                     root.buscar_area()
-                    area_id.text=''
-                    area_nombre.text=''
         Button:
             text: 'Volver al Menú'
             font_size: 28
