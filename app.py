@@ -43,10 +43,10 @@ class EmiApp(App):
             "salones": SalonesController(session=self.session),
             "aulas": AulasController(session=self.session),
             "donaciones": DonacionesController(session=self.session),
-            "ensenanza": EnsenanzaController(self.session),
-            "logistica": LogisticaController(self.session),
-            "otrasareas": OtrasAreasController(self.session),
-            "recepcion": RecepcionController(self.session),
+            "ensenanza": EnsenanzaController(session=self.session),
+            "logistica": LogisticaController(session=self.session),
+            "otrasareas": OtrasAreasController(session=self.session),
+            "recepcion": RecepcionController(session=self.session),
             "distribuciones": DistribucionesController(session=self.session),
         }
         logger.debug("Controladores inicializados: %s", list(controllers.keys()))
