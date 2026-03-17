@@ -116,33 +116,13 @@ class AulasScreen(Screen):
 
     def mostrar_popup_salones(self):
         """
-        Muestra un popup con la lista de salones para seleccionar uno.
+        Muestra un popup con la lista de salones obtenidos del controlador para seleccionar uno.
         """
-        db = self.controlador.get_db_session()
-        try:
-            salones = db.query(Salon).all()
-        except Exception as e:
-            self.mostrar_error(f"Error al obtener salones: {e}")
-            return
-        finally:
-            db.close()
-            logger.info("Conexión a la base de datos cerrada.")
+        salones = self.controlador.listar_salones()
         
-
         # Verificar si no hay salones registrados
         if not salones:
-            popup = Popup(
-                title='Sin Salones',
-                content=Label(
-                    text='No hay salones registrados.',
-                    size_hint=(1, 1),
-                    halign='center',
-                    valign='middle'
-                ),
-                size_hint=(None, None),
-                size=(400, 200)
-            )
-            popup.open()
+            StyledPopup.mostrar_popup("Sin Salones", "No hay salones registrados.", tipo="info")
             return
 
         # Crear el contenido del popup
@@ -152,54 +132,54 @@ class AulasScreen(Screen):
         salones_grid.bind(minimum_height=salones_grid.setter('height'))
 
         for salon in salones:
-            # Estilo para las etiquetas
             salon_label = Label(
                 text=f"ID: {salon.id} - {salon.salon}",
                 size_hint_y=None,
                 height=30,
                 font_size=18,
-                color=(1, 1, 1, 1)  # Texto blanco
+                color=(1, 1, 1, 1)
             )
             salones_grid.add_widget(salon_label)
 
-            # Estilo para los botones
             select_button = Button(
                 text="Seleccionar",
                 size_hint_y=None,
                 height=30,
                 font_size=16,
                 background_normal='',
-                background_color=(0, 119/255, 194/255, 1)  # Azul consistente con el estilo
+                background_color=(0, 119/255, 194/255, 1)
             )
-            select_button.bind(on_press=lambda btn, salon_id=salon.id: self.seleccionar_salon(salon_id))
+            # Definir el callback para dismiss el popup después de seleccionar
+            select_button.bind(on_press=lambda btn, s_id=salon.id: self._finalizar_seleccion_salon(s_id, popup))
             salones_grid.add_widget(select_button)
 
         scroll_view.add_widget(salones_grid)
         popup_layout.add_widget(scroll_view)
 
-        # Botón de cerrar con estilo
         close_button = Button(
             text="Cerrar",
             size_hint=(1, 0.2),
             height=50,
             font_size=18,
             background_normal='',
-            background_color=(0, 119/255, 194/255, 1)  # Azul consistente con el estilo
+            background_color=(0, 119/255, 194/255, 1)
         )
-        close_button.bind(on_press=lambda *args: popup.dismiss())
         popup_layout.add_widget(close_button)
 
-        # Crear el popup con estilo consistente
         popup = Popup(
             title="Seleccionar Salón",
             title_align="center",
             title_size=20,
-            title_color=(1, 1, 1, 1),  # Título en blanco
             content=popup_layout,
             size_hint=(0.8, 0.8),
-            background_color=(0.102, 0.2, 0.396, 1)  # Fondo azul oscuro
+            background_color=(0.102, 0.2, 0.396, 1)
         )
+        close_button.bind(on_press=popup.dismiss)
         popup.open()
+
+    def _finalizar_seleccion_salon(self, salon_id, popup):
+        self.seleccionar_salon(salon_id)
+        popup.dismiss()
 
     def seleccionar_salon(self, salon_id):
         """
@@ -209,15 +189,68 @@ class AulasScreen(Screen):
     
     def buscar_aula(self):
         """Obtiene los datos del formulario y llama al método buscar_aula del controlador."""
-        aula_id = self.ids.aula_id.text.strip()  # ID del aula
-
-        # Validar que al menos uno de los campos esté lleno
+        aula_id = self.ids.aula_id.text.strip()
         if not aula_id:
             StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID del área.", tipo="error")
             return
+        
+        if not aula_id.isdigit():
+            StyledPopup.mostrar_popup("Error", "El ID debe ser un número entero.", tipo="error")
+            return
 
-        # Convertir el ID a entero si es posible
-        aula_id = int(aula_id) if aula_id.isdigit() else None
+        exito, aula, mensaje = self.controlador.buscar_aula(id=int(aula_id))
+        if exito:
+            self.editar_aula(aula.id)
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
-        # Llamar al método buscar_aula del controlador
-        self.controlador.buscar_aula(id=aula_id)
+    def crear_aula(self):
+        datos = self.obtener_datos_formulario()
+        if datos:
+            exito, mensaje = self.controlador.crear_aula(datos)
+            if exito:
+                StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+                self.limpiar_formulario()
+            else:
+                StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def actualizar_aula(self):
+        id_texto = self.ids.aula_id.text.strip()
+        if not id_texto or not id_texto.isdigit():
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para actualizar.", tipo="error")
+            return
+        
+        datos = self.obtener_datos_formulario()
+        if datos:
+            exito, mensaje = self.controlador.actualizar_aula(int(id_texto), datos)
+            if exito:
+                StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+                self.limpiar_formulario()
+            else:
+                StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def eliminar_aula(self, aula_id_val):
+        if not aula_id_val:
+            StyledPopup.mostrar_popup("Error", "ID de aula no válido.", tipo="error")
+            return
+            
+        exito, mensaje = self.controlador.eliminar_aula(int(aula_id_val))
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self.controlador.listar_aulas(self) # Actualiza la lista si estamos en la vista de lista
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def limpiar_formulario(self):
+        self.ids.aula_id.text = ""
+        self.ids.aula_auxiliar.text = ""
+        self.ids.aula_capitan.text = ""
+        self.ids.aula_colaborador.text = ""
+        self.ids.aula_condicion.text = ""
+        self.ids.aula_maestra.text = ""
+        self.ids.aula_ninos.text = ""
+        self.ids.aula_ninas.text = ""
+        self.ids.aula_subcapitan.text = ""
+        self.ids.aula_fecha.text = ""
+        self.ids.aula_id_salon.text = ""
