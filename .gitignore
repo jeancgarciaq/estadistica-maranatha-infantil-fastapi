@@ -1,2 +1,30 @@
 # Archivo del entorno virtual
 venv
+
+# Archivos de Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de Kivy
+.kivy
+
+# Archivos de SQLAlchemy
+.db
+
+# Archivos de configuración
+.env
+
+# Archivos de logs
+*.log
+
+# Archivos de pruebas
+*.test
+
+# Archivos de documentación
+*.md
+
+# Archivos de empaquetado
+*.exe
+*.apk    
