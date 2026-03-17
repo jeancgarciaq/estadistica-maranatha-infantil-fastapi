@@ -13,11 +13,11 @@ class DonacionesScreen(Screen):
         self.controlador = controlador
 
     def obtener_datos_formulario(self):
-        descripcion = self.ids.donacion_descripcion.text
-        cantidad = self.ids.donacion_cantidad.text
-        unidad = self.ids.donacion_unidad.text
-        fecha = self.ids.donacion_fecha.text
-        equipo = self.ids.donacion_equipo.text
+        descripcion = self.ids.donacion_descripcion.text.strip()
+        cantidad = self.ids.donacion_cantidad.text.strip()
+        unidad = self.ids.donacion_unidad.text.strip()
+        fecha = self.ids.donacion_fecha.text.strip()
+        equipo = self.ids.donacion_equipo.text.strip()
 
         # Validación básica
         if not descripcion:
@@ -27,7 +27,7 @@ class DonacionesScreen(Screen):
             StyledPopup.mostrar_popup("Error", "La cantidad es obligatoria.", tipo="error")
             return None
         try:
-            float(cantidad)
+            float_cantidad = float(cantidad)
         except ValueError:
             StyledPopup.mostrar_popup("Error", "La cantidad debe ser un número.", tipo="error")
             return None
@@ -48,11 +48,56 @@ class DonacionesScreen(Screen):
 
         return {
             "descripcion": descripcion,
-            "cantidad": cantidad,
+            "cantidad": float_cantidad,
             "unidad": unidad,
             "equipo": equipo,
             "fecha": fecha
         }
+
+    def crear_donacion(self):
+        datos = self.obtener_datos_formulario()
+        if datos:
+            exito, mensaje = self.controlador.crear_donacion(datos)
+            if exito:
+                StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+                self.limpiar_formulario()
+            else:
+                StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def actualizar_donacion(self):
+        id_texto = self.ids.donacion_id.text.strip()
+        if not id_texto or not id_texto.isdigit():
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para actualizar.", tipo="error")
+            return
+        
+        datos = self.obtener_datos_formulario()
+        if datos:
+            exito, mensaje = self.controlador.actualizar_donacion(int(id_texto), datos)
+            if exito:
+                StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+                self.limpiar_formulario()
+            else:
+                StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def eliminar_donacion(self, id_val):
+        if not id_val or not id_val.isdigit():
+            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para eliminar.", tipo="error")
+            return
+            
+        exito, mensaje = self.controlador.eliminar_donacion(int(id_val))
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self.limpiar_formulario()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def limpiar_formulario(self):
+        self.ids.donacion_id.text = ""
+        self.ids.donacion_descripcion.text = ""
+        self.ids.donacion_cantidad.text = ""
+        self.ids.donacion_unidad.text = ""
+        self.ids.donacion_fecha.text = ""
+        self.ids.donacion_equipo.text = ""
 
     def actualizar_lista_donaciones(self, donaciones):
         lista_donaciones_grid = self.ids.lista_donaciones
@@ -64,7 +109,8 @@ class DonacionesScreen(Screen):
             lista_donaciones_grid.add_widget(Label(text=donacion.equipo))
             lista_donaciones_grid.add_widget(Label(text=donacion.fecha))
             lista_donaciones_grid.add_widget(Button(text="Editar", on_press=lambda btn, id=donacion.id: self.editar_donacion(id)))
-            lista_donaciones_grid.add_widget(Button(text="Eliminar", on_press=lambda btn, id=donacion.id: self.controlador.eliminar_donacion(id)))
+            # No llamar directamente al controlador en eliminar
+            lista_donaciones_grid.add_widget(Button(text="Eliminar", on_press=lambda btn, id=donacion.id: self.eliminar_donacion(str(id))))
     
     def editar_donacion(self, id):
         donacion = self.controlador.obtener_donacion(id)
@@ -78,17 +124,19 @@ class DonacionesScreen(Screen):
             self.cargar_salones_seleccionados(donacion.salones)
 
     def buscar_donacion(self):
-        """Obtiene los datos del formulario y llama al método buscar_area del controlador."""
-        donacion_id = self.ids.donacion_id.text.strip()  # ID de la donación
-        donacion_descripcion = self.ids.donacion_descripcion.text.strip()  # Descripción de la donación
+        """Obtiene los datos del formulario y llama al método buscar_donacion del controlador."""
+        donacion_id = self.ids.donacion_id.text.strip()
+        donacion_descripcion = self.ids.donacion_descripcion.text.strip()
 
-        # Validar que al menos uno de los campos esté lleno
         if not donacion_id and not donacion_descripcion:
             StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o una descripción para buscar la donación.", tipo="error")
             return
 
-        # Convertir el ID a entero si es posible
-        donacion_id = int(donacion_id) if donacion_id.isdigit() else None
-
-        # Llamar al método buscar_donacion del controlador
-        self.controlador.buscar_donacion(id=donacion_id, descripcion=donacion_descripcion)
+        d_id = int(donacion_id) if donacion_id.isdigit() else None
+        exito, donacion, mensaje = self.controlador.buscar_donacion(id=d_id, descripcion=donacion_descripcion)
+        
+        if exito:
+            self.editar_donacion(donacion.id)
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
