@@ -11,15 +11,13 @@ from kivy.uix.textinput import TextInput
 from components import StyledPopup
 
 class AulasScreen(Screen):
-    def __init__(self, controlador, vista=None, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/aulas.kv')
         except Exception as e:
             print(f"Error al cargar la vista aulas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
-        self.vista = vista
-    
     def obtener_datos_formulario(self):
         auxiliar = self.ids.aula_auxiliar.text
         capitan = self.ids.aula_capitan.text
