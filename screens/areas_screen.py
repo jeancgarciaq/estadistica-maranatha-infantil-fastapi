@@ -3,51 +3,58 @@ from kivy.lang import Builder
 from components.styled_popup import StyledPopup
 
 class AreasScreen(Screen):
-    def __init__(self, controlador, vista=None, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/areas.kv')
         except Exception as e:
             print(f"Error al cargar la vista áreas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
-        self.vista = vista
 
-    def obtener_datos_formulario(self):
-        area_nombre = self.ids.area_nombre.text
+    def _limpiar_campos(self):
+        self.ids.area_id.text = ''
+        self.ids.area_nombre.text = ''
 
-        # Validación básica
-        if not area_nombre:
-            StyledPopup.mostrar_popup("Error", "El nombre del área es obligatorio.", tipo="error")
-            return None
+    def crear_area(self, nombre):
+        exito, mensaje = self.controlador.crear_area(nombre)
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self._limpiar_campos()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
-        return {"area": area_nombre}
+    def actualizar_area(self, id_str, nombre):
+        area_id = int(id_str) if id_str and id_str.isdigit() else None
+        
+        exito, mensaje = self.controlador.actualizar_area(area_id, nombre)
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self._limpiar_campos()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
-    def actualizar_lista_areas(self, areas):
-        lista_areas_grid = self.ids.lista_areas
-        lista_areas_grid.clear_widgets()
-        for area in areas:
-            lista_areas_grid.add_widget(Label(text=area.nombre))
-            lista_areas_grid.add_widget(Button(text="Editar", on_press=lambda btn, id=area.id: self.editar_area(id)))
-            lista_areas_grid.add_widget(Button(text="Eliminar", on_press=lambda btn, id=area.id: self.controlador.eliminar_area(id)))
-
-    def editar_area(self, id):
-        area = self.controlador.obtener_area(id)
-        if area:
-            self.ids.area_nombre.text = area.nombre
-            self.ids.area_id.text = str(area.id)
+    def eliminar_area(self, id_str):
+        area_id = int(id_str) if id_str and id_str.isdigit() else None
+        
+        exito, mensaje = self.controlador.eliminar_area(area_id)
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self._limpiar_campos()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def buscar_area(self):
         """Obtiene los datos del formulario y llama al método buscar_area del controlador."""
         area_id = self.ids.area_id.text.strip()  # ID del área
         area_nombre = self.ids.area_nombre.text.strip()  # Nombre del área
 
-        # Validar que al menos uno de los campos esté lleno
-        if not area_id and not area_nombre:
-            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID o un nombre para buscar el área.", tipo="error")
-            return
-
-        # Convertir el ID a entero si es posible
-        area_id = int(area_id) if area_id.isdigit() else None
+        area_id_int = int(area_id) if area_id.isdigit() else None
 
         # Llamar al método buscar_area del controlador
-        self.controlador.buscar_area(id=area_id, nombre=area_nombre)
+        exito, area, mensaje = self.controlador.buscar_area(id=area_id_int, nombre=area_nombre)
+        
+        if exito and area:
+            StyledPopup.mostrar_popup("Información del Área", f"ID: {area.id}\nNombre: {area.area}", tipo="info")
+            self._limpiar_campos()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
