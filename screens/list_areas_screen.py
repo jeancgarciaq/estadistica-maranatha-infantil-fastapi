@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class ListAreasScreen(Screen):
     """Pantalla para desplegar la lista de areas."""
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, controlador, **kwargs):
         """Inicializando ListAreasScreen."""
         try:
             Builder.load_file("views/list_areas.kv")
@@ -19,7 +19,7 @@ class ListAreasScreen(Screen):
         logger.info("Inicializado ListAreasScreen")
         # Asignar el controlador correctamente
         self.controlador = controlador  
-        self.vista = self
+
 
     def actualizar_lista_areas(self, areas):
         """Actualiza la lista de áreas en la vista"""
@@ -40,7 +40,7 @@ class ListAreasScreen(Screen):
     def cargar_areas(self):
         """Consultando y llenando la lista areas."""
         try:
-            areas = self.controlador.listar_areas(self.vista)
+            areas = self.controlador.listar_areas()
             if areas is None:
                 logger.warning("El método listar_areas devolvió None. Verifique el controlador.")
             else:
