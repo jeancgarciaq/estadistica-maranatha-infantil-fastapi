@@ -1,7 +1,6 @@
 import logging
 from models.ensenanza import Ensenanza
-from models.database import get_db
-from sqlalchemy.orm import Session
+from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -10,36 +9,46 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class EnsenanzaController:
-    def __init__(self, vista):
-        self.vista = vista
+    def __init__(self, session=None):
+        self.session = session
+        logger.info("EnsenanzaController inicializado.")
+
+    def get_db_session(self):
+        return SessionLocal()
 
     def crear_ensenanza(self, capitan, fecha, subcapitan):
+        """
+        Crea un registro de enseñanza.
+        :return: (Exito, Mensaje)
+        """
         if not capitan or not fecha or not subcapitan:
-            self.vista.mostrar_error("Todos los campos son obligatorios.")
-            return
+            return False, "Todos los campos son obligatorios."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
                 ensenanza = Ensenanza(capitan=capitan, subcapitan=subcapitan, fecha=fecha_date)
                 db.add(ensenanza)
-                logger.info(f"Enseñanza creada: {ensenanza.id}")
+                logger.info(f"Enseñanza creada.")
+            return True, "Enseñanza creada exitosamente."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al crear enseñanza: {e}")
-            self.vista.mostrar_error("Error al crear enseñanza. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al crear enseñanza: {e}"
         finally:
-            self.listar_ensenanzas()
+            db.close()
 
     def actualizar_ensenanza(self, id, capitan, subcapitan, fecha):
+        """
+        Actualiza un registro de enseñanza.
+        :return: (Exito, Mensaje)
+        """
         if not capitan or not fecha or not subcapitan:
-            self.vista.mostrar_error("Todos los campos son obligatorios.")
-            return
+            return False, "Todos los campos son obligatorios."
 
-        db: Session = next(get_db())
+        db = self.get_db_session()
         try:
             with db.begin():
                 ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id).first()
@@ -48,49 +57,65 @@ class EnsenanzaController:
                     ensenanza.capitan = capitan
                     ensenanza.subcapitan = subcapitan
                     ensenanza.fecha = fecha_date
-                    logger.info(f"Enseñanza actualizada: {ensenanza.id}")
+                    logger.info(f"Enseñanza actualizada: ID {id}")
+                    return True, "Enseñanza actualizada exitosamente."
                 else:
-                    self.vista.mostrar_error("Enseñanza no encontrada.")
+                    return False, "Enseñanza no encontrada."
+        except ValueError:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
         except SQLAlchemyError as e:
             logger.error(f"Error al actualizar enseñanza: {e}")
-            self.vista.mostrar_error("Error al actualizar enseñanza. Inténtalo de nuevo.")
-        except ValueError as e:
-            logger.error(f"Error de formato de fecha: {e}")
-            self.vista.mostrar_error("Error: Formato de fecha incorrecto (YYYY-MM-DD).")
+            return False, f"Error al actualizar enseñanza: {e}"
         finally:
-            self.listar_ensenanzas()
+            db.close()
 
     def eliminar_ensenanza(self, id):
-        db: Session = next(get_db())
+        """
+        Elimina un registro de enseñanza.
+        :return: (Exito, Mensaje)
+        """
+        db = self.get_db_session()
         try:
             with db.begin():
                 ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id).first()
                 if ensenanza:
                     db.delete(ensenanza)
-                    logger.info(f"Enseñanza eliminada: {ensenanza.id}")
+                    logger.info(f"Enseñanza eliminada: ID {id}")
+                    return True, "Enseñanza eliminada exitosamente."
                 else:
-                    self.vista.mostrar_error("Enseñanza no encontrada.")
+                    return False, "Enseñanza no encontrada."
         except SQLAlchemyError as e:
             logger.error(f"Error al eliminar enseñanza: {e}")
-            self.vista.mostrar_error("Error al eliminar enseñanza. Inténtalo de nuevo.")
+            return False, f"Error al eliminar enseñanza: {e}"
         finally:
-            self.listar_ensenanzas()
+            db.close()
 
     def listar_ensenanzas(self):
-        db: Session = next(get_db())
+        """
+        Lista todos los registros de enseñanza.
+        :return: Lista de objetos Ensenanza.
+        """
+        db = self.get_db_session()
         try:
             ensenanzas = db.query(Ensenanza).all()
-            self.vista.actualizar_lista_ensenanzas(ensenanzas)
             logger.info("Enseñanzas listadas.")
+            return ensenanzas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar enseñanzas: {e}")
-            self.vista.mostrar_error("Error al listar enseñanzas. Inténtalo de nuevo.")
+            return []
+        finally:
+            db.close()
 
     def obtener_ensenanza(self, id):
-        db: Session = next(get_db())
+        """
+        Obtiene un registro de enseñanza por ID.
+        :return: Objeto Ensenanza o None.
+        """
+        db = self.get_db_session()
         try:
             return db.query(Ensenanza).filter(Ensenanza.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener enseñanza: {e}")
-            self.vista.mostrar_error("Error al obtener enseñanza. Inténtalo de nuevo.")
             return None
+        finally:
+            db.close()
