@@ -1,7 +1,6 @@
 import logging
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
-from components.styled_popup import StyledPopup
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -11,50 +10,44 @@ class BaseController:
     def __init__(self, vista=None, model=None, session=None):
         """
         Clase base para controladores.
-        :param vista: Vista asociada al controlador.
+        :param vista: (DEPRECATED) Vista asociada al controlador. Mantenido por compatibilidad temporal.
         :param model: Modelo SQLAlchemy asociado al controlador.
         :param session: Sesión de base de datos opcional.
         """
         self.vista = vista
         self.model = model
-        self.session = session or SessionLocal()  # Usar la sesión proporcionada o crear una nueva
+        self.session = session or SessionLocal()
 
     def get_db_session(self):
         """Obtiene una nueva sesión de base de datos."""
         return SessionLocal()
 
-    def mostrar_mensaje(self, titulo, mensaje, tipo="info"):
-        """
-        Muestra un mensaje en un popup.
-        :param titulo: Título del popup.
-        :param mensaje: Mensaje a mostrar.
-        :param tipo: Tipo de mensaje ('info', 'error', 'success').
-        """
-        StyledPopup.mostrar_popup(titulo, mensaje, tipo)
-
     def manejar_excepcion(self, e, mensaje_error):
         """
-        Maneja excepciones de SQLAlchemy y muestra un mensaje de error.
+        Maneja excepciones de SQLAlchemy y devuelve un mensaje formateado.
         :param e: Excepción capturada.
-        :param mensaje_error: Mensaje de error a mostrar.
+        :param mensaje_error: Mensaje base de error.
+        :return: (False, Mensaje de error formateado)
         """
         logger.error(f"{mensaje_error}: {e}")
-        self.mostrar_mensaje("Error", f"{mensaje_error}: {e}", tipo="error")
+        return False, f"{mensaje_error}: {e}"
 
     def ejecutar_transaccion(self, operacion, mensaje_exito=None):
         """
         Ejecuta una operación dentro de una transacción de base de datos.
         :param operacion: Función que contiene la lógica de la operación.
-        :param mensaje_exito: Mensaje de éxito a mostrar (opcional).
+        :param mensaje_exito: Mensaje de éxito a devolver (opcional).
+        :return: Tupla (Booleano Exito, Mensaje)
         """
         db = self.get_db_session()
         try:
             with db.begin():
                 operacion(db)
             if mensaje_exito:
-                self.mostrar_mensaje("Éxito", mensaje_exito, tipo="success")
+                return True, mensaje_exito
+            return True, "Operación exitosa"
         except SQLAlchemyError as e:
-            self.manejar_excepcion(e, "Error al ejecutar la operación")
+            return self.manejar_excepcion(e, "Error al ejecutar la operación")
         finally:
             db.close()
             logger.info("Conexión a la base de datos cerrada.")
@@ -117,7 +110,7 @@ class BaseController:
                 logger.info(f"Registro encontrado: {registro}")
                 return registro
             else:
-                logger.warning(f"No se encontró un registro con {'ID ' + str(id) if id else nombre_campo + ' ' + fecha}.")
+                logger.warning(f"No se encontró un registro con {'ID ' + str(id) if id else nombre_campo + ' ' + str(fecha)}.")
                 return None
         except SQLAlchemyError as e:
             logger.error(f"Error al buscar registro. ID: {id}, Fecha: {fecha}, Error: {e}")
