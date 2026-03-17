@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 #Modificando
 class ListAulasScreen(Screen):
     """ Pantalla que muestra una lista de aulas. """
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/list_aulas.kv')
         except Exception as e:
@@ -21,7 +21,6 @@ class ListAulasScreen(Screen):
         logger.info("Initializando ListAulasScreen")
         # Crear el controlador como atributo
         self.controlador = controlador
-        self.vista = self  
         
 
     def actualizar_lista_aulas(self, aulas):
@@ -54,7 +53,7 @@ class ListAulasScreen(Screen):
             logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
             return
         try:
-            aulas = self.controlador.listar_aulas(self) 
+            aulas = self.controlador.listar_aulas() 
             if aulas is None:
                 logger.warning("El método listar_aulas devolvió None. Verifique el controlador.")
             else:
