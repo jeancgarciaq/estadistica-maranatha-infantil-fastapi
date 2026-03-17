@@ -32,13 +32,13 @@ class ListDistribucionesScreen(Screen):
         if not distribuciones or len(distribuciones) == 0:
             lista_distribuciones.add_widget(Label(text="No hay áreas registradas", font_size='18sp', size_hint_y=None, height=40))
         else:
-            for area in distribuciones:
-                logger.debug(f"Agregando distribución: ID={distribucion.id}, ID Salón={distribucion.id_salon}, ID Donación={distribucion.id_donacion}, Cantidad={distribucion.cantidad}, Fecha={distribucion.fecha}")
+            for distribucion in distribuciones:
+                logger.debug(f"Agregando distribución: ID={distribucion.id}, ID Salón={distribucion.salon_id}, ID Donación={distribucion.donacion_id}, Cantidad={distribucion.cantidad}, Fecha={distribucion.fecha}")
                 lista_distribuciones.add_widget(Label(text=f"{distribucion.id}", size_hint_y=None, height=40))
-                lista_distribuciones.add_widget(Label(text=distribucion.id_salon, size_hint_y=None, height=40))
-                lista_distribuciones.add_widget(Label(text=distribucion.id_donacion, size_hint_y=None, height=40))
-                lista_distribuciones.add_widget(Label(text=distribucion.cantidad, size_hint_y=None, height=40))
-                lista_distribuciones.add_widget(Label(text=distribucion.fecha, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.salon_id), size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.donacion_id), size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad), size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.fecha), size_hint_y=None, height=40))
 
     def cargar_distribuciones(self):
         """Consultando y llenando la lista distribuciones."""
