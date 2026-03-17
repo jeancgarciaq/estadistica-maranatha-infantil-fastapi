@@ -4,14 +4,13 @@ from datetime import datetime
 from components import StyledPopup
 
 class DonacionesScreen(Screen):
-    def __init__(self, controlador, vista=None, **kwargs):
+    def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/donaciones.kv')
         except Exception as e:
             print(f"Error al cargar la vista donaciones: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
-        self.vista = vista
 
     def obtener_datos_formulario(self):
         descripcion = self.ids.donacion_descripcion.text
