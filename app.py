@@ -65,23 +65,23 @@ class EmiApp(App):
         # Creación de pantallas
         screens = [
             MenuScreen(name='menu'),
-            AreasScreen(controllers["areas"], vista="areas_vista", name='areas'),
-            SalonesScreen(controllers["salones"], vista="salones_vista", name='salones'),
+            AreasScreen(controllers["areas"], name='areas'),
+            SalonesScreen(controllers["salones"], name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
             EstadisticaScreen(name='estadistica'),
-            DonacionesScreen(controllers["donaciones"], vista="donaciones_vista", name='donaciones'),
-            DistribucionesScreen(controllers["distribuciones"], vista="distribuciones_vista", name='distribuciones'),
+            DonacionesScreen(controllers["donaciones"], name='donaciones'),
+            DistribucionesScreen(controllers["distribuciones"], name='distribuciones'),
             LogisticaScreen(controllers["logistica"], name='logistica'),
             OtrasAreasScreen(controllers["otrasareas"], name='otrasareas'),
             EnsenanzaScreen(controllers["ensenanza"], name='ensenanza'),
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
             ReporteScreen(name='reporte'),
             AyudaScreen(name='ayuda'),
-            ListAreasScreen(controlador=controllers["areas"], vista="lista_areas_vista", name='lista_areas'),  
-            ListSalonesScreen(controlador=controllers["salones"], vista="lista_salones_vista", name='lista_salones'),
-            ListAulasScreen(controlador=controllers["aulas"], vista="lista_aulas_vista", name='lista_aulas'),
-            ListDonacionesScreen(controlador=controllers["donaciones"], vista="lista_donaciones_vista", name='lista_donaciones'),
-            ListDistribucionesScreen(controlador=controllers["distribuciones"], vista="lista_distribuciones_vista", name='lista_distribuciones'),
+            ListAreasScreen(controlador=controllers["areas"], name='lista_areas'),  
+            ListSalonesScreen(controlador=controllers["salones"], name='lista_salones'),
+            ListAulasScreen(controlador=controllers["aulas"], name='lista_aulas'),
+            ListDonacionesScreen(controlador=controllers["donaciones"], name='lista_donaciones'),
+            ListDistribucionesScreen(controlador=controllers["distribuciones"], name='lista_distribuciones'),
         ]
 
         # Agregar pantallas al manejador
