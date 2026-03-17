@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ListDistribucionesScreen(Screen):
     """Pantalla para desplegar la lista de distribuciones."""
-    def __init__(self, controlador, vista, **kwargs):
+    def __init__(self, controlador, **kwargs):
         """Inicializando ListDistribucionesScreen."""
         try:
             Builder.load_file("views/list_distribuciones.kv")
@@ -19,8 +19,7 @@ class ListDistribucionesScreen(Screen):
         super().__init__(**kwargs)
         logger.info("Inicializado ListAreasScreen")
         # Asignar el controlador correctamente
-        self.controlador = controlador  
-        self.vista = self
+        self.controlador = controlador
 
     def actualizar_lista_distribuciones(self, distribuciones):
         """ Actualiza la vista de la lista de las distribuciones """
@@ -44,7 +43,7 @@ class ListDistribucionesScreen(Screen):
     def cargar_distribuciones(self):
         """Consultando y llenando la lista distribuciones."""
         try:
-            distribuciones = self.controlador.listar_distribuciones(self.vista)
+            distribuciones = self.controlador.listar_distribuciones()
             if distribuciones is None:
                 logger.warning("El método listar_distribuciones devolvió None. Verifique el controlador.")
             else:
