@@ -114,7 +114,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.crear_logistica(logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
+                on_press: root.crear_logistica()
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -122,7 +122,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.actualizar_logistica(logistica_id.text, logistica_almacen.text, logistica_capitan.text, logistica_distribucion.text, logistica_fecha.text, logistica_hidratacion.text, logistica_pasillo.text, logistica_secretaria.text)
+                on_press: root.actualizar_logistica()
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -130,7 +130,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.eliminar_logistica(logistica_id.text)
+                on_press: root.eliminar_logistica(logistica_id.text)
             Button:
                 text: 'Listar'
                 font_size: 28
@@ -138,7 +138,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.listar_logisticas()
+                on_press: root.cargar_logisticas()
         Button:
             text: 'Volver al Menú'
             font_size: 28
