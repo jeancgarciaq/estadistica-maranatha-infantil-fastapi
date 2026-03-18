@@ -68,7 +68,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.crear_ensenanza(ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+                on_press: root.crear_ensenanza()
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -76,7 +76,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.actualizar_ensenanza(ensenanza_id.text, ensenanza_capitan.text, ensenanza_fecha.text, ensenanza_subcapitan.text)
+                on_press: root.actualizar_ensenanza()
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -84,7 +84,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.eliminar_ensenanza(ensenanza_id.text)
+                on_press: root.eliminar_ensenanza(ensenanza_id.text)
             Button:
                 text: 'Listar'
                 font_size: 28
@@ -92,7 +92,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.listar_ensenanzas()
+                on_press: root.cargar_ensenanzas()
         # Lista de enseñanzas
         ScrollView:
             GridLayout:
