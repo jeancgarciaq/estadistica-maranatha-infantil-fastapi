@@ -121,7 +121,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.crear_otrasareas(otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
+                on_press: root.crear_otrasareas()
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -129,7 +129,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.actualizar_otrasareas(otrasareas_id.text, otrasareas_alabanza.text, otrasareas_fecha.text, otrasareas_protocolo.text, otrasareas_semillitas.text, otrasareas_sonido.text, otrasareas_teatro.text, otrasareas_tv.text, otrasareas_ujier.text)
+                on_press: root.actualizar_otrasareas()
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -137,7 +137,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.eliminar_otrasareas(otrasareas_id.text)
+                on_press: root.eliminar_otrasareas(otrasareas_id.text)
             Button:
                 text: 'Listar'
                 font_size: 28
@@ -145,7 +145,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: root.controlador.listar_otrasareas()
+                on_press: root.cargar_otrasareas()
         Button:
             text: 'Volver al Menú'
             font_size: 28
