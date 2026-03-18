@@ -56,10 +56,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press:
-                    root.controlador.crear_salon(salon_nombre.text, salon_edad.text)
-                    salon_nombre.text = ''
-                    salon_edad.text = ''
+                on_press: root.crear_salon()
             Button:
                 text: 'Actualizar'
                 font_size: 28
@@ -67,11 +64,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: 
-                    root.controlador.actualizar_salon(salon_id.text, salon_nombre.text, salon_edad.text)
-                    salon_id.text=''
-                    salon_nombre.text=''
-                    salon_edad.text=''
+                on_press: root.actualizar_salon()
             Button:
                 text: 'Eliminar'
                 font_size: 28
@@ -79,9 +72,7 @@
                 background_color: (0, 119/255, 194/255, 1)
                 size_hint_y: None
                 height: 50
-                on_press: 
-                    root.controlador.eliminar_salon(salon_id.text)
-                    salon_id.text=''
+                on_press: root.eliminar_salon(salon_id.text)
             Button:
                 text: "Buscar"
                 font_size: 28
