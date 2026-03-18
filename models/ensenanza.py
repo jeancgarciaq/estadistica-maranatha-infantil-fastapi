@@ -8,3 +8,6 @@ class Ensenanza(Base):
     capitan = Column(String)
     subcapitan = Column(Integer)
     fecha = Column(Date)
+
+    def __repr__(self):
+        return f"Ensenanza(id={self.id}, capitan='{self.capitan}', subcapitan={self.subcapitan}, fecha='{self.fecha}')"
