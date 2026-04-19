@@ -7,6 +7,8 @@ import logging
 from datetime import datetime
 from components import StyledPopup
 
+from kivy.factory import Factory
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,14 +64,18 @@ class ListDonacionesScreen(Screen):
                         logger.error(f"Donación inválida con ID {donacion.id}: fecha faltante o inválida.")
                         continue
 
-                    # Agregar cada donación a la lista
+                    # Agregar cada donación a la lista usando la nueva tarjeta
                     logger.debug(f"Agregando donación: ID={donacion.id}, Descripcion={donacion.descripcion}, Cantidad={donacion.cantidad}, Unidad={donacion.unidad}, Equipo={donacion.equipo}, Fecha={fecha_str}")
-                    lista_donaciones.add_widget(Label(text=f"{donacion.id}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=f"{donacion.descripcion}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=f"{donacion.cantidad}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=f"{donacion.unidad}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=f"{donacion.equipo}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=fecha_str, size_hint_y=None, height=40))
+                    
+                    card = Factory.DonacionCard()
+                    card.donacion_id = str(donacion.id)
+                    card.descripcion = str(donacion.descripcion)
+                    card.cantidad = str(donacion.cantidad)
+                    card.unidad = str(donacion.unidad)
+                    card.equipo = str(donacion.equipo)
+                    card.fecha = fecha_str
+                    
+                    lista_donaciones.add_widget(card)
             except Exception as e:
                 logger.error(f"Error inesperado al procesar las donaciones: {e}")
                 StyledPopup.mostrar_popup("Error", "Ocurrió un error inesperado al procesar las donaciones.", tipo="error")
