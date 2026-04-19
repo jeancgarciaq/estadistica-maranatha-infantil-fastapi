@@ -35,7 +35,6 @@ class ListAulasScreen(Screen):
             lista_aulas.add_widget(Label(text="No hay aulas registradas", font_size='18sp', size_hint_y=None, height=40))
         else:
             for aula in aulas: 
-                logger.debug(f"Agregando aula: ID={aula.id}, Auxiliar={aula.auxiliar}, Capitan={aula.capitan}, Colaborador={aula.colaborador}, Condición={aula.condicion}, Edad={aula.edad}, Maestra={aula.maestra}, Niños={aula.ninos}, Niñas={aula.ninas}, Subcapitan={aula.subcapitan}, Fecha={aula.fecha}")
                 lista_aulas.add_widget(Label(text=f"{aula.id}", size_hint_y=None, height=40))
                 lista_aulas.add_widget(Label(text=aula.capitan, size_hint_y=None, height=40))
                 lista_aulas.add_widget(Label(text=aula.colaborador, size_hint_y=None, height=40))
@@ -45,7 +44,7 @@ class ListAulasScreen(Screen):
                 lista_aulas.add_widget(Label(text=aula.ninos, size_hint_y=None, height=40))
                 lista_aulas.add_widget(Label(text=aula.ninas, size_hint_y=None, height=40))
                 lista_aulas.add_widget(Label(text=aula.subcapitan, size_hint_y=None, height=40))
-                lista_aulas.add_widget(Label(text=aula.fecha, size_hint_y=None, height=40))
+                lista_aulas.add_widget(Label(text=str(aula.fecha), size_hint_y=None, height=40))
             
     def cargar_aulas(self):
         """Consultando y llenando la lista aulas."""
