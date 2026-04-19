@@ -29,6 +29,13 @@ class DonacionesController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 donacion = Donacion(**datos)
                 db.add(donacion)
@@ -55,6 +62,13 @@ class DonacionesController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 donacion = db.query(Donacion).filter(Donacion.id == id).first()
                 if donacion:
