@@ -113,6 +113,8 @@ class AulasScreen(Screen):
             self.ids.aula_subcapitan.text = str(aula.subcapitan)
             self.ids.aula_id_salon.text = str(aula.id_salon)
             self.ids.aula_id.text = str(aula.id)
+            if hasattr(aula, 'fecha') and aula.fecha:
+                self.ids.aula_fecha.text = aula.fecha.strftime('%Y-%m-%d') if hasattr(aula.fecha, 'strftime') else str(aula.fecha)
 
     def mostrar_popup_salones(self):
         """
