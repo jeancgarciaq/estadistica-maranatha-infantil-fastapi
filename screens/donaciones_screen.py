@@ -120,7 +120,8 @@ class DonacionesScreen(Screen):
             self.ids.donacion_cantidad.text = str(donacion.cantidad)
             self.ids.donacion_unidad.text = donacion.unidad
             self.ids.donacion_equipo.text = donacion.equipo
-            self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d')
+            if hasattr(donacion, 'fecha') and donacion.fecha:
+                self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d') if hasattr(donacion.fecha, 'strftime') else str(donacion.fecha)
             self.cargar_salones_seleccionados(donacion.salones)
 
     def buscar_donacion(self):
