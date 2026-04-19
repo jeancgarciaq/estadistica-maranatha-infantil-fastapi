@@ -47,40 +47,29 @@ class ListDonacionesScreen(Screen):
                         logger.warning(f"Donación duplicada encontrada con ID {donacion.id}.")
                         continue
                     ids.add(donacion.id)
-                    if hasattr(donacion, 'cantidad') and (not isinstance(donacion.cantidad, (int, float)) or donacion.cantidad <= 0):
-                        logger.error(f"Cantidad inválida para la donación con ID {donacion.id}: {donacion.cantidad}")
+
+                    # Obtener fecha como string de forma robusta
+                    fecha_str = ""
+                    if hasattr(donacion, 'fecha'):
+                        if isinstance(donacion.fecha, str):
+                            fecha_str = donacion.fecha
+                        elif hasattr(donacion.fecha, 'strftime'):
+                            fecha_str = donacion.fecha.strftime('%Y-%m-%d')
+                        else:
+                            fecha_str = str(donacion.fecha)
+                    
+                    if not fecha_str:
+                        logger.error(f"Donación inválida con ID {donacion.id}: fecha faltante o inválida.")
                         continue
-                    try:
-                        datetime.strptime(donacion.fecha, '%Y-%m-%d')
-                    except ValueError:
-                        logger.error(f"Formato de fecha inválido para la donación con ID {donacion.id}: {donacion.fecha}")
-                        continue
-                    if not hasattr(donacion, 'id') or not isinstance(donacion.id, int):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'id' es obligatorio y debe ser un entero.")
-                        continue
-                    if not hasattr(donacion, 'descripcion') or not isinstance(donacion.descripcion, str):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'descripcion' es obligatorio y debe ser una cadena.")
-                        continue
-                    if not hasattr(donacion, 'cantidad') or not isinstance(donacion.cantidad, (int, float)):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'cantidad' es obligatorio y debe ser un número.")
-                        continue
-                    if not hasattr(donacion, 'unidad') or not isinstance(donacion.unidad, str):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'unidad' es obligatorio y debe ser una cadena.")
-                        continue
-                    if not hasattr(donacion, 'equipo') or not isinstance(donacion.equipo, str):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'equipo' es obligatorio y debe ser una cadena.")
-                        continue
-                    if not hasattr(donacion, 'fecha') or not isinstance(donacion.fecha, str):
-                        logger.error(f"Donación inválida: {donacion}. El atributo 'fecha' es obligatorio y debe ser una cadena.")
-                        continue
+
                     # Agregar cada donación a la lista
-                    logger.debug(f"Agregando donación: ID={donacion.id}, Descripcion={donacion.descripcion}, Cantidad={donacion.cantidad}, Unidad={donacion.unidad}, Equipo={donacion.equipo}, Fecha={donacion.fecha}")
+                    logger.debug(f"Agregando donación: ID={donacion.id}, Descripcion={donacion.descripcion}, Cantidad={donacion.cantidad}, Unidad={donacion.unidad}, Equipo={donacion.equipo}, Fecha={fecha_str}")
                     lista_donaciones.add_widget(Label(text=f"{donacion.id}", size_hint_y=None, height=40))
                     lista_donaciones.add_widget(Label(text=f"{donacion.descripcion}", size_hint_y=None, height=40))
                     lista_donaciones.add_widget(Label(text=f"{donacion.cantidad}", size_hint_y=None, height=40))
                     lista_donaciones.add_widget(Label(text=f"{donacion.unidad}", size_hint_y=None, height=40))
                     lista_donaciones.add_widget(Label(text=f"{donacion.equipo}", size_hint_y=None, height=40))
-                    lista_donaciones.add_widget(Label(text=f"{donacion.fecha}", size_hint_y=None, height=40))
+                    lista_donaciones.add_widget(Label(text=fecha_str, size_hint_y=None, height=40))
             except Exception as e:
                 logger.error(f"Error inesperado al procesar las donaciones: {e}")
                 StyledPopup.mostrar_popup("Error", "Ocurrió un error inesperado al procesar las donaciones.", tipo="error")
