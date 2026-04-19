@@ -23,7 +23,7 @@ class Donacion(Base):
     equipo = Column(String(100))  # Longitud máxima de 100 caracteres, permite nulos
     fecha = Column(Date, nullable=False)  # No permite valores nulos
 
-    distribuciones = relationship("Distribucion", back_populates="donaciones")
+    distribuciones = relationship("Distribucion", back_populates="donacion")
 
 
     def __repr__(self):
