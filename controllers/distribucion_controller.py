@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from models.donaciones import Donacion
 from models.salones import Salon
 from models.distribucion import Distribucion
@@ -34,6 +35,13 @@ class DistribucionesController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 distribucion = Distribucion(**datos)
                 db.add(distribucion)
@@ -79,6 +87,13 @@ class DistribucionesController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
                 if distribucion:
@@ -159,5 +174,13 @@ class DistribucionesController(BaseController):
             errores.append("El campo 'cantidad' debe ser un número positivo.")
         elif cantidad > 1000:
             errores.append("El campo 'cantidad' no puede ser mayor a 1000.")
+
+        if not isinstance(datos.get("fecha"), str):
+            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
+        else:
+            try:
+                datetime.strptime(datos["fecha"], '%Y-%m-%d')
+            except ValueError:
+                errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
 
         return errores
