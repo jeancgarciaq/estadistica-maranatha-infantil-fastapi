@@ -1,3 +1,62 @@
+<DonacionCard@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: 15
+    spacing: 8
+    donacion_id: ''
+    fecha: ''
+    descripcion: ''
+    cantidad: ''
+    unidad: ''
+    equipo: ''
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.25, 0.45, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15,]
+    
+    BoxLayout:
+        size_hint_y: None
+        height: 30
+        Label:
+            text: "ID: " + root.donacion_id
+            bold: True
+            font_size: 18
+            halign: 'left'
+            text_size: self.size
+        Label:
+            text: root.fecha
+            halign: 'right'
+            text_size: self.size
+            color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: root.descripcion
+        size_hint_y: None
+        height: self.texture_size[1] + 10
+        text_size: self.width, None
+        halign: 'left'
+        valign: 'middle'
+        font_size: 20
+        color: 1, 1, 1, 1
+
+    BoxLayout:
+        size_hint_y: None
+        height: 30
+        Label:
+            text: "Cant: " + root.cantidad + " " + root.unidad
+            halign: 'left'
+            text_size: self.size
+            color: 0.5, 0.9, 1, 1  # Cyan-ish blue
+        Label:
+            text: "Equipo: " + root.equipo
+            halign: 'right'
+            text_size: self.size
+            color: 0.9, 0.9, 0.9, 1
+
 <ListDonacionesScreen>:
     name: 'lista_donaciones'
     BoxLayout:
@@ -15,13 +74,13 @@
             size_hint_y: None
             height: 50
         ScrollView:
-            GridLayout:
-                id: lista_donaciones  # Cambiado de lista_areas a lista_donaciones
-                cols: 6  # ID, Descripción, Cantidad, Unidad, Equipo, Fecha
+            BoxLayout:
+                id: lista_donaciones
+                orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
-                row_force_default: True
+                padding: 10
+                spacing: 15
         # Contenedor de botones
         BoxLayout:
             orientation: 'vertical'
