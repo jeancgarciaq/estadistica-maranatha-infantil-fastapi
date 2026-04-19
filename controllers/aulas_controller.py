@@ -29,6 +29,13 @@ class AulasController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 aula = Aula(**datos)
                 db.add(aula)
@@ -55,6 +62,13 @@ class AulasController(BaseController):
 
         db = self.get_db_session()
         try:
+            # Convertir fecha de string a objeto date
+            if 'fecha' in datos and isinstance(datos['fecha'], str):
+                try:
+                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                except ValueError:
+                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+
             with db.begin():
                 aula = db.query(Aula).filter(Aula.id == id).first()
                 if aula:
