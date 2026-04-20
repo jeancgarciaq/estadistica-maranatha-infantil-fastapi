@@ -140,6 +140,20 @@ class AulasController(BaseController):
         finally:
             db.close()
 
+    def obtener_aula(self, id):
+        """
+        Obtiene un aula por su ID.
+        :param id: ID del aula.
+        :return: Objeto Aula o None.
+        """
+        db = self.get_db_session()
+        try:
+            return db.query(Aula).filter(Aula.id == id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener aula: {e}")
+            return None
+        finally:
+            db.close()
     def buscar_aula(self, id=None, fecha=None):
         """
         Busca un aula por ID o fecha.
