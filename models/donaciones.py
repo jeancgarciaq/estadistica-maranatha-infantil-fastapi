@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy import Column, Integer, String, Float, Date, Boolean
 from sqlalchemy.orm import relationship
 from models.base import Base
 
@@ -13,17 +13,21 @@ class Donacion(Base):
         unidad (str): Unidad de medida de la donación.
         equipo (str): Equipo asociado con la donación.
         fecha (date): Fecha en la que se realizó la donación.
+        es_compuesta (bool): Indica si la donación es resultado de una mezcla/composición.
     """
     __tablename__ = 'donaciones'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    descripcion = Column(String(255), nullable=False)  # Longitud máxima de 255 caracteres
-    cantidad = Column(Float, nullable=False)  # No permite valores nulos
-    unidad = Column(String(50), nullable=False)  # Longitud máxima de 50 caracteres
-    equipo = Column(String(100))  # Longitud máxima de 100 caracteres, permite nulos
-    fecha = Column(Date, nullable=False)  # No permite valores nulos
+    descripcion = Column(String(255), nullable=False)
+    cantidad = Column(Float, nullable=False)
+    unidad = Column(String(50), nullable=False)
+    equipo = Column(String(100))
+    fecha = Column(Date, nullable=False)
+    es_compuesta = Column(Boolean, default=False)
 
     distribuciones = relationship("Distribucion", back_populates="donacion")
+    componentes = relationship("DonacionComponente", back_populates="donacion_compuesta", foreign_keys="[DonacionComponente.donacion_compuesta_id]")
+    usada_en = relationship("DonacionComponente", back_populates="materia_prima", foreign_keys="[DonacionComponente.donacion_materia_id]")
 
 
     def __repr__(self):
