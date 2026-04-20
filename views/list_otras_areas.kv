@@ -1,0 +1,71 @@
+<ListOtrasAreasScreen>:
+    name: 'lista_otras_areas'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        # Título
+        Label:
+            text: 'Listado de Otras Áreas'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 60
+            bold: True
+
+        # Encabezados de la tabla
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 40
+            padding: [10, 0]
+            canvas.before:
+                Color:
+                    rgba: 0, 119/255, 194/255, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Label:
+                text: 'Fecha'
+                bold: True
+                size_hint_x: 0.4
+            Label:
+                text: 'ID'
+                bold: True
+                size_hint_x: 0.2
+            Label:
+                text: 'Acciones'
+                bold: True
+                size_hint_x: 0.4
+
+        # Lista deslizable
+        ScrollView:
+            GridLayout:
+                id: container
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 5
+                padding: 5
+
+        # Botones de navegación
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            padding: 10
+            spacing: 10
+            Button:
+                text: 'Refrescar'
+                background_normal: ''
+                background_color: (0, 150/255, 0, 1)
+                on_press: root.cargar_datos()
+            Button:
+                text: 'Cerrar'
+                background_normal: ''
+                background_color: (0.7, 0.1, 0.1, 1)
+                on_press: app.root.current = 'otrasareas'
