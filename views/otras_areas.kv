@@ -23,7 +23,7 @@
                 spacing: 20
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 30
+                row_default_height: 50
                 Label:
                     text: 'Alabanza:'
                     font_size: 20
@@ -86,8 +86,25 @@
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 30
-                TextInput:
-                    id: otrasareas_fecha
+                BoxLayout:
+                    orientation: 'horizontal'
+                    spacing: 10
+                    TextInput:
+                        id: otrasareas_fecha
+                        readonly: True
+                        hint_text: 'YYYY-MM-DD'
+                    Button:
+                        size_hint_x: None
+                        width: 50
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.abrir_datepicker('otrasareas_fecha')
+                        Image:
+                            source: 'images/calendar_icon.png'
+                            center_x: self.parent.center_x
+                            center_y: self.parent.center_y
+                            size: 30, 30
+                            allow_stretch: True
                 Label:
                     text: 'ID Otras Áreas:'
                     font_size: 20
