@@ -1,0 +1,149 @@
+<CombinarDonacionesScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Combinar Donaciones (Ensamblaje)'
+            font_size: 32
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 60
+
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 10
+            spacing: 20
+
+            # Lado Izquierdo: Producto Resultante
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                size_hint_x: 0.4
+                Label:
+                    text: 'PRODUCTO TERMINADO'
+                    font_size: 24
+                    bold: True
+                    size_hint_y: None
+                    height: 40
+                
+                GridLayout:
+                    cols: 1
+                    spacing: 5
+                    Label:
+                        text: 'Descripción:'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: res_descripcion
+                        multiline: False
+                        hint_text: 'Ej: Jugo de Limón 80L'
+                    
+                    Label:
+                        text: 'Cantidad:'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: res_cantidad
+                        multiline: False
+                        input_filter: 'float'
+                    
+                    Label:
+                        text: 'Medida:'
+                        halign: 'left'
+                        text_size: self.size
+                    Spinner:
+                        id: res_unidad
+                        text: 'Unidad(es)'
+                        values: root.medidas
+                    
+                    Label:
+                        text: 'Fecha:'
+                        halign: 'left'
+                        text_size: self.size
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: 5
+                        TextInput:
+                            id: res_fecha
+                            readonly: True
+                        Button:
+                            text: '📅'
+                            size_hint_x: None
+                            width: 40
+                            on_press: root.abrir_datepicker('res_fecha')
+                    
+                    Label:
+                        text: 'Equipo:'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: res_equipo
+                        multiline: False
+                Widget: # Spacer
+
+            # Lado Derecho: Materias Primas
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                size_hint_x: 0.6
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: 50
+                    Label:
+                        text: 'MATERIAS PRIMAS USADAS'
+                        font_size: 24
+                        bold: True
+                    Button:
+                        text: '+ Agregar Materia'
+                        size_hint_x: None
+                        width: 150
+                        background_color: (0, 0.5, 0, 1)
+                        on_press: root.abrir_popup_materias_primas()
+
+                ScrollView:
+                    canvas.before:
+                        Color:
+                            rgba: 1, 1, 1, 0.1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    BoxLayout:
+                        id: lista_componentes
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: 10
+                        spacing: 10
+                
+                Label:
+                    text: '* Las cantidades se descontarán del inventario automáticamente.'
+                    italic: True
+                    font_size: 14
+                    color: 0.8, 0.8, 0.8, 1
+                    size_hint_y: None
+                    height: 30
+
+        # Botones Inferiores
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 20
+            padding: 10
+            Button:
+                text: 'REALIZAR COMBINACIÓN'
+                font_size: 24
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: root.realizar_combinacion()
+            Button:
+                text: 'CANCELAR / VOLVER'
+                font_size: 24
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1)
+                on_press: root.manager.current = 'menu'
