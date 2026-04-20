@@ -14,14 +14,56 @@
             color: 1, 1, 1, 1
             size_hint_y: None
             height: 50
+        # Encabezados de la lista
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            padding: [10, 0]
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.3, 0.5, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Label:
+                text: 'ID'
+                bold: True
+                size_hint_x: 0.1
+            Label:
+                text: 'Donación'
+                bold: True
+                size_hint_x: 0.2
+            Label:
+                text: 'Salón'
+                bold: True
+                size_hint_x: 0.1
+            Label:
+                text: 'Cant.'
+                bold: True
+                size_hint_x: 0.1
+            Label:
+                text: 'Unid.'
+                bold: True
+                size_hint_x: 0.1
+            Label:
+                text: 'Fecha'
+                bold: True
+                size_hint_x: 0.2
+            Label:
+                text: 'Acciones'
+                bold: True
+                size_hint_x: 0.2
+
         ScrollView:
             GridLayout:
                 id: lista_distribuciones
-                cols: 6  # ID, ID Donación, ID Salón, Cantidad, Unidad, Fecha
+                cols: 7  # ID, ID Donación, ID Salón, Cantidad, Unidad, Fecha, Acciones
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
+                row_default_height: 50
                 row_force_default: True
+                spacing: [0, 5]
+                padding: [10, 5]
         # Contenedor de botones
         BoxLayout:
             orientation: 'vertical'
