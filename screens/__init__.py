@@ -3,6 +3,7 @@ from .aulas_screen import AulasScreen
 from .ayuda_screen import AyudaScreen
 from .distribuciones_screen import DistribucionesScreen
 from .donaciones_screen import DonacionesScreen
+from .combinar_donaciones_screen import CombinarDonacionesScreen
 from .ensenanza_screen import EnsenanzaScreen
 from .estadistica_screen import EstadisticaScreen
 from .logistica_screen import LogisticaScreen
