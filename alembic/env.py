@@ -9,9 +9,19 @@ import os
 import sys
 from logging.config import fileConfig
 
-#agregado
-sys.path.append(os.path.join(os.getcwd(), 'models'))
+#Base implementación alembic
+sys.path.append(os.getcwd())
 from models.base import Base
+import models.areas
+import models.salones
+import models.aulas
+import models.donaciones
+import models.donacion_componente
+import models.distribucion
+import models.ensenanza
+import models.logistica
+import models.otras_areas
+import models.recepcion
 
 
 # this is the Alembic Config object, which provides
