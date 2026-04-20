@@ -57,6 +57,21 @@
             text_size: self.size
             color: 0.9, 0.9, 0.9, 1
 
+    BoxLayout:
+        size_hint_y: None
+        height: 40
+        spacing: 10
+        Button:
+            text: 'Editar'
+            background_normal: ''
+            background_color: (0, 119/255, 194/255, 1)
+            on_press: app.root.get_screen('lista_donaciones').editar_donacion(root.donacion_id)
+        Button:
+            text: 'Borrar'
+            background_normal: ''
+            background_color: (180/255, 0, 0, 1)
+            on_press: app.root.get_screen('lista_donaciones').confirmar_eliminacion(root.donacion_id)
+
 <ListDonacionesScreen>:
     name: 'lista_donaciones'
     BoxLayout:
