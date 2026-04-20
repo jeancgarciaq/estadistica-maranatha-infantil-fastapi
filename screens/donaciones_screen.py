@@ -3,6 +3,7 @@ from kivy.lang import Builder
 from datetime import datetime
 from components import StyledPopup
 from components.styled_datepicker import StyledDatePicker
+from utils.config_loader import obtener_medidas
 
 class DonacionesScreen(Screen):
     def __init__(self, controlador, **kwargs):
@@ -12,6 +13,7 @@ class DonacionesScreen(Screen):
             print(f"Error al cargar la vista donaciones: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+        self.medidas = obtener_medidas()
 
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha."""
@@ -37,6 +39,12 @@ class DonacionesScreen(Screen):
             return None
         try:
             float_cantidad = float(cantidad)
+            
+            # Validación semántica: Si la medida es "Unidad(es)", la cantidad debe ser entera.
+            if "Unidad" in unidad and not float_cantidad.is_integer():
+                StyledPopup.mostrar_popup("Error", "Para la medida 'Unidad(es)', la cantidad debe ser un número entero.", tipo="error")
+                return None
+                
         except ValueError:
             StyledPopup.mostrar_popup("Error", "La cantidad debe ser un número.", tipo="error")
             return None
@@ -104,7 +112,7 @@ class DonacionesScreen(Screen):
         self.ids.donacion_id.text = ""
         self.ids.donacion_descripcion.text = ""
         self.ids.donacion_cantidad.text = ""
-        self.ids.donacion_unidad.text = ""
+        self.ids.donacion_unidad.text = "Unidad(es)"
         self.ids.donacion_fecha.text = ""
         self.ids.donacion_equipo.text = ""
 
