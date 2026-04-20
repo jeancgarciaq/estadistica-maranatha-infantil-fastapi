@@ -111,3 +111,28 @@ class ListDonacionesScreen(Screen):
     def volver(self, instance):
         """Regresa a la pantalla de donaciones"""
         self.manager.current = 'donaciones'
+
+    def editar_donacion(self, id_donacion):
+        """Regresa a la pantalla de donaciones y carga los datos para editar."""
+        logger.info(f"Editando donación con ID: {id_donacion}")
+        self.manager.current = 'donaciones'
+        donaciones_screen = self.manager.get_screen('donaciones')
+        donaciones_screen.editar_donacion(int(id_donacion))
+
+    def confirmar_eliminacion(self, id_donacion):
+        """Muestra el popup de confirmación antes de eliminar."""
+        StyledPopup.mostrar_confirmacion(
+            "Confirmar Eliminación",
+            "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminar este registro?",
+            on_confirm=lambda: self.eliminar_donacion(id_donacion)
+        )
+
+    def eliminar_donacion(self, id_donacion):
+        """Ejecuta la eliminación de la donación."""
+        logger.info(f"Eliminando donación con ID: {id_donacion}")
+        exito, mensaje = self.controlador.eliminar_donacion(int(id_donacion))
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self.cargar_donaciones() # Actualizar la lista
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
