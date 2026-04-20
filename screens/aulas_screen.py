@@ -9,6 +9,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from components import StyledPopup
+from components.styled_datepicker import StyledDatePicker
 
 class AulasScreen(Screen):
     def __init__(self, controlador, **kwargs):
@@ -18,6 +19,14 @@ class AulasScreen(Screen):
             print(f"Error al cargar la vista aulas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+
+    def abrir_datepicker(self, target_id):
+        """Abre el selector de fecha."""
+        def set_date(date_str):
+            self.ids[target_id].text = date_str
+            
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
     def obtener_datos_formulario(self):
         auxiliar = self.ids.aula_auxiliar.text
         capitan = self.ids.aula_capitan.text
@@ -69,7 +78,6 @@ class AulasScreen(Screen):
             int(capitan)
             int(colaborador)
             int(id_salon)
-            int(condicion)
             int(maestra)
             int(ninos)
             int(ninas)
