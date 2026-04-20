@@ -19,6 +19,7 @@ from models.areas import Area
 from models.salones import Salon
 from models.aulas import Aula
 from models.donaciones import Donacion
+from models.donacion_componente import DonacionComponente
 from models.distribucion import Distribucion
 from models.ensenanza import Ensenanza
 from models.logistica import Logistica
