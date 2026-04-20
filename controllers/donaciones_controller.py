@@ -123,6 +123,21 @@ class DonacionesController(BaseController):
         finally:
             db.close()
 
+    def obtener_donacion(self, id):
+        """
+        Obtiene una donación por su ID.
+        :param id: ID de la donación.
+        :return: Objeto Donacion o None.
+        """
+        db = self.get_db_session()
+        try:
+            return db.query(Donacion).filter(Donacion.id == id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener donación: {e}")
+            return None
+        finally:
+            db.close()
+
     def buscar_donacion(self, id=None, descripcion=None):
         """
         Busca una donación por ID o descripción.
