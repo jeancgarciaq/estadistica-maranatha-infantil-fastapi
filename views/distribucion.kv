@@ -51,13 +51,15 @@
                     id: donacion_cantidad
                     input_type: 'number'
                 Label:
-                    text: 'Unidad:'
+                    text: 'Medida:'
                     font_size: 28
                     color: 1, 1, 1, 1
                     size_hint_y: None 
                     height: 50
-                TextInput:
+                Spinner:
                     id: donacion_unidad
+                    text: 'Unidad(es)'
+                    values: root.medidas
                 Label:
                     text: 'Fecha:'
                     font_size: 28
