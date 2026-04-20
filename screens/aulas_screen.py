@@ -240,7 +240,7 @@ class AulasScreen(Screen):
         exito, mensaje = self.controlador.eliminar_aula(int(aula_id_val))
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
-            self.controlador.listar_aulas(self) # Actualiza la lista si estamos en la vista de lista
+            self.controlador.listar_aulas() # Actualiza la lista si estamos en la vista de lista
         else:
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
