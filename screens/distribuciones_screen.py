@@ -10,6 +10,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 from components.styled_popup import StyledPopup
 from datetime import datetime
+from components.styled_datepicker import StyledDatePicker
 import traceback
 
 # Configuración de logging
@@ -29,6 +30,14 @@ class DistribucionesScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = controlador
         logger.info("DistribucionesScreen inicializado correctamente.")
+
+    def abrir_datepicker(self, target_id):
+        """Abre el selector de fecha."""
+        def set_date(date_str):
+            self.ids[target_id].text = date_str
+            
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
 
     def on_pre_enter(self, *args):
         """Se ejecuta antes de que la pantalla sea visible."""
