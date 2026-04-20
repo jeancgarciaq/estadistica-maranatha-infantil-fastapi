@@ -11,6 +11,7 @@ from kivy.clock import Clock
 from components.styled_popup import StyledPopup
 from datetime import datetime
 from components.styled_datepicker import StyledDatePicker
+from utils.config_loader import obtener_medidas
 import traceback
 
 # Configuración de logging
@@ -30,6 +31,7 @@ class DistribucionesScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = controlador
         self.edit_id = None
+        self.medidas = obtener_medidas()
         logger.info("DistribucionesScreen inicializado correctamente.")
 
     def abrir_datepicker(self, target_id):
@@ -42,8 +44,9 @@ class DistribucionesScreen(Screen):
 
     def on_pre_enter(self, *args):
         """Se ejecuta antes de que la pantalla sea visible."""
-        logger.debug("Ejecutando on_pre_enter...")
-        Clock.schedule_once(self.cargar_datos, 1)
+        logger.debug(f"Ejecutando on_pre_enter... edit_id: {self.edit_id}")
+        if self.edit_id is None:
+            Clock.schedule_once(self.cargar_datos, 1)
     
     def obtener_datos_formulario(self):
         donacion_id = self.ids.donacion_id.text.strip()
@@ -69,9 +72,17 @@ class DistribucionesScreen(Screen):
             donacion_id = int(donacion_id)
             salon_id = int(salon_id)
             cantidad = float(cantidad)
+            unidad = self.ids.donacion_unidad.text.strip()
+            
+            # Validación semántica: Si la medida es "Unidad(es)", la cantidad debe ser entera.
+            if "Unidad" in unidad and not cantidad.is_integer():
+                StyledPopup.mostrar_popup("Error", "Para la medida 'Unidad(es)', la cantidad debe ser un número entero.", tipo="error")
+                return None
+                
             fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
-        except ValueError:
-            StyledPopup.mostrar_popup("Error", "Formato de fecha incorrecto. Debe ser YYYY-MM-DD.", tipo="error")
+        except ValueError as e:
+            logger.error(f"⚠️ Error de valor: {e}")
+            StyledPopup.mostrar_popup("Error", "Asegúrese de que los ID y cantidades son numéricos y la fecha es válida.", tipo="error")
             return None
         except Exception as e:
             logger.error(f"⚠️ Error al convertir datos: {e}")
