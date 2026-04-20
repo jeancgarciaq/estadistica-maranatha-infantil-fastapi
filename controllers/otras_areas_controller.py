@@ -16,7 +16,7 @@ class OtrasAreasController:
     def get_db_session(self):
         return SessionLocal()
 
-    def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
+    def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha):
         """
         Crea un registro de otras áreas.
         :return: (Exito, Mensaje)
@@ -30,7 +30,7 @@ class OtrasAreasController:
                 fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
                 otrasareas = OtrasAreas(
                     alabanza=alabanza, protocolo=protocolo, semillitas=semillitas,
-                    sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, fecha=fecha_date
+                    sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, seguridad=seguridad, fecha=fecha_date
                 )
                 db.add(otrasareas)
                 logger.info(f"Otras áreas creadas.")
@@ -43,7 +43,7 @@ class OtrasAreasController:
         finally:
             db.close()
 
-    def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, fecha):
+    def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha):
         """
         Actualiza un registro de otras áreas.
         :return: (Exito, Mensaje)
@@ -64,6 +64,7 @@ class OtrasAreasController:
                     otrasareas.teatro = teatro
                     otrasareas.tv = tv
                     otrasareas.ujier = ujier
+                    otrasareas.seguridad = seguridad
                     otrasareas.fecha = fecha_date
                     logger.info(f"Otras áreas actualizadas: ID {id}")
                     return True, "Otras áreas actualizadas exitosamente."
