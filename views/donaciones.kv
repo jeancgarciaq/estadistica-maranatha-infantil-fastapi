@@ -49,13 +49,15 @@
                 TextInput:
                     id: donacion_cantidad
                 Label:
-                    text: 'Unidad:'
+                    text: 'Medida:'
                     font_size: 20
                     color: 1, 1, 1, 1
                     size_hint_y: None
                     height: 30
-                TextInput:
+                Spinner:
                     id: donacion_unidad
+                    text: 'Unidad(es)'
+                    values: root.medidas
                 Label:
                     text: 'Fecha (YYYY-MM-DD):'
                     font_size: 20
