@@ -34,8 +34,11 @@ class StyledPopup(Popup):
         popup_label = Label(
             text=mensaje,
             size_hint=(1, 0.8),
-            color=(1, 1, 1, 1)  # Texto blanco
+            color=(1, 1, 1, 1),  # Texto blanco
+            halign='center',
+            valign='middle'
         )
+        popup_label.bind(size=lambda s, w: setattr(popup_label, 'text_size', (w[0], None)))
         popup_layout.add_widget(popup_label)
 
         # Botón "Cerrar"
