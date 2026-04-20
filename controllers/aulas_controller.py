@@ -1,4 +1,5 @@
 from models.aulas import Aula
+from models.salones import Salon
 from sqlalchemy.exc import SQLAlchemyError
 from controllers.base_controller import BaseController
 from datetime import datetime
@@ -119,6 +120,22 @@ class AulasController(BaseController):
             return aulas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar aulas: {e}")
+            return []
+        finally:
+            db.close()
+
+    def listar_salones(self):
+        """
+        Lista todos los salones disponibles.
+        :return: Lista de objetos Salon.
+        """
+        db = self.get_db_session()
+        try:
+            salones = db.query(Salon).all()
+            logger.info(f"{len(salones)} salones obtenidos para AulasController.")
+            return salones
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar salones en AulasController: {e}")
             return []
         finally:
             db.close()
