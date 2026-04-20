@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from datetime import datetime
 from components import StyledPopup
+from components.styled_datepicker import StyledDatePicker
 
 class DonacionesScreen(Screen):
     def __init__(self, controlador, **kwargs):
@@ -11,6 +12,14 @@ class DonacionesScreen(Screen):
             print(f"Error al cargar la vista donaciones: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+
+    def abrir_datepicker(self, target_id):
+        """Abre el selector de fecha."""
+        def set_date(date_str):
+            self.ids[target_id].text = date_str
+            
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
 
     def obtener_datos_formulario(self):
         descripcion = self.ids.donacion_descripcion.text.strip()
