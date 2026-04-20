@@ -131,7 +131,6 @@ class DonacionesScreen(Screen):
             self.ids.donacion_equipo.text = donacion.equipo
             if hasattr(donacion, 'fecha') and donacion.fecha:
                 self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d') if hasattr(donacion.fecha, 'strftime') else str(donacion.fecha)
-            self.cargar_salones_seleccionados(donacion.salones)
 
     def buscar_donacion(self):
         """Obtiene los datos del formulario y llama al método buscar_donacion del controlador."""
