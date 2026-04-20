@@ -122,21 +122,8 @@ class OtrasAreasScreen(Screen):
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def cargar_otrasareas(self):
-        otrasareas = self.controlador.listar_otrasareas()
-        self.actualizar_lista_otrasareas(otrasareas)
-
-    def actualizar_lista_otrasareas(self, otrasareas):
-        lista_grid = self.ids.lista_otrasareas
-        lista_grid.clear_widgets()
-        if not otrasareas:
-            lista_grid.add_widget(Label(text="No hay registros de otras áreas", size_hint_y=None, height=40))
-            return
-        for otrasarea in otrasareas:
-            lista_grid.add_widget(Label(text=f"ID: {otrasarea.id} | Fecha: {otrasarea.fecha}", size_hint_y=None, height=40))
-            lista_grid.add_widget(Button(text="Editar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=otrasarea.id: self.editar_otrasareas(id)))
-            lista_grid.add_widget(Button(text="Eliminar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=otrasarea.id: self.eliminar_otrasareas(id)))
+        """Redirige a la pantalla de listado."""
+        self.manager.current = 'lista_otras_areas'
 
     def editar_otrasareas(self, id):
         otrasarea = self.controlador.obtener_otrasareas(id)
@@ -156,4 +143,4 @@ class OtrasAreasScreen(Screen):
             StyledPopup.mostrar_popup("Error", "Registro no encontrado.", tipo="error")
 
     def on_enter(self):
-        self.cargar_otrasareas()
+        pass
