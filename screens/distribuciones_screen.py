@@ -29,6 +29,7 @@ class DistribucionesScreen(Screen):
             logger.error(f"⚠️ Error al cargar distribucion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+        self.edit_id = None
         logger.info("DistribucionesScreen inicializado correctamente.")
 
     def abrir_datepicker(self, target_id):
@@ -88,17 +89,26 @@ class DistribucionesScreen(Screen):
             logger.error(f"⚠️ Error al listar distribuciones: {e}")
             traceback.print_exc()
 
-    def editar_distribucion(self):
-        """Edita una distribución existente."""
-        logger.debug("Intentando editar distribución...")
+    def preparar_edicion(self, dist_id):
+        """Prepara el formulario para editar una distribución."""
+        logger.debug(f"Preparando edición para ID: {dist_id}")
+        self.edit_id = dist_id
         try:
-            datos = self.obtener_datos_formulario()
-            if datos:
-                self.controlador.editar_distribucion(datos)
-                logger.info("Distribución editada correctamente.")
+            dist = self.controlador.obtener_distribucion(dist_id)
+            if dist:
+                self.ids.donacion_id.text = str(dist.donacion_id)
+                self.ids.salon_id.text = str(dist.salon_id)
+                self.ids.donacion_cantidad.text = str(dist.cantidad)
+                self.ids.donacion_unidad.text = str(dist.unidad or "")
+                self.ids.fecha.text = str(dist.fecha)
+                logger.info(f"Datos de distribución {dist_id} cargados para edición.")
+            else:
+                StyledPopup.mostrar_popup("Error", "No se pudo encontrar la distribución.", tipo="error")
+                self.edit_id = None
         except Exception as e:
-            logger.error(f"⚠️ Error al editar distribución: {e}")
-            traceback.print_exc()
+            logger.error(f"⚠️ Error al preparar edición: {e}")
+            StyledPopup.mostrar_popup("Error", "Error al cargar datos para edición.", tipo="error")
+            self.edit_id = None
 
     def cargar_datos(self, dt):
         """Carga los datos iniciales necesarios para la pantalla."""
@@ -218,17 +228,26 @@ class DistribucionesScreen(Screen):
             "donacion_id": donacion_id,
             "salon_id": salon_id,
             "cantidad": cantidad,
+            "unidad": self.ids.donacion_unidad.text.strip(),
             "fecha": str(fecha)
         }
 
-        exito, mensaje = self.controlador.crear_distribucion(datos)
+        if self.edit_id:
+            # Modo Edición
+            exito, mensaje = self.controlador.actualizar_distribucion(self.edit_id, datos)
+        else:
+            # Modo Creación
+            exito, mensaje = self.controlador.crear_distribucion(datos)
+
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
             self.limpiar_formulario()
+            # Si veníamos de la lista, volver a ella podría ser bueno, pero por ahora limpiamos.
         else:
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def limpiar_formulario(self):
+        self.edit_id = None
         self.ids.donacion_id.text = ""
         self.ids.salon_id.text = ""
         self.ids.donacion_cantidad.text = ""
