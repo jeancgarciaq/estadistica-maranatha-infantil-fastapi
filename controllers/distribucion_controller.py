@@ -132,6 +132,21 @@ class DistribucionesController(BaseController):
         finally:
             db.close()
 
+    def obtener_distribucion(self, id):
+        """
+        Obtiene una distribución por su ID.
+        :param id: ID de la distribución.
+        :return: Objeto Distribucion o None.
+        """
+        db = self.get_db_session()
+        try:
+            return db.query(Distribucion).filter(Distribucion.id == id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener distribución: {e}")
+            return None
+        finally:
+            db.close()
+
     def buscar_distribucion(self, id=None):
         """
         Busca una distribución por ID.
