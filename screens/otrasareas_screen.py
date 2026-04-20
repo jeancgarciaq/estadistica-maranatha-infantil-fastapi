@@ -32,12 +32,14 @@ class OtrasAreasScreen(Screen):
         teatro = self.ids.otrasareas_teatro.text.strip()
         tv = self.ids.otrasareas_tv.text.strip()
         ujier = self.ids.otrasareas_ujier.text.strip()
+        seguridad = self.ids.otrasareas_seguridad.text.strip()
         fecha = self.ids.otrasareas_fecha.text.strip()
 
         campos = {
             "alabanza": alabanza, "protocolo": protocolo,
             "semillitas": semillitas, "sonido": sonido,
-            "teatro": teatro, "tv": tv, "ujier": ujier, "fecha": fecha
+            "teatro": teatro, "tv": tv, "ujier": ujier, 
+            "seguridad": seguridad, "fecha": fecha
         }
         for nombre, valor in campos.items():
             if not valor:
@@ -59,6 +61,7 @@ class OtrasAreasScreen(Screen):
                 "teatro": int(teatro),
                 "tv": int(tv),
                 "ujier": int(ujier),
+                "seguridad": int(seguridad),
                 "fecha": fecha
             }
         except ValueError:
@@ -68,7 +71,7 @@ class OtrasAreasScreen(Screen):
     def _limpiar_campos(self):
         for campo in ['otrasareas_alabanza', 'otrasareas_protocolo', 'otrasareas_semillitas',
                       'otrasareas_sonido', 'otrasareas_teatro', 'otrasareas_tv',
-                      'otrasareas_ujier', 'otrasareas_fecha']:
+                      'otrasareas_ujier', 'otrasareas_seguridad', 'otrasareas_fecha']:
             if hasattr(self.ids, campo):
                 getattr(self.ids, campo).text = ""
         if hasattr(self.ids, 'otrasareas_id'):
@@ -80,7 +83,8 @@ class OtrasAreasScreen(Screen):
             return
         exito, mensaje = self.controlador.crear_otrasareas(
             datos["alabanza"], datos["protocolo"], datos["semillitas"],
-            datos["sonido"], datos["teatro"], datos["tv"], datos["ujier"], datos["fecha"]
+            datos["sonido"], datos["teatro"], datos["tv"], datos["ujier"], 
+            datos["seguridad"], datos["fecha"]
         )
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
@@ -99,7 +103,8 @@ class OtrasAreasScreen(Screen):
             return
         exito, mensaje = self.controlador.actualizar_otrasareas(
             int(otrasareas_id), datos["alabanza"], datos["protocolo"], datos["semillitas"],
-            datos["sonido"], datos["teatro"], datos["tv"], datos["ujier"], datos["fecha"]
+            datos["sonido"], datos["teatro"], datos["tv"], datos["ujier"], 
+            datos["seguridad"], datos["fecha"]
         )
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
@@ -144,6 +149,7 @@ class OtrasAreasScreen(Screen):
             self.ids.otrasareas_teatro.text = str(otrasarea.teatro)
             self.ids.otrasareas_tv.text = str(otrasarea.tv)
             self.ids.otrasareas_ujier.text = str(otrasarea.ujier)
+            self.ids.otrasareas_seguridad.text = str(otrasarea.seguridad)
             if hasattr(self.ids, 'otrasareas_id'):
                 self.ids.otrasareas_id.text = str(otrasarea.id)
         else:
