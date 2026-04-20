@@ -1,7 +1,7 @@
 <MenuScreen>:
     GridLayout:
         cols: 4
-        rows: 6
+        rows: 8
         size: root.width, root.height
         padding: 10
         spacing: 10
@@ -30,7 +30,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "areas" # Agregado para navegación
+            on_press: root.manager.current = "areas"
         Button:
             text: 'SALONES'
             font_size: 28
@@ -38,7 +38,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "salones" # Agregado para navegación
+            on_press: root.manager.current = "salones"
         Button:
             text: 'ESTADISTICA'
             font_size: 28
@@ -46,7 +46,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "estadistica" # Agregado para navegación
+            on_press: root.manager.current = "estadistica"
         Button:
             text: 'DONACIONES'
             font_size: 28
@@ -54,7 +54,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "donaciones" # Agregado para navegación
+            on_press: root.manager.current = "donaciones"
 
         # Fila 3: Imágenes
         Image:
@@ -74,7 +74,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "distribuciones" # Agregado para navegación
+            on_press: root.manager.current = "distribuciones"
         Button:
             text: 'LOGISTICA'
             font_size: 28
@@ -82,7 +82,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "logistica" # Agregado para navegación
+            on_press: root.manager.current = "logistica"
         Button:
             text: 'OTRAS AREAS'
             font_size: 28
@@ -90,7 +90,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "otrasareas" # Agregado para navegación
+            on_press: root.manager.current = "otrasareas"
         Button:
             text: 'ENSEÑANZA'
             font_size: 28
@@ -98,7 +98,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "ensenanza" # Agregado para navegación
+            on_press: root.manager.current = "ensenanza"
 
         # Fila 5: Imágenes
         Image:
@@ -108,7 +108,7 @@
         Image:
             source: 'images/ayuda.png'
         Image:
-            source: 'images/exit.png'
+            source: 'images/combinar.png'
 
         # Fila 6: Botones
         Button:
@@ -118,7 +118,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "recepcion" # Agregado para navegación
+            on_press: root.manager.current = "recepcion"
         Button:
             text: 'REPORTE'
             font_size: 28
@@ -126,7 +126,7 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "reporte" # Agregado para navegación
+            on_press: root.manager.current = "reporte"
         Button:
             text: 'AYUDA'
             font_size: 28
@@ -134,12 +134,32 @@
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: root.manager.current = "ayuda" # Agregado para navegación
+            on_press: root.manager.current = "ayuda"
         Button:
-            text: 'SALIR'
+            text: 'COMBINAR'
             font_size: 28
             background_normal: ''
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
             height: 50
-            on_press: app.stop() # Agregado para navegación
+            on_press: root.manager.current = "combinar_donaciones"
+
+        # Fila 7: Imagen de Salir
+        Image:
+            source: 'images/exit.png'
+        Widget: # Spacers
+        Widget:
+        Widget:
+
+        # Fila 8: Botón Salir
+        Button:
+            text: 'SALIR'
+            font_size: 28
+            background_normal: ''
+            background_color: (180/255, 0, 0, 1) # Rojo para salir
+            size_hint_y: None
+            height: 50
+            on_press: app.stop()
+        Widget:
+        Widget:
+        Widget:
