@@ -13,7 +13,7 @@ class OtrasAreas(Base):
     teatro = Column(Integer)
     tv = Column(Integer)
     ujier = Column(Integer)
-    fecha = Column(Date)
+    seguridad = Column(Integer)
 
     def __repr__(self):
-        return f"OtrasAreas(id={self.id}, alabanza={self.alabanza}, protocolo={self.protocolo}, semillitas={self.semillitas}, sonido={self.sonido}, teatro={self.teatro}, tv={self.tv}, ujier={self.ujier}, fecha='{self.fecha}')"
+        return f"OtrasAreas(id={self.id}, alabanza={self.alabanza}, protocolo={self.protocolo}, semillitas={self.semillitas}, sonido={self.sonido}, teatro={self.teatro}, tv={self.tv}, ujier={self.ujier}, seguridad={self.seguridad}, fecha='{self.fecha}')"
