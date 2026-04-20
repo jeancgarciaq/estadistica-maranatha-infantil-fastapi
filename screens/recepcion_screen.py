@@ -4,6 +4,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from datetime import datetime
 from components.styled_popup import StyledPopup
+from components.styled_datepicker import StyledDatePicker
 
 
 class RecepcionScreen(Screen):
@@ -14,6 +15,14 @@ class RecepcionScreen(Screen):
             print(f"Error cargando recepcion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+
+    def abrir_datepicker(self, target_id):
+        """Abre el selector de fecha."""
+        def set_date(date_str):
+            self.ids[target_id].text = date_str
+            
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
 
     def obtener_datos_formulario(self):
         nombre = self.ids.recepcion_nombre.text.strip()
