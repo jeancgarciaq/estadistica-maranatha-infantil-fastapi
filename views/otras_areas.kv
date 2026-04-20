@@ -121,59 +121,34 @@
                     height: 30
                 TextInput:
                     id: otrasareas_id
-                # Lista de otras áreas
-                Label:
-                    text: 'Lista de Otras Áreas:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                ScrollView:
-                    GridLayout:
-                        id: lista_otrasareas
-                        cols: 3 # Nombre, Editar, Eliminar
-                        size_hint_y: None
-                        height: self.minimum_height
+        # Contenedor de botones
         BoxLayout:
             size_hint_y: None
             height: 50
             spacing: 10
-            padding: 10        
+            padding: [10, 0, 10, 10]
             Button:
                 text: 'Crear'
-                font_size: 28
+                font_size: 20
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
                 on_press: root.crear_otrasareas()
             Button:
                 text: 'Actualizar'
-                font_size: 28
+                font_size: 20
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
                 on_press: root.actualizar_otrasareas()
             Button:
-                text: 'Eliminar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.eliminar_otrasareas(otrasareas_id.text)
-            Button:
                 text: 'Listar'
-                font_size: 28
+                font_size: 20
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.cargar_otrasareas()
+                on_press: app.root.current = 'lista_otras_areas'
+        
         Button:
             text: 'Volver al Menú'
-            font_size: 28
+            font_size: 24
             background_normal: ''
             background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
