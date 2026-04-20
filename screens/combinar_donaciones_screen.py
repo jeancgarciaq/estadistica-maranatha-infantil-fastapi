@@ -1,6 +1,7 @@
 import logging
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
+from kivy.properties import ListProperty
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -17,14 +18,16 @@ from utils.config_loader import obtener_medidas
 logger = logging.getLogger(__name__)
 
 class CombinarDonacionesScreen(Screen):
+    medidas = ListProperty([])
+
     def __init__(self, controlador, **kwargs):
+        self.medidas = obtener_medidas()
         try:
             Builder.load_file('views/combinar_donaciones.kv')
         except Exception as e:
             logger.error(f"Error al cargar combinar_donaciones.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
-        self.medidas = obtener_medidas()
         self.componentes_seleccionados = [] # Lista de {'id': id, 'descripcion': desc, 'cantidad_usada': cant}
 
     def on_pre_enter(self, *args):
