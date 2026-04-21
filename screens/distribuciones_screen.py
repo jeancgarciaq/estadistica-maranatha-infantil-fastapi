@@ -1,6 +1,7 @@
 import logging
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
+from kivy.properties import ListProperty
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -22,7 +23,10 @@ from models.donaciones import Donacion
 from models.salones import Salon
 
 class DistribucionesScreen(Screen):
+    medidas = ListProperty([])
+
     def __init__(self, controlador, **kwargs):
+        self.medidas = obtener_medidas()
         try:
             logger.debug("Cargando archivo distribucion.kv...")
             Builder.load_file('views/distribucion.kv')
@@ -31,7 +35,6 @@ class DistribucionesScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = controlador
         self.edit_id = None
-        self.medidas = obtener_medidas()
         logger.info("DistribucionesScreen inicializado correctamente.")
 
     def abrir_datepicker(self, target_id):
