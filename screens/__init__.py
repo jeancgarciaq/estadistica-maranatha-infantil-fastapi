@@ -16,5 +16,6 @@ from .list_areas_screen import ListAreasScreen
 from .list_salones_screen import ListSalonesScreen
 from .list_aulas_screen import ListAulasScreen
 from .list_donaciones_screen import ListDonacionesScreen
+from .list_preparados_screen import ListPreparadosScreen
 from .list_distribuciones_screen import ListDistribucionesScreen
 from .list_otras_areas_screen import ListOtrasAreasScreen
