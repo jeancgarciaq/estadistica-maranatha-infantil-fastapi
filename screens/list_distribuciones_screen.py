@@ -33,10 +33,14 @@ class ListDistribucionesScreen(Screen):
         lista_distribuciones = self.ids.lista_distribuciones
         lista_distribuciones.clear_widgets()
         if not distribuciones or len(distribuciones) == 0:
-            lista_distribuciones.add_widget(Label(text="No hay áreas registradas", font_size='18sp', size_hint_y=None, height=40))
+            lista_distribuciones.add_widget(Label(text="No hay distribuciones registradas", font_size='18sp', size_hint_y=None, height=40))
         else:
             for distribucion in distribuciones:
-                logger.debug(f"Agregando distribución: ID={distribucion.id}, ID Salón={distribucion.salon_id}, ID Donación={distribucion.donacion_id}, Cantidad={distribucion.cantidad}, Fecha={distribucion.fecha}")
+                logger.debug(
+                    f"Agregando distribución: ID={distribucion.id}, ID Salón={distribucion.salon_id}, "
+                    f"ID Área={getattr(distribucion, 'area_id', None)}, ID Donación={distribucion.donacion_id}, "
+                    f"Cantidad={distribucion.cantidad}, Fecha={distribucion.fecha}"
+                )
                 
                 # ID
                 lista_distribuciones.add_widget(Label(text=f"{distribucion.id}", size_hint_x=0.1, size_hint_y=None, height=40))
@@ -45,9 +49,16 @@ class ListDistribucionesScreen(Screen):
                 donacion_text = f"{distribucion.donacion.descripcion}" if distribucion.donacion else str(distribucion.donacion_id)
                 lista_distribuciones.add_widget(Label(text=donacion_text, size_hint_x=0.2, size_hint_y=None, height=40))
                 
-                # Salón
-                salon_text = f"{distribucion.salon.salon}" if distribucion.salon else str(distribucion.salon_id)
-                lista_distribuciones.add_widget(Label(text=salon_text, size_hint_x=0.1, size_hint_y=None, height=40))
+                # Destino (salón o área)
+                if distribucion.salon:
+                    destino_text = f"Salón: {distribucion.salon.salon}"
+                elif getattr(distribucion, "area", None):
+                    destino_text = f"Área: {distribucion.area.area}"
+                elif getattr(distribucion, "area_id", None):
+                    destino_text = f"Área ID {distribucion.area_id}"
+                else:
+                    destino_text = "Sin destino"
+                lista_distribuciones.add_widget(Label(text=destino_text, size_hint_x=0.1, size_hint_y=None, height=40))
                 
                 # Cantidad
                 lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad), size_hint_x=0.1, size_hint_y=None, height=40))
