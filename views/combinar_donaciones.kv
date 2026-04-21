@@ -33,76 +33,109 @@
                 
                 GridLayout:
                     cols: 1
-                    spacing: 5
+                    spacing: 10
+                    size_hint_y: None
+                    height: self.minimum_height
                     Label:
                         text: 'Descripción:'
                         halign: 'left'
                         text_size: self.size
+                        size_hint_y: None
+                        height: 30
                     TextInput:
                         id: res_descripcion
                         multiline: False
                         hint_text: 'Ej: Jugo de Limón 80L'
+                        size_hint_y: None
+                        height: 45
                     
                     Label:
                         text: 'Cantidad:'
                         halign: 'left'
                         text_size: self.size
+                        size_hint_y: None
+                        height: 30
                     TextInput:
                         id: res_cantidad
                         multiline: False
                         input_filter: 'float'
+                        size_hint_y: None
+                        height: 45
                     
                     Label:
                         text: 'Medida:'
                         halign: 'left'
                         text_size: self.size
+                        size_hint_y: None
+                        height: 30
                     Spinner:
                         id: res_unidad
                         text: 'Unidad(es)'
                         values: root.medidas
+                        size_hint_y: None
+                        height: 45
                     
                     Label:
                         text: 'Fecha:'
                         halign: 'left'
                         text_size: self.size
+                        size_hint_y: None
+                        height: 30
                     BoxLayout:
                         orientation: 'horizontal'
                         spacing: 5
+                        size_hint_y: None
+                        height: 45
                         TextInput:
                             id: res_fecha
                             readonly: True
                         Button:
-                            text: '📅'
                             size_hint_x: None
-                            width: 40
+                            width: 50
+                            background_normal: ''
+                            background_color: (0, 119/255, 194/255, 1)
                             on_press: root.abrir_datepicker('res_fecha')
+                            Image:
+                                source: 'images/calendar_icon.png'
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                                size: 30, 30
+                                allow_stretch: True
                     
                     Label:
                         text: 'Equipo:'
                         halign: 'left'
                         text_size: self.size
+                        size_hint_y: None
+                        height: 30
                     TextInput:
                         id: res_equipo
                         multiline: False
+                        size_hint_y: None
+                        height: 45
                 Widget: # Spacer
 
             # Lado Derecho: Materias Primas
             BoxLayout:
                 orientation: 'vertical'
-                spacing: 10
+                spacing: 15
                 size_hint_x: 0.6
                 BoxLayout:
                     orientation: 'horizontal'
                     size_hint_y: None
                     height: 50
+                    spacing: 10
                     Label:
                         text: 'MATERIAS PRIMAS USADAS'
-                        font_size: 24
+                        font_size: 18
                         bold: True
+                        halign: 'left'
+                        text_size: self.size
                     Button:
                         text: '+ Agregar Materia'
                         size_hint_x: None
-                        width: 150
+                        width: 180
+                        background_normal: ''
                         background_color: (0, 0.5, 0, 1)
                         on_press: root.abrir_popup_materias_primas()
 
