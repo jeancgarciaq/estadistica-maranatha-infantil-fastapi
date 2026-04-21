@@ -3,6 +3,8 @@
 kivy>=2.3.0
 SQLAlchemy>=2.0.0
 python-dotenv  # Para manejo de variables de entorno (opcional)
+reportlab>=4.0.0
+matplotlib>=3.8.0
 
 # Dependencias adicionales si son necesarias
 kivy-garden
