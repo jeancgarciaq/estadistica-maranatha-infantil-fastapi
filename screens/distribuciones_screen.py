@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 from models.donaciones import Donacion
 from models.salones import Salon
+from models.areas import Area
 
 class DistribucionesScreen(Screen):
     medidas = ListProperty([])
@@ -54,6 +55,7 @@ class DistribucionesScreen(Screen):
     def obtener_datos_formulario(self):
         donacion_id = self.ids.donacion_id.text.strip()
         salon_id = self.ids.salon_id.text.strip()
+        area_id = self.ids.area_id.text.strip()
         cantidad = self.ids.donacion_cantidad.text.strip()
         fecha = self.ids.fecha.text.strip()
 
@@ -61,8 +63,11 @@ class DistribucionesScreen(Screen):
         if not donacion_id:
             StyledPopup.mostrar_popup("Error", "El ID de donación es obligatorio.", tipo="error")
             return None
-        if not salon_id:
-            StyledPopup.mostrar_popup("Error", "El ID de salón es obligatorio.", tipo="error")
+        if not salon_id and not area_id:
+            StyledPopup.mostrar_popup("Error", "Debe seleccionar un salón o un área.", tipo="error")
+            return None
+        if salon_id and area_id:
+            StyledPopup.mostrar_popup("Error", "Solo puede seleccionar un destino: salón o área.", tipo="error")
             return None
         if not cantidad:
             StyledPopup.mostrar_popup("Error", "La cantidad es obligatoria.", tipo="error")
@@ -73,7 +78,8 @@ class DistribucionesScreen(Screen):
         
         try:
             donacion_id = int(donacion_id)
-            salon_id = int(salon_id)
+            salon_id = int(salon_id) if salon_id else None
+            area_id = int(area_id) if area_id else None
             cantidad = float(cantidad)
             unidad = self.ids.donacion_unidad.text.strip()
             
@@ -85,13 +91,13 @@ class DistribucionesScreen(Screen):
             fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
         except ValueError as e:
             logger.error(f"⚠️ Error de valor: {e}")
-            StyledPopup.mostrar_popup("Error", "Asegúrese de que los ID y cantidades son numéricos y la fecha es válida.", tipo="error")
+            StyledPopup.mostrar_popup("Error", "Asegúrese de que los IDs y cantidades son numéricos y la fecha es válida.", tipo="error")
             return None
         except Exception as e:
             logger.error(f"⚠️ Error al convertir datos: {e}")
             StyledPopup.mostrar_popup("Error", "Error al procesar los datos del formulario.", tipo="error")
             return None
-        return donacion_id, salon_id, cantidad, fecha
+        return donacion_id, salon_id, area_id, cantidad, fecha
 
     def listar_distribuciones(self):
         """Lista todas las distribuciones."""
@@ -111,7 +117,8 @@ class DistribucionesScreen(Screen):
             dist = self.controlador.obtener_distribucion(dist_id)
             if dist:
                 self.ids.donacion_id.text = str(dist.donacion_id)
-                self.ids.salon_id.text = str(dist.salon_id)
+                self.ids.salon_id.text = str(dist.salon_id or "")
+                self.ids.area_id.text = str(dist.area_id or "")
                 self.ids.donacion_cantidad.text = str(dist.cantidad)
                 self.ids.donacion_unidad.text = str(dist.unidad or "")
                 self.ids.fecha.text = str(dist.fecha)
@@ -130,6 +137,7 @@ class DistribucionesScreen(Screen):
         try:
             self.ids.donacion_id.text = ""
             self.ids.salon_id.text = ""
+            self.ids.area_id.text = ""
             self.ids.donacion_cantidad.text = ""
             self.ids.fecha.text = datetime.now().strftime("%Y-%m-%d")
             logger.info("Datos iniciales cargados correctamente.")
@@ -226,6 +234,48 @@ class DistribucionesScreen(Screen):
 
     def _seleccionar_salon(self, s_id, popup):
         self.ids.salon_id.text = str(s_id)
+        self.ids.area_id.text = ""
+        popup.dismiss()
+
+    def abrir_popup_area(self):
+        """Abre un popup para seleccionar un área."""
+        logger.debug("Obteniendo áreas para el popup...")
+        db = self.controlador.get_db_session()
+        try:
+            areas = db.query(Area).all()
+        except Exception as e:
+            StyledPopup.mostrar_popup("Error", f"Error al obtener áreas: {e}", tipo="error")
+            return
+        finally:
+            db.close()
+
+        if not areas:
+            StyledPopup.mostrar_popup("Sin Áreas", "No hay áreas registradas.", tipo="info")
+            return
+
+        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        scroll = ScrollView()
+        grid = GridLayout(cols=1, size_hint_y=None, spacing=5)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for a in areas:
+            btn = Button(text=f"ID: {a.id} - {a.area}", size_hint_y=None, height=40)
+            btn.bind(on_press=lambda b, a_id=a.id: self._seleccionar_area(a_id, popup))
+            grid.add_widget(btn)
+
+        scroll.add_widget(grid)
+        layout.add_widget(scroll)
+
+        close_btn = Button(text="Cerrar", size_hint_y=None, height=40)
+        layout.add_widget(close_btn)
+
+        popup = Popup(title="Seleccionar Área", content=layout, size_hint=(0.9, 0.9))
+        close_btn.bind(on_press=popup.dismiss)
+        popup.open()
+
+    def _seleccionar_area(self, a_id, popup):
+        self.ids.area_id.text = str(a_id)
+        self.ids.salon_id.text = ""
         popup.dismiss()
 
     def guardar_distribucion(self):
@@ -236,11 +286,12 @@ class DistribucionesScreen(Screen):
         if not datos_raw:
             return
 
-        donacion_id, salon_id, cantidad, fecha = datos_raw
+        donacion_id, salon_id, area_id, cantidad, fecha = datos_raw
         
         datos = {
             "donacion_id": donacion_id,
             "salon_id": salon_id,
+            "area_id": area_id,
             "cantidad": cantidad,
             "unidad": self.ids.donacion_unidad.text.strip(),
             "fecha": str(fecha)
@@ -264,6 +315,7 @@ class DistribucionesScreen(Screen):
         self.edit_id = None
         self.ids.donacion_id.text = ""
         self.ids.salon_id.text = ""
+        self.ids.area_id.text = ""
         self.ids.donacion_cantidad.text = ""
         if hasattr(self.ids, 'donacion_unidad'):
             self.ids.donacion_unidad.text = ""
