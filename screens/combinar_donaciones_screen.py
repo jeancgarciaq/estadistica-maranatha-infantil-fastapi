@@ -42,8 +42,7 @@ class CombinarDonacionesScreen(Screen):
     def abrir_popup_materias_primas(self):
         db = self.controlador.get_db_session()
         try:
-            # Solo mostrar donaciones que NO son compuestas (materia prima) y tienen stock
-            materias = db.query(Donacion).filter(Donacion.cantidad > 0, Donacion.es_compuesta == False).all()
+            materias = db.query(Donacion).filter(Donacion.cantidad > 0).all()
         except Exception as e:
             StyledPopup.mostrar_popup("Error", f"Error al obtener materias: {e}", tipo="error")
             return
@@ -194,3 +193,6 @@ class CombinarDonacionesScreen(Screen):
         self.ids.res_equipo.text = ""
         self.componentes_seleccionados = []
         self.ids.lista_componentes.clear_widgets()
+
+    def ver_lista_preparados(self):
+        self.manager.current = 'lista_preparados'
