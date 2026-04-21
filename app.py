@@ -12,7 +12,7 @@ from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, CombinarDonacionesScreen,
     DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen,
     AyudaScreen, AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen,
-    ListDistribucionesScreen, ListOtrasAreasScreen )
+    ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen )
 import logging
 
 # Configure logging
@@ -83,6 +83,7 @@ class EmiApp(App):
             ListSalonesScreen(controlador=controllers["salones"], name='lista_salones'),
             ListAulasScreen(controlador=controllers["aulas"], name='lista_aulas'),
             ListDonacionesScreen(controlador=controllers["donaciones"], name='lista_donaciones'),
+            ListPreparadosScreen(controlador=controllers["donaciones"], name='lista_preparados'),
             ListDistribucionesScreen(controlador=controllers["distribuciones"], name='lista_distribuciones'),
             ListOtrasAreasScreen(controlador=controllers["otrasareas"], name='lista_otras_areas'),
         ]
