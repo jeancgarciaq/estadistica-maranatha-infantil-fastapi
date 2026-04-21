@@ -6,7 +6,8 @@ class Distribucion(Base):
     __tablename__ = 'distribuciones'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    donacion_id = Column(Integer, ForeignKey('donaciones.id'), nullable=False)
+    donacion_id = Column(Integer, ForeignKey('donaciones.id'), nullable=True)
+    alimento_preparado_id = Column(Integer, ForeignKey('alimentos_preparados.id'), nullable=True)
     salon_id = Column(Integer, ForeignKey('salones.id'), nullable=True)
     area_id = Column(Integer, ForeignKey('areas.id'), nullable=True)
     cantidad = Column(Float, nullable=False)
@@ -15,12 +16,13 @@ class Distribucion(Base):
 
     # Relaciones
     donacion = relationship("Donacion", back_populates="distribuciones")
+    alimento_preparado = relationship("AlimentoPreparado", back_populates="distribuciones")
     salon = relationship("Salon", back_populates="distribuciones")
     area = relationship("Area", back_populates="distribuciones")
 
     def __repr__(self):
         return (
-            f"<Distribucion(id={self.id}, donacion_id={self.donacion_id}, "
+            f"<Distribucion(id={self.id}, donacion_id={self.donacion_id}, alimento_preparado_id={self.alimento_preparado_id}, "
             f"salon_id={self.salon_id}, area_id={self.area_id}, "
             f"cantidad={self.cantidad}, fecha='{self.fecha}')>"
         )
