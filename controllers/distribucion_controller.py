@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from models.donaciones import Donacion
 from models.salones import Salon
+from models.areas import Area
 from models.distribucion import Distribucion
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
@@ -29,25 +30,27 @@ class DistribucionesController(BaseController):
         if not isinstance(datos, dict):
             return False, "Los datos proporcionados no son válidos."
 
-        errores = self.validar_datos(datos)
-        if errores:
-            return False, "\n".join(errores)
-
         db = self.get_db_session()
         try:
+            datos_normalizados = self._normalizar_datos(datos)
+            errores = self.validar_datos(datos_normalizados, db)
+            if errores:
+                return False, "\n".join(errores)
+
             # Convertir fecha de string a objeto date
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
+            if 'fecha' in datos_normalizados and isinstance(datos_normalizados['fecha'], str):
                 try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                    datos_normalizados['fecha'] = datetime.strptime(datos_normalizados['fecha'], '%Y-%m-%d').date()
                 except ValueError:
                     return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
 
-            with db.begin():
-                distribucion = Distribucion(**datos)
-                db.add(distribucion)
-                logger.info(f"Distribución creada.")
+            distribucion = Distribucion(**datos_normalizados)
+            db.add(distribucion)
+            db.commit()
+            logger.info("Distribución creada.")
             return True, "Distribución creada exitosamente."
         except SQLAlchemyError as e:
+            db.rollback()
             return self.manejar_excepcion(e, "Error al crear distribución")
         finally:
             db.close()
@@ -61,7 +64,8 @@ class DistribucionesController(BaseController):
         try:
             distribuciones = db.query(Distribucion).options(
                 joinedload(Distribucion.donacion),
-                joinedload(Distribucion.salon)
+                joinedload(Distribucion.salon),
+                joinedload(Distribucion.area)
             ).all()
             logger.info(f"{len(distribuciones)} distribuciones obtenidas.")
             return distribuciones
@@ -81,29 +85,40 @@ class DistribucionesController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID de la distribución es obligatorio y debe ser un número entero."
 
-        errores = self.validar_datos(datos)
-        if errores:
-            return False, "\n".join(errores)
-
         db = self.get_db_session()
         try:
+            datos_normalizados = self._normalizar_datos(datos)
+            distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
+            if not distribucion:
+                return False, "Distribución no encontrada."
+
+            datos_validar = {
+                "donacion_id": datos_normalizados.get("donacion_id", distribucion.donacion_id),
+                "salon_id": datos_normalizados.get("salon_id", distribucion.salon_id),
+                "area_id": datos_normalizados.get("area_id", distribucion.area_id),
+                "cantidad": datos_normalizados.get("cantidad", distribucion.cantidad),
+                "unidad": datos_normalizados.get("unidad", distribucion.unidad),
+                "fecha": datos_normalizados.get("fecha", distribucion.fecha),
+            }
+
+            errores = self.validar_datos(datos_validar, db)
+            if errores:
+                return False, "\n".join(errores)
+
             # Convertir fecha de string a objeto date
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
+            if 'fecha' in datos_normalizados and isinstance(datos_normalizados['fecha'], str):
                 try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
+                    datos_normalizados['fecha'] = datetime.strptime(datos_normalizados['fecha'], '%Y-%m-%d').date()
                 except ValueError:
                     return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
 
-            with db.begin():
-                distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
-                if distribucion:
-                    for key, value in datos.items():
-                        setattr(distribucion, key, value)
-                    logger.info(f"Distribución actualizada: ID {id}")
-                    return True, "Distribución actualizada exitosamente."
-                else:
-                    return False, "Distribución no encontrada."
+            for key, value in datos_normalizados.items():
+                setattr(distribucion, key, value)
+            db.commit()
+            logger.info(f"Distribución actualizada: ID {id}")
+            return True, "Distribución actualizada exitosamente."
         except SQLAlchemyError as e:
+            db.rollback()
             return self.manejar_excepcion(e, "Error al actualizar distribución")
         finally:
             db.close()
@@ -119,15 +134,16 @@ class DistribucionesController(BaseController):
 
         db = self.get_db_session()
         try:
-            with db.begin():
-                distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
-                if distribucion:
-                    db.delete(distribucion)
-                    logger.info(f"Distribución eliminada: ID {id}")
-                    return True, "Distribución eliminada exitosamente."
-                else:
-                    return False, "Distribución no encontrada."
+            distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
+            if distribucion:
+                db.delete(distribucion)
+                db.commit()
+                logger.info(f"Distribución eliminada: ID {id}")
+                return True, "Distribución eliminada exitosamente."
+            else:
+                return False, "Distribución no encontrada."
         except SQLAlchemyError as e:
+            db.rollback()
             return self.manejar_excepcion(e, "Error al eliminar distribución")
         finally:
             db.close()
@@ -140,7 +156,11 @@ class DistribucionesController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(Distribucion).filter(Distribucion.id == id).first()
+            return db.query(Distribucion).options(
+                joinedload(Distribucion.donacion),
+                joinedload(Distribucion.salon),
+                joinedload(Distribucion.area)
+            ).filter(Distribucion.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener distribución: {e}")
             return None
@@ -164,24 +184,55 @@ class DistribucionesController(BaseController):
         else:
             return False, None, f"No existe una distribución con ID {id}."
 
-    def validar_datos(self, datos):
+    def _normalizar_datos(self, datos):
+        """
+        Normaliza los datos de entrada para facilitar validaciones.
+        """
+        datos_normalizados = dict(datos)
+
+        for campo in ("salon_id", "area_id", "unidad"):
+            if campo in datos_normalizados and isinstance(datos_normalizados[campo], str):
+                datos_normalizados[campo] = datos_normalizados[campo].strip()
+
+        if datos_normalizados.get("salon_id") == "":
+            datos_normalizados["salon_id"] = None
+        if datos_normalizados.get("area_id") == "":
+            datos_normalizados["area_id"] = None
+
+        return datos_normalizados
+
+    def validar_datos(self, datos, db):
         """
         Valida los datos para crear o actualizar una distribución.
         :return: Lista de errores encontrados.
         """
         errores = []
-        if not datos.get("donacion_id"):
-            errores.append("El campo 'donacion_id' es obligatorio.")
-        elif not isinstance(datos.get("donacion_id"), int):
-            errores.append("El campo 'donacion_id' debe ser un número entero.")
+        donacion_id = datos.get("donacion_id")
+        salon_id = datos.get("salon_id")
+        area_id = datos.get("area_id")
+        unidad = datos.get("unidad")
 
-        if not datos.get("salon_id"):
-            errores.append("El campo 'salon_id' es obligatorio.")
-        elif not isinstance(datos.get("salon_id"), int):
+        if not donacion_id:
+            errores.append("El campo 'donacion_id' es obligatorio.")
+        elif not isinstance(donacion_id, int):
+            errores.append("El campo 'donacion_id' debe ser un número entero.")
+        elif db.query(Donacion).filter(Donacion.id == donacion_id).first() is None:
+            errores.append(f"No existe una donación con ID {donacion_id}.")
+
+        if salon_id and not isinstance(salon_id, int):
             errores.append("El campo 'salon_id' debe ser un número entero.")
+        if area_id and not isinstance(area_id, int):
+            errores.append("El campo 'area_id' debe ser un número entero.")
+
+        if bool(salon_id) == bool(area_id):
+            errores.append("Debe seleccionar exactamente un destino: salón o área.")
+        elif salon_id and db.query(Salon).filter(Salon.id == salon_id).first() is None:
+            errores.append(f"No existe un salón con ID {salon_id}.")
+        elif area_id and db.query(Area).filter(Area.id == area_id).first() is None:
+            errores.append(f"No existe un área con ID {area_id}.")
 
         cantidad = datos.get("cantidad")
-        if not cantidad:
+        if cantidad is None:
             errores.append("El campo 'cantidad' es obligatorio.")
         elif not isinstance(cantidad, (int, float)):
             errores.append("El campo 'cantidad' debe ser un número.")
@@ -190,12 +241,18 @@ class DistribucionesController(BaseController):
         elif cantidad > 1000:
             errores.append("El campo 'cantidad' no puede ser mayor a 1000.")
 
-        if not isinstance(datos.get("fecha"), str):
-            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
-        else:
+        if not isinstance(unidad, str) or not unidad.strip():
+            errores.append("El campo 'unidad' es obligatorio y debe ser texto.")
+        elif len(unidad.strip()) > 50:
+            errores.append("El campo 'unidad' no puede superar 50 caracteres.")
+
+        fecha = datos.get("fecha")
+        if isinstance(fecha, str):
             try:
-                datetime.strptime(datos["fecha"], '%Y-%m-%d')
+                datetime.strptime(fecha, '%Y-%m-%d')
             except ValueError:
                 errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
+        elif fecha is None or not hasattr(fecha, "year"):
+            errores.append("El campo 'fecha' es obligatorio y debe tener formato 'YYYY-MM-DD'.")
 
         return errores
