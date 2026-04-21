@@ -9,10 +9,10 @@ from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
     LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController )
 from screens import (
-    MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, DistribucionesScreen, 
-    LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen, AyudaScreen, 
-    AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen, ListDistribucionesScreen,
-    ListOtrasAreasScreen ) 
+    MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, CombinarDonacionesScreen,
+    DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen,
+    AyudaScreen, AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen,
+    ListDistribucionesScreen, ListOtrasAreasScreen )
 import logging
 
 # Configure logging
