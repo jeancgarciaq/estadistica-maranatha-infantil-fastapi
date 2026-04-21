@@ -1,6 +1,9 @@
 import logging
 from models.donaciones import Donacion
+from models.alimento_preparado import AlimentoPreparado
+from models.alimento_preparado_componente import AlimentoPreparadoComponente
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
 from datetime import datetime
 from controllers import BaseController
 
@@ -85,7 +88,7 @@ class DonacionesController(BaseController):
 
     def eliminar_donacion(self, id):
         """
-        Elimina una donación por su ID. Si es compuesta, devuelve cantidades a materias primas.
+        Elimina una donación por su ID.
         :param id: ID de la donación a eliminar.
         :return: (Exito, Mensaje)
         """
@@ -94,29 +97,14 @@ class DonacionesController(BaseController):
 
         db = self.get_db_session()
         try:
-            from models.donacion_componente import DonacionComponente
             with db.begin():
                 donacion = db.query(Donacion).filter(Donacion.id == id).first()
                 if not donacion:
                     return False, "Donación no encontrada."
-                
-                # Reversibilidad: Si es compuesta, devolver materiales
-                if donacion.es_compuesta:
-                    logger.info(f"Revirtiendo donación compuesta ID {id}...")
-                    componentes = db.query(DonacionComponente).filter(DonacionComponente.donacion_compuesta_id == id).all()
-                    for comp in componentes:
-                        materia = db.query(Donacion).filter(Donacion.id == comp.donacion_materia_id).first()
-                        if materia:
-                            materia.cantidad += comp.cantidad_usada
-                            logger.debug(f"Devueltos {comp.cantidad_usada} a materia prima ID {materia.id}")
-                    
-                    # Eliminar registros de componentes
-                    for comp in componentes:
-                        db.delete(comp)
 
                 db.delete(donacion)
                 logger.info(f"Donación eliminada: ID {id}")
-                return True, "Donación eliminada (y materiales devueltos si aplica) exitosamente."
+                return True, "Donación eliminada exitosamente."
         except SQLAlchemyError as e:
             return self.manejar_excepcion(e, "Error al eliminar donación")
         finally:
@@ -124,8 +112,8 @@ class DonacionesController(BaseController):
 
     def combinar_donaciones(self, datos_resultado, lista_componentes):
         """
-        Crea una donación compuesta restando cantidades de las materias primas.
-        :param datos_resultado: Diccionario con datos de la nueva donación (descripcion, cantidad, unidad, fecha, equipo).
+        Registra un alimento preparado y su composición, sin descontar inventario de donaciones.
+        :param datos_resultado: Diccionario con datos del preparado (descripcion, cantidad, unidad, fecha, equipo).
         :param lista_componentes: Lista de diccionarios [{'id': id_materia, 'cantidad': cantidad_usada}, ...]
         :return: (Exito, Mensaje)
         """
@@ -134,43 +122,71 @@ class DonacionesController(BaseController):
 
         db = self.get_db_session()
         try:
-            from models.donacion_componente import DonacionComponente
             with db.begin():
-                # 1. Validar existencias
+                # 1. Validar que todas las materias primas existan
                 for item in lista_componentes:
                     materia = db.query(Donacion).filter(Donacion.id == item['id']).first()
                     if not materia:
                         return False, f"ID de materia prima {item['id']} no encontrado."
-                    if materia.cantidad < item['cantidad']:
-                        return False, f"Cantidad insuficiente para {materia.descripcion}. Disponible: {materia.cantidad}"
 
-                # 2. Crear la nueva donación (compuesta)
+                # 2. Crear el alimento preparado
                 if 'fecha' in datos_resultado and isinstance(datos_resultado['fecha'], str):
                     datos_resultado['fecha'] = datetime.strptime(datos_resultado['fecha'], '%Y-%m-%d').date()
-                
-                datos_resultado['es_compuesta'] = True
-                donacion_compuesta = Donacion(**datos_resultado)
-                db.add(donacion_compuesta)
-                db.flush() # Para obtener ID
 
-                # 3. Restar cantidades y crear vínculos de componentes
+                preparado = AlimentoPreparado(**datos_resultado)
+                db.add(preparado)
+                db.flush()
+
+                # 3. Registrar componentes utilizados sin alterar cantidades de donación
                 for item in lista_componentes:
-                    materia = db.query(Donacion).filter(Donacion.id == item['id']).first()
-                    materia.cantidad -= item['cantidad']
-                    
-                    componente = DonacionComponente(
-                        donacion_compuesta_id=donacion_compuesta.id,
+                    componente = AlimentoPreparadoComponente(
+                        alimento_preparado_id=preparado.id,
                         donacion_materia_id=item['id'],
                         cantidad_usada=item['cantidad']
                     )
                     db.add(componente)
-                
-                logger.info(f"Donación compuesta ID {donacion_compuesta.id} creada exitosamente.")
-                return True, f"Combinación exitosa. ID nueva donación: {donacion_compuesta.id}"
+
+                logger.info(f"Alimento preparado ID {preparado.id} registrado exitosamente.")
+                return True, f"Preparado registrado exitosamente. ID: {preparado.id}"
         except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al combinar donaciones")
+            return self.manejar_excepcion(e, "Error al registrar preparado")
         except Exception as e:
             return False, f"Error inesperado: {str(e)}"
+        finally:
+            db.close()
+
+    def listar_preparados(self):
+        """
+        Lista los alimentos preparados con sus componentes.
+        """
+        db = self.get_db_session()
+        try:
+            return db.query(AlimentoPreparado).options(
+                joinedload(AlimentoPreparado.componentes).joinedload(AlimentoPreparadoComponente.materia_prima)
+            ).order_by(AlimentoPreparado.fecha.desc(), AlimentoPreparado.id.desc()).all()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar preparados: {e}")
+            return []
+        finally:
+            db.close()
+
+    def eliminar_preparado(self, preparado_id):
+        """
+        Elimina un alimento preparado y sus componentes.
+        """
+        if not preparado_id or not isinstance(preparado_id, int):
+            return False, "El ID del preparado es obligatorio y debe ser un número entero."
+
+        db = self.get_db_session()
+        try:
+            with db.begin():
+                preparado = db.query(AlimentoPreparado).filter(AlimentoPreparado.id == preparado_id).first()
+                if not preparado:
+                    return False, "Preparado no encontrado."
+                db.delete(preparado)
+            return True, "Preparado eliminado exitosamente."
+        except SQLAlchemyError as e:
+            return self.manejar_excepcion(e, "Error al eliminar preparado")
         finally:
             db.close()
 
