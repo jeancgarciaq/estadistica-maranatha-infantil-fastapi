@@ -104,6 +104,25 @@
                         size_hint_x: None
                         width: 120
                         on_press: root.abrir_popup_salon()
+                Label:
+                    text: 'Áreas:'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 50
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: 50
+                    TextInput:
+                        id: area_id
+                        hint_text: 'ID de Área'
+                        readonly: True
+                    Button:
+                        text: 'Seleccionar'
+                        size_hint_x: None
+                        width: 120
+                        on_press: root.abrir_popup_area()
         # Botones de acción
         BoxLayout:
             size_hint_y: None
