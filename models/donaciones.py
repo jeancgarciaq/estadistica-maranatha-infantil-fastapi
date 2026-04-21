@@ -26,8 +26,6 @@ class Donacion(Base):
     es_compuesta = Column(Boolean, default=False)
 
     distribuciones = relationship("Distribucion", back_populates="donacion")
-    componentes = relationship("DonacionComponente", back_populates="donacion_compuesta", foreign_keys="[DonacionComponente.donacion_compuesta_id]")
-    usada_en = relationship("DonacionComponente", back_populates="materia_prima", foreign_keys="[DonacionComponente.donacion_materia_id]")
 
 
     def __repr__(self):
