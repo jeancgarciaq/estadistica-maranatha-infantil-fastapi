@@ -16,7 +16,6 @@ import models.areas
 import models.salones
 import models.aulas
 import models.donaciones
-import models.donacion_componente
 import models.distribucion
 import models.ensenanza
 import models.logistica
