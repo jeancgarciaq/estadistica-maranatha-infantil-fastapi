@@ -1,0 +1,44 @@
+<ListPreparadosScreen>:
+    name: 'lista_preparados'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Lista de Alimentos Preparados'
+            font_size: 30
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: 50
+
+        ScrollView:
+            BoxLayout:
+                id: lista_preparados
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 10
+                padding: 10
+
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            padding: 10
+            spacing: 10
+            Button:
+                text: 'Recargar'
+                font_size: 24
+                background_normal: ''
+                background_color: (0, 119/255, 194/255, 1)
+                on_press: root.cargar_preparados()
+            Button:
+                text: 'Volver a Preparados'
+                font_size: 24
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1)
+                on_press: app.root.current = 'combinar_donaciones'
