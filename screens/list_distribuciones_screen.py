@@ -43,11 +43,20 @@ class ListDistribucionesScreen(Screen):
                 )
                 
                 # ID
-                lista_distribuciones.add_widget(Label(text=f"{distribucion.id}", size_hint_x=0.1, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=f"{distribucion.id}", size_hint_x=0.1, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
-                # Donación (Podemos mostrar descripción si está cargada)
-                donacion_text = f"{distribucion.donacion.descripcion}" if distribucion.donacion else str(distribucion.donacion_id)
-                lista_distribuciones.add_widget(Label(text=donacion_text, size_hint_x=0.2, size_hint_y=None, height=40))
+                # Origen (donación o preparado)
+                if getattr(distribucion, 'donacion', None):
+                    origen_text = f"Donación: {distribucion.donacion.descripcion}"
+                elif getattr(distribucion, 'alimento_preparado', None):
+                    origen_text = f"Preparado: {distribucion.alimento_preparado.descripcion}"
+                elif getattr(distribucion, 'donacion_id', None):
+                    origen_text = f"Donación ID {distribucion.donacion_id}"
+                elif getattr(distribucion, 'alimento_preparado_id', None):
+                    origen_text = f"Preparado ID {distribucion.alimento_preparado_id}"
+                else:
+                    origen_text = "Sin origen"
+                lista_distribuciones.add_widget(Label(text=origen_text, size_hint_x=0.2, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
                 # Destino (salón o área)
                 if distribucion.salon:
@@ -58,16 +67,16 @@ class ListDistribucionesScreen(Screen):
                     destino_text = f"Área ID {distribucion.area_id}"
                 else:
                     destino_text = "Sin destino"
-                lista_distribuciones.add_widget(Label(text=destino_text, size_hint_x=0.1, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=destino_text, size_hint_x=0.1, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
                 # Cantidad
-                lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad), size_hint_x=0.1, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.cantidad), size_hint_x=0.1, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
                 # Unidad
-                lista_distribuciones.add_widget(Label(text=str(distribucion.unidad), size_hint_x=0.1, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.unidad), size_hint_x=0.1, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
                 # Fecha
-                lista_distribuciones.add_widget(Label(text=str(distribucion.fecha), size_hint_x=0.2, size_hint_y=None, height=40))
+                lista_distribuciones.add_widget(Label(text=str(distribucion.fecha), size_hint_x=0.2, size_hint_y=None, height=40, color=(1, 1, 1, 1)))
                 
                 # Acciones
                 acciones_layout = BoxLayout(orientation='horizontal', spacing=5, size_hint_x=0.2, size_hint_y=None, height=40)
