@@ -2,6 +2,7 @@ import logging
 from models.donaciones import Donacion
 from models.alimento_preparado import AlimentoPreparado
 from models.alimento_preparado_componente import AlimentoPreparadoComponente
+from models.distribucion import Distribucion
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -101,6 +102,22 @@ class DonacionesController(BaseController):
                 donacion = db.query(Donacion).filter(Donacion.id == id).first()
                 if not donacion:
                     return False, "Donación no encontrada."
+
+                # No permitir eliminar si la donación es materia prima de algún preparado.
+                uso_en_preparados = db.query(AlimentoPreparadoComponente).filter(
+                    AlimentoPreparadoComponente.donacion_materia_id == id
+                ).count()
+                if uso_en_preparados > 0:
+                    return (
+                        False,
+                        "No se puede eliminar la donación porque está asociada a alimentos preparados. "
+                        "Elimine primero los preparados relacionados."
+                    )
+
+                # Limpiar distribuciones ligadas para evitar violación de check de origen exclusivo.
+                distribuciones_vinculadas = db.query(Distribucion).filter(Distribucion.donacion_id == id).all()
+                for distribucion in distribuciones_vinculadas:
+                    db.delete(distribucion)
 
                 db.delete(donacion)
                 logger.info(f"Donación eliminada: ID {id}")
