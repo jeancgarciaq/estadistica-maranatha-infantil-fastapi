@@ -7,7 +7,7 @@ from kivy.core.window import Window
 from models.database import SessionLocal
 from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
-    LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController )
+    LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController, EstadisticaController )
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, CombinarDonacionesScreen,
     DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen,
@@ -44,6 +44,7 @@ class EmiApp(App):
             "salones": SalonesController(session=self.session),
             "aulas": AulasController(session=self.session),
             "donaciones": DonacionesController(session=self.session),
+            "estadistica": EstadisticaController(session=self.session),
             "ensenanza": EnsenanzaController(session=self.session),
             "logistica": LogisticaController(session=self.session),
             "otrasareas": OtrasAreasController(session=self.session),
@@ -57,8 +58,9 @@ class EmiApp(App):
         self.salones_controller = controllers["salones"]
         self.aulas_controller = controllers["aulas"]
         self.donaciones_controller = controllers["donaciones"]
+        self.estadistica_controller = controllers["estadistica"]
         self.distribuciones_controller = controllers["distribuciones"]  
-        logger.debug("AreasController, SalonesController, AulasController, DonacionesController y DistribucionesController fueron asignados a EmiApp.")
+        logger.debug("Controladores principales fueron asignados a EmiApp.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
@@ -69,7 +71,7 @@ class EmiApp(App):
             AreasScreen(controllers["areas"], name='areas'),
             SalonesScreen(controllers["salones"], name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
-            EstadisticaScreen(name='estadistica'),
+            EstadisticaScreen(controllers["estadistica"], name='estadistica'),
             DonacionesScreen(controllers["donaciones"], name='donaciones'),
             CombinarDonacionesScreen(controllers["donaciones"], name='combinar_donaciones'),
             DistribucionesScreen(controllers["distribuciones"], name='distribuciones'),
