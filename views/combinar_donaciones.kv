@@ -8,7 +8,7 @@
                 pos: self.pos
                 size: self.size
         Label:
-            text: 'Combinar Donaciones (Ensamblaje)'
+            text: 'Preparación de Alimentos'
             font_size: 32
             color: 1, 1, 1, 1
             size_hint_y: None
@@ -25,7 +25,7 @@
                 spacing: 10
                 size_hint_x: 0.4
                 Label:
-                    text: 'PRODUCTO TERMINADO'
+                    text: 'ALIMENTO PREPARADO'
                     font_size: 24
                     bold: True
                     size_hint_y: None
@@ -45,7 +45,7 @@
                     TextInput:
                         id: res_descripcion
                         multiline: False
-                        hint_text: 'Ej: Jugo de Limón 80L'
+                        hint_text: 'Ej: Jugo de papelón con limón'
                         size_hint_y: None
                         height: 45
                     
@@ -155,7 +155,7 @@
                         spacing: 10
                 
                 Label:
-                    text: '* Las cantidades se descontarán del inventario automáticamente.'
+                    text: '* Se registra el uso de materias primas sin descontar la donación original.'
                     italic: True
                     font_size: 14
                     color: 0.8, 0.8, 0.8, 1
@@ -169,11 +169,17 @@
             spacing: 20
             padding: 10
             Button:
-                text: 'REALIZAR COMBINACIÓN'
+                text: 'REGISTRAR PREPARADO'
                 font_size: 24
                 background_normal: ''
                 background_color: (0, 119/255, 194/255, 1)
                 on_press: root.realizar_combinacion()
+            Button:
+                text: 'LISTAR PREPARADOS'
+                font_size: 24
+                background_normal: ''
+                background_color: (0.18, 0.5, 0.22, 1)
+                on_press: root.ver_lista_preparados()
             Button:
                 text: 'CANCELAR / VOLVER'
                 font_size: 24
