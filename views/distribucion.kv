@@ -23,7 +23,7 @@
                 padding: 20
                 spacing: 20
                 Label:
-                    text: 'Donación:'
+                    text: 'Origen (Donación):'
                     font_size: 28
                     color: 1, 1, 1, 1
                     size_hint_y: None
@@ -41,6 +41,25 @@
                         size_hint_x: None
                         width: 120
                         on_press: root.abrir_popup_donacion()
+                Label:
+                    text: 'Origen (Preparado):'
+                    font_size: 28
+                    color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: 50
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: 50
+                    TextInput:
+                        id: alimento_preparado_id
+                        hint_text: 'ID de Preparado'
+                        readonly: True
+                    Button:
+                        text: 'Seleccionar'
+                        size_hint_x: None
+                        width: 120
+                        on_press: root.abrir_popup_preparado()
                 Label:
                     text: 'Cantidad:'
                     font_size: 28
