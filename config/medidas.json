@@ -1,11 +1,36 @@
 {
     "unidades": [
         "Unidad(es)",
+        "Porción(es)",
         "Kilogramos",
         "Gramos",
         "Miligramo",
         "Litros",
         "Mililitros",
-        "Empaque(s)"
+        "Empaque(s)",
+        "Caja(s)",
+        "Pieza(s)",
+        "Paquete(s)",
+        "Botella(s)",
+        "Saco(s)",
+        "Metro(s)",
+        "Centímetro(s)",
+        "Pulgada(s)",
+        "Yarda(s)",
+        "Tonelada(s)",
+        "Onza(s)",
+        "Libra(s)",
+        "Galón(es)",
+        "Barril(es)",
+        "Lata(s)",
+        "Bolsa(s)",
+        "Rollo(s)",
+        "Tubo(s)",
+        "Frasco(s)",
+        "Vaso(s)",
+        "Taza(s)",
+        "Cucharada(s)",
+        "Cucharadita(s)",
+        "Grano(s)"
     ]
 }
