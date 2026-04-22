@@ -44,6 +44,7 @@ from models.alimento_preparado import AlimentoPreparado
 from models.alimento_preparado_componente import AlimentoPreparadoComponente
 from models.distribucion import Distribucion
 from models.logistica import Logistica
+from models.salones import Salon
 
 
 @dataclass
@@ -67,6 +68,8 @@ class ResumenEstadistico:
     preparados: list
     distribuciones: list
     componentes: list
+    donaciones_no_repartidas: list
+    salones_cerrados: list
 
 
 class ReporteEstadisticoService:
@@ -87,6 +90,7 @@ class ReporteEstadisticoService:
         fecha_corte = self._parse_fecha(fecha_corte)
 
         aulas = self.session.query(Aula).options(joinedload(Aula.salon)).filter(Aula.fecha == fecha_corte).all()
+        salones = self.session.query(Salon).all()
         logistica = self.session.query(Logistica).filter(Logistica.fecha == fecha_corte).all()
         donaciones = self.session.query(Donacion).filter(Donacion.fecha == fecha_corte).all()
         preparados = self.session.query(AlimentoPreparado).filter(AlimentoPreparado.fecha == fecha_corte).all()
@@ -101,6 +105,7 @@ class ReporteEstadisticoService:
             self.session.query(Distribucion)
             .options(
                 joinedload(Distribucion.donacion),
+                joinedload(Distribucion.alimento_preparado),
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area),
             )
@@ -153,6 +158,16 @@ class ReporteEstadisticoService:
         faltante_preparado = max(donaciones_combinadas - distribuciones_combinadas, 0)
         preparacion_completa = faltante_preparado == 0
 
+        donaciones_distribuidas_ids = {d.donacion_id for d in distribuciones if d.donacion_id}
+        donaciones_usadas_en_preparados_ids = {c.donacion_materia_id for c in componentes if c.donacion_materia_id}
+        donaciones_no_repartidas = [
+            d for d in donaciones
+            if d.id not in donaciones_distribuidas_ids and d.id not in donaciones_usadas_en_preparados_ids
+        ]
+
+        salones_con_asistencia_ids = {a.id_salon for a in aulas if a.id_salon is not None}
+        salones_cerrados = [s for s in salones if s.id not in salones_con_asistencia_ids]
+
         return ResumenEstadistico(
             fecha_corte=fecha_corte,
             asistencia_ninos=asistencia_ninos,
@@ -173,6 +188,8 @@ class ReporteEstadisticoService:
             preparados=preparados,
             distribuciones=distribuciones,
             componentes=componentes,
+            donaciones_no_repartidas=donaciones_no_repartidas,
+            salones_cerrados=salones_cerrados,
         )
 
     def generar_graficos(self, resumen):
@@ -219,6 +236,10 @@ class ReporteEstadisticoService:
     def _nombre_donacion(self, distribucion):
         if distribucion.donacion:
             return distribucion.donacion.descripcion
+        if getattr(distribucion, 'alimento_preparado', None):
+            return f"Preparado: {distribucion.alimento_preparado.descripcion}"
+        if getattr(distribucion, 'alimento_preparado_id', None):
+            return f"Preparado ID {distribucion.alimento_preparado_id}"
         return str(distribucion.donacion_id)
 
     def generar_pdf(self, resumen, graficos, archivo_salida=None):
@@ -241,7 +262,17 @@ class ReporteEstadisticoService:
         story.append(Paragraph(f'Fecha de corte: {resumen.fecha_corte.strftime("%d/%m/%Y")}', styles['CuerpoInforme']))
         story.append(Spacer(1, 0.3 * cm))
 
-        story.append(Paragraph('1. Resumen Ejecutivo de Asistencia', styles['SubTituloInforme']))
+        total_ninos_atendidos = resumen.asistencia_ninos + resumen.asistencia_ninas
+        intro_texto = (
+            f'Se está presentando la información relacionada con la estadística del servicio de fecha '
+            f'{resumen.fecha_corte.strftime("%d/%m/%Y")}. '
+            f'Inicialmente damos a conocer que estuvieron trabajando {resumen.asistencia_servidores} servidores '
+            f'y se atendió un total de {total_ninos_atendidos} niños.'
+        )
+        story.append(Paragraph('1. Asistencia Del Servicio', styles['SubTituloInforme']))
+        story.append(Paragraph(intro_texto, styles['CuerpoInforme']))
+        story.append(Spacer(1, 0.2 * cm))
+
         resumen_data = [
             ['Indicador', 'Valor'],
             ['Asistencia niños', str(resumen.asistencia_ninos)],
@@ -262,20 +293,7 @@ class ReporteEstadisticoService:
         story.append(tabla)
         story.append(Spacer(1, 0.4 * cm))
 
-        conclusion = 'La totalidad de lo preparado fue distribuida.' if resumen.preparacion_completa else (
-            f'Quedó pendiente por distribuir {resumen.faltante_preparado:.2f} de lo preparado.'
-        )
-        story.append(Paragraph('2. Conclusión Operativa', styles['SubTituloInforme']))
-        story.append(Paragraph(conclusion, styles['CuerpoInforme']))
-        story.append(Spacer(1, 0.3 * cm))
-
-        story.append(Paragraph('3. Gráficos', styles['SubTituloInforme']))
-        story.append(Image(graficos['asistencia'], width=16 * cm, height=7.5 * cm))
-        story.append(Spacer(1, 0.2 * cm))
-        story.append(Image(graficos['alimentos'], width=16 * cm, height=7.5 * cm))
-        story.append(Spacer(1, 0.3 * cm))
-
-        story.append(Paragraph('4. Detalle de Asistencia por Aula', styles['SubTituloInforme']))
+        story.append(Paragraph('Tabla de Asistencia por Aula', styles['SubTituloInforme']))
         aulas_data = [['ID', 'Aula', 'Niños', 'Niñas', 'Servidores', 'Total']]
         for aula in resumen.aulas:
             aulas_data.append([
@@ -297,7 +315,18 @@ class ReporteEstadisticoService:
         story.append(tabla_aulas)
         story.append(Spacer(1, 0.4 * cm))
 
-        story.append(Paragraph('5. Donaciones', styles['SubTituloInforme']))
+        story.append(Paragraph('2. Representación Gráfica De La Asistencia', styles['SubTituloInforme']))
+        story.append(Image(graficos['asistencia'], width=16 * cm, height=7.5 * cm))
+        story.append(Spacer(1, 0.3 * cm))
+
+        story.append(Paragraph('3. Donaciones, Preparados Y Observaciones Del Servicio', styles['SubTituloInforme']))
+        story.append(Paragraph(
+            'Estas son las donaciones que se recibieron para el servicio del día domingo:',
+            styles['CuerpoInforme']
+        ))
+        story.append(Spacer(1, 0.2 * cm))
+
+        story.append(Paragraph('Tabla de Donaciones Recibidas', styles['SubTituloInforme']))
         donaciones_data = [['Descripción', 'Cantidad', 'Unidad']]
         for donacion in resumen.donaciones:
             donaciones_data.append([
@@ -305,6 +334,8 @@ class ReporteEstadisticoService:
                 f'{donacion.cantidad:.2f}',
                 donacion.unidad,
             ])
+        if len(donaciones_data) == 1:
+            donaciones_data.append(['Sin donaciones registradas para la fecha', '-', '-'])
         tabla_donaciones = Table(donaciones_data, repeatRows=1)
         tabla_donaciones.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
@@ -316,7 +347,13 @@ class ReporteEstadisticoService:
         story.append(tabla_donaciones)
         story.append(Spacer(1, 0.3 * cm))
 
-        story.append(Paragraph('6. Alimentos Preparados', styles['SubTituloInforme']))
+        story.append(Paragraph(
+            'Luego de estas donaciones se lograron preparar la siguiente cantidad de alimentos:',
+            styles['CuerpoInforme']
+        ))
+        story.append(Spacer(1, 0.2 * cm))
+
+        story.append(Paragraph('Tabla de Alimentos Preparados', styles['SubTituloInforme']))
         preparados_data = [['Descripción', 'Cantidad', 'Unidad', 'Equipo']]
         for preparado in resumen.preparados:
             preparados_data.append([
@@ -325,6 +362,8 @@ class ReporteEstadisticoService:
                 preparado.unidad,
                 preparado.equipo,
             ])
+        if len(preparados_data) == 1:
+            preparados_data.append(['Sin preparados registrados para la fecha', '-', '-', '-'])
         tabla_preparados = Table(preparados_data, repeatRows=1)
         tabla_preparados.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
@@ -336,24 +375,126 @@ class ReporteEstadisticoService:
         story.append(tabla_preparados)
         story.append(Spacer(1, 0.3 * cm))
 
-        story.append(Paragraph('7. Alimentos Distribuidos', styles['SubTituloInforme']))
-        distribuciones_data = [['Donación', 'Destino', 'Cantidad', 'Unidad']]
+        distribucion_por_preparado = {}
         for distribucion in resumen.distribuciones:
-            distribuciones_data.append([
-                self._nombre_donacion(distribucion),
-                self._destino_texto(distribucion),
-                f'{distribucion.cantidad:.2f}',
-                distribucion.unidad,
+            preparado_id = getattr(distribucion, 'alimento_preparado_id', None)
+            if preparado_id:
+                distribucion_por_preparado[preparado_id] = distribucion_por_preparado.get(preparado_id, 0) + (distribucion.cantidad or 0)
+
+        story.append(Paragraph(
+            '4. Cantidad Repartida Y Sobrante De Alimentos Preparados',
+            styles['SubTituloInforme']
+        ))
+        story.append(Paragraph(
+            'A continuación se detalla, por cada alimento preparado, cuánto se repartió y cuánto sobró.',
+            styles['CuerpoInforme']
+        ))
+        story.append(Spacer(1, 0.2 * cm))
+
+        control_preparados_data = [['Alimento preparado', 'Cantidad preparada', 'Cantidad repartida', 'Cantidad sobrante', 'Unidad']]
+        sobrantes_preparados_data = [['Alimento preparado', 'Cantidad sobrante', 'Unidad']]
+
+        for preparado in resumen.preparados:
+            cantidad_preparada = preparado.cantidad or 0
+            cantidad_repartida = distribucion_por_preparado.get(preparado.id, 0)
+            cantidad_sobrante = max(cantidad_preparada - cantidad_repartida, 0)
+
+            control_preparados_data.append([
+                preparado.descripcion,
+                f'{cantidad_preparada:.2f}',
+                f'{cantidad_repartida:.2f}',
+                f'{cantidad_sobrante:.2f}',
+                preparado.unidad,
             ])
-        tabla_distribuciones = Table(distribuciones_data, repeatRows=1)
-        tabla_distribuciones.setStyle(TableStyle([
+
+            if cantidad_sobrante > 0:
+                sobrantes_preparados_data.append([
+                    preparado.descripcion,
+                    f'{cantidad_sobrante:.2f}',
+                    preparado.unidad,
+                ])
+
+        if len(control_preparados_data) == 1:
+            control_preparados_data.append(['Sin alimentos preparados para la fecha', '-', '-', '-', '-'])
+
+        tabla_control_preparados = Table(control_preparados_data, repeatRows=1)
+        tabla_control_preparados.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('GRID', (0, 0), (-1, -1), 0.4, colors.grey),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 8),
         ]))
-        story.append(tabla_distribuciones)
+        story.append(tabla_control_preparados)
+        story.append(Spacer(1, 0.2 * cm))
+
+        story.append(Paragraph('Tabla de Sobrantes de Alimentos Preparados', styles['SubTituloInforme']))
+        if len(sobrantes_preparados_data) == 1:
+            sobrantes_preparados_data.append(['No hubo sobrantes de alimentos preparados', '-', '-'])
+        tabla_sobrantes_preparados = Table(sobrantes_preparados_data, repeatRows=1)
+        tabla_sobrantes_preparados.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.4, colors.grey),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        story.append(tabla_sobrantes_preparados)
+        story.append(Spacer(1, 0.3 * cm))
+
+        story.append(Paragraph(
+            'Las siguientes donaciones no fueron repartidas a los niños ni a los servidores durante el servicio:',
+            styles['CuerpoInforme']
+        ))
+        story.append(Spacer(1, 0.2 * cm))
+
+        no_repartidas_data = [['Descripción', 'Cantidad', 'Unidad']]
+        for donacion in resumen.donaciones_no_repartidas:
+            no_repartidas_data.append([
+                donacion.descripcion,
+                f'{donacion.cantidad:.2f}',
+                donacion.unidad,
+            ])
+        if len(no_repartidas_data) == 1:
+            no_repartidas_data.append(['No hay donaciones pendientes sin repartir', '-', '-'])
+
+        tabla_no_repartidas = Table(no_repartidas_data, repeatRows=1)
+        tabla_no_repartidas.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.4, colors.grey),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        story.append(tabla_no_repartidas)
+        story.append(Spacer(1, 0.3 * cm))
+
+        story.append(Paragraph('Salones Cerrados', styles['SubTituloInforme']))
+        salones_cerrados_data = [['Salón', 'Edad']]
+        for salon in resumen.salones_cerrados:
+            salones_cerrados_data.append([
+                salon.salon,
+                salon.edad,
+            ])
+        if len(salones_cerrados_data) == 1:
+            salones_cerrados_data.append(['No se registran salones cerrados para la fecha', '-'])
+
+        tabla_salones_cerrados = Table(salones_cerrados_data, repeatRows=1)
+        tabla_salones_cerrados.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A335C')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.4, colors.grey),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        story.append(tabla_salones_cerrados)
+        story.append(Spacer(1, 0.3 * cm))
+
+        cierre = (
+            'Esta fue la información que se recopiló del servicio del día, esperando que la información pueda ser de utilidad. '
+            'Sin más que añadir, atentamente la coordinación de Maranatha Kids.'
+        )
+        story.append(Paragraph(cierre, styles['CuerpoInforme']))
 
         doc = SimpleDocTemplate(
             archivo_salida,
