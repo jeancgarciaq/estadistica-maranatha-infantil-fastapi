@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from models.donaciones import Donacion
+from models.alimento_preparado import AlimentoPreparado
 from models.salones import Salon
 from models.areas import Area
 from models.distribucion import Distribucion
@@ -64,6 +65,7 @@ class DistribucionesController(BaseController):
         try:
             distribuciones = db.query(Distribucion).options(
                 joinedload(Distribucion.donacion),
+                joinedload(Distribucion.alimento_preparado),
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area)
             ).all()
@@ -94,6 +96,7 @@ class DistribucionesController(BaseController):
 
             datos_validar = {
                 "donacion_id": datos_normalizados.get("donacion_id", distribucion.donacion_id),
+                "alimento_preparado_id": datos_normalizados.get("alimento_preparado_id", distribucion.alimento_preparado_id),
                 "salon_id": datos_normalizados.get("salon_id", distribucion.salon_id),
                 "area_id": datos_normalizados.get("area_id", distribucion.area_id),
                 "cantidad": datos_normalizados.get("cantidad", distribucion.cantidad),
@@ -158,6 +161,7 @@ class DistribucionesController(BaseController):
         try:
             return db.query(Distribucion).options(
                 joinedload(Distribucion.donacion),
+                joinedload(Distribucion.alimento_preparado),
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area)
             ).filter(Distribucion.id == id).first()
@@ -190,10 +194,14 @@ class DistribucionesController(BaseController):
         """
         datos_normalizados = dict(datos)
 
-        for campo in ("salon_id", "area_id", "unidad"):
+        for campo in ("donacion_id", "alimento_preparado_id", "salon_id", "area_id", "unidad"):
             if campo in datos_normalizados and isinstance(datos_normalizados[campo], str):
                 datos_normalizados[campo] = datos_normalizados[campo].strip()
 
+        if datos_normalizados.get("donacion_id") in ("", "None", "none"):
+            datos_normalizados["donacion_id"] = None
+        if datos_normalizados.get("alimento_preparado_id") in ("", "None", "none"):
+            datos_normalizados["alimento_preparado_id"] = None
         if datos_normalizados.get("salon_id") == "":
             datos_normalizados["salon_id"] = None
         if datos_normalizados.get("area_id") == "":
@@ -208,16 +216,24 @@ class DistribucionesController(BaseController):
         """
         errores = []
         donacion_id = datos.get("donacion_id")
+        alimento_preparado_id = datos.get("alimento_preparado_id")
         salon_id = datos.get("salon_id")
         area_id = datos.get("area_id")
         unidad = datos.get("unidad")
 
-        if not donacion_id:
-            errores.append("El campo 'donacion_id' es obligatorio.")
-        elif not isinstance(donacion_id, int):
-            errores.append("El campo 'donacion_id' debe ser un número entero.")
-        elif db.query(Donacion).filter(Donacion.id == donacion_id).first() is None:
-            errores.append(f"No existe una donación con ID {donacion_id}.")
+        if bool(donacion_id) == bool(alimento_preparado_id):
+            errores.append("Debe seleccionar exactamente un origen: donación o alimento preparado.")
+        else:
+            if donacion_id:
+                if not isinstance(donacion_id, int):
+                    errores.append("El campo 'donacion_id' debe ser un número entero.")
+                elif db.query(Donacion).filter(Donacion.id == donacion_id).first() is None:
+                    errores.append(f"No existe una donación con ID {donacion_id}.")
+            if alimento_preparado_id:
+                if not isinstance(alimento_preparado_id, int):
+                    errores.append("El campo 'alimento_preparado_id' debe ser un número entero.")
+                elif db.query(AlimentoPreparado).filter(AlimentoPreparado.id == alimento_preparado_id).first() is None:
+                    errores.append(f"No existe un alimento preparado con ID {alimento_preparado_id}.")
 
         if salon_id and not isinstance(salon_id, int):
             errores.append("El campo 'salon_id' debe ser un número entero.")
