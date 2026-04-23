@@ -24,17 +24,14 @@ from models.alimento_preparado import AlimentoPreparado
 from models.salones import Salon
 from models.areas import Area
 
+Builder.load_file('views/distribucion.kv')
+
 class DistribucionesScreen(Screen):
     medidas = ListProperty([])
 
     def __init__(self, controlador, **kwargs):
-        self.medidas = obtener_medidas()
-        try:
-            logger.debug("Cargando archivo distribucion.kv...")
-            Builder.load_file('views/distribucion.kv')
-        except Exception as e:
-            logger.error(f"⚠️ Error al cargar distribucion.kv: {e}")
         super().__init__(**kwargs)
+        self.medidas = obtener_medidas()
         self.controlador = controlador
         self.edit_id = None
         logger.info("DistribucionesScreen inicializado correctamente.")
@@ -142,12 +139,18 @@ class DistribucionesScreen(Screen):
         """Carga los datos iniciales necesarios para la pantalla."""
         logger.debug("Cargando datos iniciales...")
         try:
-            self.ids.donacion_id.text = ""
-            self.ids.alimento_preparado_id.text = ""
-            self.ids.salon_id.text = ""
-            self.ids.area_id.text = ""
-            self.ids.donacion_cantidad.text = ""
-            self.ids.fecha.text = datetime.now().strftime("%Y-%m-%d")
+            if 'donacion_id' in self.ids:
+                self.ids.donacion_id.text = ""
+            if 'alimento_preparado_id' in self.ids:
+                self.ids.alimento_preparado_id.text = ""
+            if 'salon_id' in self.ids:
+                self.ids.salon_id.text = ""
+            if 'area_id' in self.ids:
+                self.ids.area_id.text = ""
+            if 'donacion_cantidad' in self.ids:
+                self.ids.donacion_cantidad.text = ""
+            if 'fecha' in self.ids:
+                self.ids.fecha.text = datetime.now().strftime("%Y-%m-%d")
             logger.info("Datos iniciales cargados correctamente.")
         except Exception as e:
             logger.error(f"⚠️ Error al cargar datos iniciales: {e}")
@@ -156,15 +159,7 @@ class DistribucionesScreen(Screen):
     def abrir_popup_donacion(self):
         """Abre un popup para seleccionar una donación."""
         logger.debug("Obteniendo donaciones para el popup...")
-        donaciones = self.controlador.get_db_session().query(Donacion).all() # Usar el controlador sería mejor, pero el controlador no tiene listar_donaciones, DonacionesController sí.
-        # En una arquitectura MVC pura, DistribucionesController debería tener acceso o app.py debería proveerlo.
-        # Como DistribucionesController no tiene listar_donaciones, y queremos evitar tocar mucho los controladores ahora:
-        # Pero espera, DistribucionesController hereda de BaseController.
-        
-        # Vamos a usar el método del controlador si existe, si no, lo hacemos aquí pero idealmente a través del controlador.
-        # En este caso, el usuario quiere MVC, así que el controlador de distribuciones DEBERÍA poder proveer donaciones o usamos el de donaciones.
-        
-        # Para ser consistentes con AulasScreen:
+        donaciones = self.controlador.get_db_session().query(Donacion).all() 
         db = self.controlador.get_db_session()
         try:
             donaciones = db.query(Donacion).all()
