@@ -1,11 +1,11 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.lang import Builder
+from kivy.properties import StringProperty
 import logging
 from datetime import datetime
 from components import StyledPopup
+from components.styled_datepicker import StyledDatePicker
 
 from kivy.factory import Factory
 
@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 #Clase ListDonacionScreen
 class ListDonacionesScreen(Screen):
     """ Pantalla que muestra una lista de donaciones. """
+    fecha_filtro = StringProperty("")
+
     def __init__(self, controlador, **kwargs):
         try:
             Builder.load_file('views/list_donaciones.kv')
@@ -24,6 +26,29 @@ class ListDonacionesScreen(Screen):
         super().__init__(**kwargs)
         logger.info("Inicializando ListDonacionesScreen")
         self.controlador = controlador
+
+    def abrir_datepicker_filtro(self):
+        """Abre el selector de fecha para filtrar donaciones."""
+        def set_date(date_str):
+            self.fecha_filtro = date_str
+
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
+
+    def _obtener_fecha_filtro(self):
+        """Valida y devuelve la fecha seleccionada para el filtro."""
+        fecha = (self.fecha_filtro or "").strip()
+        if not fecha:
+            StyledPopup.mostrar_popup("Error", "Debe seleccionar una fecha para listar las donaciones.", tipo="error")
+            return None
+
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d')
+            return fecha
+        except ValueError:
+            StyledPopup.mostrar_popup("Error", "Formato de fecha inválido. Use YYYY-MM-DD.", tipo="error")
+            return None
+
     def actualizar_lista_donaciones(self, donaciones):
         """Actualiza la lista de donaciones en la vista."""
         logger.debug(f"Datos recibidos para actualizar lista de donaciones: {donaciones}")
@@ -87,8 +112,13 @@ class ListDonacionesScreen(Screen):
         if not self.controlador:
             logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
             return
+
+        fecha = self._obtener_fecha_filtro()
+        if not fecha:
+            return
+
         try:
-            donaciones = self.controlador.listar_donaciones()
+            donaciones = self.controlador.listar_donaciones(fecha=fecha)
             if donaciones is None:
                 logger.warning("El método listar_donaciones devolvió None. Verifique el controlador.")
             else:
@@ -104,6 +134,9 @@ class ListDonacionesScreen(Screen):
             logger.error("El controlador no está inicializado. No se pueden listar las donaciones.")
             return
         try:
+            # Inicializar filtro con la fecha actual para mantener el flujo de trabajo por día.
+            if not self.fecha_filtro:
+                self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
             self.cargar_donaciones()
         except Exception as e:
             logger.error(f"Error consultando donaciones: {e}")
