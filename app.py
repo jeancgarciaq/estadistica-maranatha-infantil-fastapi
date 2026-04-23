@@ -3,6 +3,7 @@ kivy.require('2.3.1')
 
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
+from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from models.database import SessionLocal
 from controllers import (
@@ -27,6 +28,11 @@ class EmiApp(App):
                 logging.FileHandler("app.log"),
                 logging.StreamHandler()
             ]
+        )
+
+        LabelBase.register(
+            name='LineAwesome', 
+            fn_regular='assets/fonts/la-regular-400.ttf'
         )
         
         Window.clearcolor = (20/255, 40/255, 80/255, 1)
