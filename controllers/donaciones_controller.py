@@ -207,14 +207,26 @@ class DonacionesController(BaseController):
         finally:
             db.close()
 
-    def listar_donaciones(self):
+    def listar_donaciones(self, fecha=None):
         """
         Obtiene la lista de donaciones desde la base de datos.
+        :param fecha: Fecha en formato YYYY-MM-DD o date para filtrar resultados (opcional).
         :return: Lista de objetos Donacion.
         """
         db = self.get_db_session()
         try:
-            donaciones = db.query(Donacion).all()
+            query = db.query(Donacion)
+
+            if fecha:
+                if isinstance(fecha, str):
+                    try:
+                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    except ValueError:
+                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
+                        return []
+                query = query.filter(Donacion.fecha == fecha)
+
+            donaciones = query.order_by(Donacion.id.desc()).all()
             logger.info(f"{len(donaciones)} donaciones obtenidas de la base de datos.")
             return donaciones
         except SQLAlchemyError as e:
