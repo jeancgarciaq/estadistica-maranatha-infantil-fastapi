@@ -1,98 +1,132 @@
 <AreasScreen>:
     name: 'areas'
-    BoxLayout:
-        orientation: 'vertical'
-        canvas.before:
-            Color:
-                rgba: 0.102, 0.2, 0.396, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        Label:
-            text: 'Áreas de Maranatha Infantil'
-            font_size: 30
-            color: 1, 1, 1, 1
-            size_hint_y: None
-            height: 50
-        # Formulario
-        GridLayout:
-            cols: 2
-            padding: 20
-            spacing: 20
-            Label:
-                text: 'Id área:'
-                font_size: 28
-                color: 1, 1, 1, 1
-                size_hint_y: None
-                height: 30
-            TextInput:
-                id: area_id
-                height: 30
-                size_hint_y: None
-            Label:
-                text: 'Nombre del área:'
-                font_size: 28
-                color: 1, 1, 1, 1
-                size_hint_y: None
-                height: 30
-            TextInput:
-                id: area_nombre
-                height: 30
-                size_hint_y: None
-        #Contenedor de botones
+    
+    # 1. Usamos ScrollView para que si el teclado aparece, el usuario pueda navegar
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+
         BoxLayout:
-            spacing: 10
-            padding: 10
-            Button:
-                text: 'Crear'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press:
-                    root.crear_area(area_nombre.text)
-            Button:
-                text: 'Actualizar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press:
-                    root.actualizar_area(area_id.text, area_nombre.text)
-            Button:
-                text: 'Eliminar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press:
-                    root.eliminar_area(area_id.text)
-            Button:
-                text: 'Ver Lista'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.manager.current = 'lista_areas'
-            Button:
-                text: "Buscar"
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press:
-                    root.buscar_area()
-        Button:
-            text: 'Volver al Menú'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
+            orientation: 'vertical'
             size_hint_y: None
-            height: 50
-            on_press: root.manager.current = 'menu'
-               
+            height: self.minimum_height  # Esto es vital para que el ScrollView funcione
+            padding: dp(20)
+            spacing: dp(15)
+
+            canvas.before:
+                Color:
+                    rgba: 0.102, 0.2, 0.396, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            # Título
+            Label:
+                text: 'Áreas de Maranatha Kids'
+                font_size: '24sp' # Usamos sp para texto
+                size_hint_y: None
+                height: dp(60)
+                bold: True
+
+            # 2. Formulario optimizado (Vertical para móvil)
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+
+                # Campo ID
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Id área:'
+                        font_size: '18sp'
+                        halign: 'left'
+                        text_size: self.size
+                        color: 1, 1, 1, 1
+                    TextInput:
+                        id: area_id
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Campo Nombre
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Nombre del área:'
+                        font_size: '18sp'
+                        halign: 'left'
+                        text_size: self.size
+                        color: 1, 1, 1, 1
+                    TextInput:
+                        id: area_nombre
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+            # 3. Contenedor de Botones en cuadrícula (Grid)
+            # Esto evita que los botones sean minúsculos
+            GridLayout:
+                cols: 2
+                spacing: dp(10)
+                size_hint_y: None
+                height: dp(120) # Ajustar según cantidad de botones
+
+                Button:
+                    text: 'Crear'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.crear_area(area_nombre.text)
+
+                Button:
+                    text: 'Actualizar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.actualizar_area(area_id.text, area_nombre.text)
+
+                Button:
+                    text: 'Eliminar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0.8, 0.2, 0.2, 1) # Rojo para eliminar
+                    on_press: root.eliminar_area(area_id.text)
+
+                Button:
+                    text: 'Buscar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.buscar_area()
+
+            # Botón de Ver Lista (Ocupa todo el ancho)
+            Button:
+                text: 'Ver Lista de Áreas'
+                size_hint_y: None
+                height: dp(50)
+                font_size: '18sp'
+                background_normal: ''
+                background_color: (0.2, 0.6, 0.2, 1)
+                on_press: root.manager.current = 'lista_areas'
+
+            # Espaciador para empujar el botón "Volver" hacia abajo si hay espacio
+            Widget:
+                size_hint_y: 1
+
+            # Botón de Volver
+            Button:
+                text: 'Volver al Menú'
+                size_hint_y: None
+                height: dp(50)
+                font_size: '18sp'
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1)
+                on_press: root.manager.current = 'menu'
