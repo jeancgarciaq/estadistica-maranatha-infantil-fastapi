@@ -30,6 +30,9 @@ class ListDistribucionesScreen(Screen):
         if not isinstance(distribuciones, list):
             logger.error("El parámetro 'distribuciones' no es una lista. Verifique el controlador.")
             distribuciones = []
+        if 'lista_distribuciones' not in self.ids:
+            logger.error("No se encontró el id 'lista_distribuciones'. Verifique la estructura de list_distribuciones.kv")
+            return
         lista_distribuciones = self.ids.lista_distribuciones
         lista_distribuciones.clear_widgets()
         if not distribuciones or len(distribuciones) == 0:
@@ -104,7 +107,7 @@ class ListDistribucionesScreen(Screen):
             logger.error(f"Error consultando distribuciones: {e}")
             self.actualizar_lista_distribuciones([])
 
-    def on_enter(self):
+    def on_enter(self, *args):
         """Llamando cuando la pantalla está completa."""
         self.cargar_distribuciones()
 
