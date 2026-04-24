@@ -48,7 +48,7 @@ class ListOtrasAreasScreen(Screen):
         """Se ejecuta al entrar a la pantalla."""
         if not self.fecha_filtro:
             self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
-        self.cargar_datos()
+        self.actualizar_lista([]) # Iniciar vacío por defecto
 
     def cargar_datos(self):
         """Carga los registros desde el controlador."""
