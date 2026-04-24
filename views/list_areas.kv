@@ -1,5 +1,6 @@
 <ListAreasScreen>:
     name: 'lista_areas'
+    
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -8,46 +9,49 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+        # 1. TÍTULO (Fijo arriba)
         Label:
             text: 'Lista de Áreas'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '22sp'
             size_hint_y: None
-            height: 50
+            height: dp(60)
+            bold: True
+
+        # 2. ÁREA DE LA LISTA (Scrollable)
         ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            
             GridLayout:
                 id: lista_areas
-                cols: 2  # ID and Name
+                cols: 2  # Mantenemos 2 columnas, pero con mayor altura de fila
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
+                spacing: dp(5)
+                padding: [dp(10), dp(10), dp(10), dp(10)]
+                row_default_height: dp(50) # Altura de fila más cómoda para el dedo
                 row_force_default: True
-        #Contenedor de botones
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: 10
-            padding: 10
+
+        # 3. FOOTER DE BOTONES (Fijo abajo)
+        GridLayout:
+            cols: 2
             size_hint_y: None
-            height: self.minimum_height
-            GridLayout:
-                cols: 2
-                spacing: 10
-                padding: 10
-                size_hint_y: None
-                height: self.minimum_height
-                Button: 
-                    text: 'Listar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None  # Ajusta el ancho dinámicamente
-                    height: 50
-                    on_press: root.controlador.listar_areas(root)  # Pass the root view to the controller
-                Button:
-                    text: 'Cerrar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None  # Ajusta el ancho dinámicamente
-                    height: 50
-                    on_press: app.root.current = 'areas'
+            height: dp(120)
+            padding: dp(10)
+            spacing: dp(10)
+
+            Button: 
+                text: 'Actualizar'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0, 0.47, 0.76, 1) # Azul
+                on_press: root.controlador.listar_areas(root)
+                
+            Button:
+                text: 'Cerrar'
+                font_size: '16sp'
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1) # Gris
+                on_press: app.root.current = 'areas'
