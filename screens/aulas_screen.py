@@ -1,4 +1,4 @@
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import Logger, Screen
 from kivy.lang import Builder
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -11,12 +11,14 @@ from kivy.uix.textinput import TextInput
 from components import StyledPopup
 from components.styled_datepicker import StyledDatePicker
 
+# Cargar la vista a nivel de módulo para evitar errores de inicialización de IDs
+try:
+    Builder.load_file('views/aulas.kv')
+except Exception as e:
+    Logger.error(f"Error cargando views/aulas.kv: {e}")
+
 class AulasScreen(Screen):
     def __init__(self, controlador, **kwargs):
-        try:
-            Builder.load_file('views/aulas.kv')
-        except Exception as e:
-            print(f"Error al cargar la vista aulas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
 
