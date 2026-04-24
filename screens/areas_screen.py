@@ -1,13 +1,16 @@
+from kivy.logger import Logger
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from components.styled_popup import StyledPopup
 
+# Cargar la vista a nivel de módulo para evitar errores de inicialización de IDs
+try:
+    Builder.load_file('views/areas.kv')
+except Exception as e:
+    Logger.error(f"Error cargando views/areas.kv: {e}")
+
 class AreasScreen(Screen):
     def __init__(self, controlador, **kwargs):
-        try:
-            Builder.load_file('views/areas.kv')
-        except Exception as e:
-            print(f"Error al cargar la vista áreas: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
 
