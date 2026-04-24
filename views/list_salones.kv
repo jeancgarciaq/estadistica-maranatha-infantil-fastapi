@@ -10,45 +10,45 @@
                 size: self.size
         Label:
             text: 'Lista de Salones'
-            font_size: 30
+            font_size: '22sp'
+            bold: True
             color: 1, 1, 1, 1
             size_hint_y: None
-            height: 50
+            height: dp(60)
         ScrollView:
+            do_scroll_x: False
             GridLayout:
                 id: lista_salones
-                cols: 3 # ID, Salon and Edad
+                cols: 1 # Optimizado para móvil: una columna
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
-                row_force_default: True
+                spacing: dp(10)
+                padding: dp(15)
+
         #Contenedor de botones
         BoxLayout:
             orientation: 'vertical'
-            spacing: 10
-            padding: 10
+            spacing: dp(10)
+            padding: dp(10)
             size_hint_y: None
             height: self.minimum_height
             GridLayout:
                 cols: 2
-                spacing: 10
-                padding: 10
+                spacing: dp(10)
                 size_hint_y: None
-                height: self.minimum_height
+                height: dp(70)
                 
                 Button:
-                    text: 'Listar'
-                    font_size: 28
+                    text: 'LISTAR'
+                    font_size: '18sp'
+                    bold: True
                     background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
+                    background_color: (0, 0.6, 0.2, 1)
                     on_press: root.controlador.listar_salones(root)
                 Button:
-                    text: 'Cerrar'
-                    font_size: 28
+                    text: 'VOLVER'
+                    font_size: '18sp'
+                    bold: True
                     background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
+                    background_color: (0.5, 0.5, 0.5, 1)
                     on_press: root.manager.current = 'salones'
