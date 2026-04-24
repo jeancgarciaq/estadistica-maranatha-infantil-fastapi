@@ -1,5 +1,6 @@
 <ListDistribucionesScreen>:
     name: 'lista_distribuciones'
+
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -8,88 +9,46 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
         Label:
             text: 'Lista de Distribuciones'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '22sp'
             size_hint_y: None
-            height: 50
-        # Encabezados de la lista
-        BoxLayout:
-            size_hint_y: None
-            height: 40
-            padding: [10, 0]
-            canvas.before:
-                Color:
-                    rgba: 0.2, 0.3, 0.5, 1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            Label:
-                text: 'ID'
-                bold: True
-                size_hint_x: 0.1
-            Label:
-                text: 'Donación'
-                bold: True
-                size_hint_x: 0.2
-            Label:
-                text: 'Destino'
-                bold: True
-                size_hint_x: 0.1
-            Label:
-                text: 'Cant.'
-                bold: True
-                size_hint_x: 0.1
-            Label:
-                text: 'Unid.'
-                bold: True
-                size_hint_x: 0.1
-            Label:
-                text: 'Fecha'
-                bold: True
-                size_hint_x: 0.2
-            Label:
-                text: 'Acciones'
-                bold: True
-                size_hint_x: 0.2
+            height: dp(60)
+            bold: True
 
         ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+
             GridLayout:
                 id: lista_distribuciones
-                cols: 7  # ID, ID Donación, ID Salón, Cantidad, Unidad, Fecha, Acciones
+                cols: 7
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 50
+                row_default_height: dp(50)
                 row_force_default: True
-                spacing: [0, 5]
-                padding: [10, 5]
-        # Contenedor de botones
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: 10
-            padding: 10
+                spacing: [0, dp(5)]
+                padding: [dp(10), dp(5)]
+
+        GridLayout:
+            cols: 2
+            spacing: dp(10)
+            padding: dp(10)
             size_hint_y: None
-            height: self.minimum_height
-            GridLayout:
-                cols: 2
-                spacing: 10
-                padding: 10
-                size_hint_y: None
-                height: self.minimum_height
-                Button: 
-                    text: 'Listar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
-                    on_press: root.cargar_distribuciones()
-                Button:
-                    text: 'Cerrar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
-                    on_press: app.root.current = 'distribuciones'
+            height: dp(70)
+
+            Button:
+                text: 'LISTAR'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0, 0.47, 0.76, 1)
+                on_press: root.cargar_distribuciones()
+
+            Button:
+                text: 'CERRAR'
+                font_size: '16sp'
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1)
+                on_press: app.root.current = 'distribuciones'
