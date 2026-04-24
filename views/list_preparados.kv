@@ -2,8 +2,8 @@
     orientation: 'vertical'
     size_hint_y: None
     height: self.minimum_height
-    padding: dp(15)
-    spacing: dp(8)
+    padding: [dp(15), dp(15)]
+    spacing: dp(10)
 
     preparado_id: ''
     nombre: ''
@@ -12,51 +12,70 @@
 
     canvas.before:
         Color:
-            rgba: 0.15, 0.25, 0.45, 1
+            rgba: 0.18, 0.28, 0.48, 1 # Color ligeramente más claro para resaltar
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [dp(12),]
+            radius: [dp(10),]
 
     BoxLayout:
+        orientation: 'horizontal'
         size_hint_y: None
-        height: dp(30)
+        height: self.minimum_height
+        spacing: dp(5)
+
         Label:
             text: root.nombre
             bold: True
-            font_size: '18sp'
+            font_size: '17sp'
             halign: 'left'
-            text_size: self.size
+            valign: 'middle'
+            text_size: (self.width, None)
+            size_hint_y: None
+            height: self.texture_size[1]
+
         Label:
             text: root.fecha
-            font_size: '14sp'
+            font_size: '12sp'
             halign: 'right'
-            text_size: self.size
+            valign: 'top'
+            text_size: (self.width, None)
             color: 0.7, 0.7, 0.7, 1
+            size_hint: (0.35, None)
+            height: self.texture_size[1]
 
     Label:
-        text: 'ID: ' + root.preparado_id + ' | Cantidad: ' + root.cantidad
+        text: 'ID: ' + str(root.preparado_id) + '  •  Cantidad: ' + str(root.cantidad)
+        size_hint_y: None
+        height: self.texture_size[1]
         font_size: '14sp'
         halign: 'left'
-        text_size: self.size
-        color: 0.6, 0.6, 0.6, 1
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
 
     BoxLayout:
         size_hint_y: None
         height: dp(40)
         spacing: dp(10)
+        padding: [0, dp(5), 0, 0]
+
         Button:
             text: 'Editar'
             font_size: '14sp'
+            bold: True
+            size_hint_x: 0.5
             background_normal: ''
             background_color: (0, 0.47, 0.76, 1)
             on_press: app.root.get_screen('lista_preparados').editar_registro(root.preparado_id)
+
         Button:
             text: 'Eliminar'
             font_size: '14sp'
+            bold: True
             background_normal: ''
             background_color: (0.8, 0, 0, 1)
             on_press: app.root.get_screen('lista_preparados').confirmar_eliminacion(root.preparado_id)
+            size_hint_x: 0.5
 
 <ListPreparadosScreen>:
     name: 'lista_preparados'
@@ -76,9 +95,35 @@
             height: dp(60)
             bold: True
 
+        # 2. FILTRO POR FECHA
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: dp(10), 0, dp(10), dp(10)
+            spacing: dp(10)
+
+            TextInput:
+                id: fecha_filtro
+                text: root.fecha_filtro
+                readonly: True
+                hint_text: 'Seleccione fecha'
+                multiline: False
+                font_size: '16sp'
+
+            Button:
+                text: 'FECHA'
+                size_hint_x: None
+                width: dp(110)
+                font_size: '14sp'
+                bold: True
+                background_color: (0.2, 0.6, 0.2, 1)
+                on_press: root.abrir_datepicker_filtro()
+
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True
+            bar_width: dp(4)
+            
             GridLayout:
                 id: lista_preparados
                 cols: 1
@@ -108,4 +153,4 @@
                 bold: True
                 background_normal: ''
                 background_color: (0.5, 0.5, 0.5, 1) # Gris
-                on_press: app.root.current = 'combinar_donaciones'
+                on_press: app.root.current = 'donaciones'
