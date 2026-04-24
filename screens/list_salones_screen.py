@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
+from kivy.factory import Factory
 from kivy.lang import Builder
 import logging
 
@@ -35,10 +36,13 @@ class ListSalonesScreen(Screen):
             lista_salones.add_widget(Label(text="No hay salones registrados", font_size='18sp', size_hint_y=None, height=40))
         else:
             for salon in salones:
-                logger.debug(f"Agregando salón: ID={salon.id}, Nombre={salon.salon}, Edad={salon.edad}")
-                lista_salones.add_widget(Label(text=f"{salon.id}", size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=f"{salon.salon}", size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=f"{salon.edad}", size_hint_y=None, height=40))
+                # Usamos Factory para crear la tarjeta definida en el KV
+                card = Factory.SalonCard()
+                card.salon_id = str(salon.id)
+                card.nombre = str(salon.salon)
+                card.edad = str(salon.edad)
+                
+                lista_salones.add_widget(card)
             
     def cargar_salones(self):
         """Consultando y llenando la lista salones."""
@@ -53,12 +57,10 @@ class ListSalonesScreen(Screen):
             logger.error(f"Error consultando salones: {e}")
             self.actualizar_lista_salones([])
     
-    def on_enter(self):
+    def on_enter(self): # type: ignore
         """Llamando cuando la pantalla está completa."""
         self.cargar_salones()
 
     def volver(self, instance):
         """Regresa a la pantalla de salones"""
         self.manager.current = 'salones'
-
-
