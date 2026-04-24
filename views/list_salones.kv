@@ -1,3 +1,56 @@
+<SalonCard@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: dp(15)
+    spacing: dp(5)
+
+    salon_id: ''
+    nombre: ''
+    edad: ''
+
+    canvas.before:
+        Color:
+            rgba: 0.18, 0.28, 0.48, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10),]
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: dp(30)
+        Label:
+            text: 'ID: ' + str(root.salon_id)
+            bold: True
+            font_size: '14sp'
+            halign: 'left'
+            text_size: self.size
+            color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Salón: ' + root.nombre
+        bold: True
+        font_size: '18sp'
+        halign: 'left'
+        valign: 'middle'
+        text_size: (self.width, None)
+        size_hint_y: None
+        height: self.texture_size[1]
+        color: 1, 1, 1, 1
+
+    Label:
+        text: 'Edad: ' + root.edad
+        font_size: '16sp'
+        halign: 'left'
+        valign: 'middle'
+        text_size: (self.width, None)
+        size_hint_y: None
+        height: self.texture_size[1]
+        color: 0.9, 0.9, 0.9, 1
+
+
 <ListSalonesScreen>:
     name: 'lista_salones'
     BoxLayout:
