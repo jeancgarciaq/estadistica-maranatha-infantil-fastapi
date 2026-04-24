@@ -51,7 +51,7 @@ class ListPreparadosScreen(Screen):
     def on_enter(self):
         if not self.fecha_filtro:
             self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
-        self.cargar_preparados()
+        self.actualizar_lista([]) # Iniciar con la lista vacía hasta filtrar
 
     def cargar_preparados(self):
         fecha = self._obtener_fecha_filtro()
