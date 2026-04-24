@@ -19,3 +19,4 @@ from .list_donaciones_screen import ListDonacionesScreen
 from .list_preparados_screen import ListPreparadosScreen
 from .list_distribuciones_screen import ListDistribucionesScreen
 from .list_otras_areas_screen import ListOtrasAreasScreen
+from .list_logisticas_screen import ListLogisticaScreen
