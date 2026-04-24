@@ -10,14 +10,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Cargar la vista a nivel de módulo para evitar errores de inicialización de IDs
+Builder.load_file('views/list_otras_areas.kv')
+
 class ListOtrasAreasScreen(Screen):
+    
     fecha_filtro = StringProperty("")
 
     def __init__(self, controlador, **kwargs):
-        try:
-            Builder.load_file('views/list_otras_areas.kv')
-        except Exception as e:
-            logger.error(f"Error cargando list_otras_areas.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
 
@@ -65,6 +65,10 @@ class ListOtrasAreasScreen(Screen):
 
     def actualizar_lista(self, registros):
         """Puebla el contenedor con los registros."""
+        if 'container' not in self.ids:
+            logger.error("El widget 'container' no está definido en el archivo .kv.")
+            return
+            
         container = self.ids.container
         container.clear_widgets()
 
@@ -91,25 +95,25 @@ class ListOtrasAreasScreen(Screen):
 
             container.add_widget(card)
 
-    def editar_registro(self, id):
+    def editar_registro(self, registro_id):
         """Regresa a la pantalla principal y carga el registro para editar."""
-        id = int(id)
+        registro_id = int(registro_id)
         self.manager.current = 'otrasareas'
         main_screen = self.manager.get_screen('otrasareas')
-        main_screen.editar_otrasareas(id)
+        main_screen.editar_otrasareas(registro_id)
 
-    def confirmar_eliminacion(self, id):
+    def confirmar_eliminacion(self, registro_id):
         """Muestra el popup de confirmación antes de borrar."""
         StyledPopup.mostrar_confirmacion(
             "Confirmar Eliminación",
             "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminar este registro?",
-            on_confirm=lambda: self.eliminar_registro(id)
+            on_confirm=lambda: self.eliminar_registro(registro_id)
         )
 
-    def eliminar_registro(self, id):
+    def eliminar_registro(self, registro_id):
         """Ejecuta la eliminación final del registro."""
-        id = int(id)
-        exito, mensaje = self.controlador.eliminar_otrasareas(id)
+        registro_id = int(registro_id)
+        exito, mensaje = self.controlador.eliminar_otrasareas(registro_id)
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
             self.cargar_datos() # Refrescar lista
