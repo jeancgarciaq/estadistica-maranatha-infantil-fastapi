@@ -13,7 +13,7 @@ from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, CombinarDonacionesScreen,
     DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen,
     AyudaScreen, AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen,
-    ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen )
+    ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen, ListLogisticaScreen)
 import logging
 
 # Configure logging
@@ -79,7 +79,7 @@ class EmiApp(App):
             DonacionesScreen(controllers["donaciones"], name='donaciones'),
             CombinarDonacionesScreen(controllers["donaciones"], name='combinar_donaciones'),
             DistribucionesScreen(controllers["distribuciones"], name='distribuciones'),
-            LogisticaScreen(controllers["logistica"], name='logistica'),
+            LogisticaScreen(controllers["logistica"], name='logisticas'),
             OtrasAreasScreen(controllers["otrasareas"], name='otrasareas'),
             EnsenanzaScreen(controllers["ensenanza"], name='ensenanza'),
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
@@ -92,6 +92,7 @@ class EmiApp(App):
             ListPreparadosScreen(controlador=controllers["donaciones"], name='lista_preparados'),
             ListDistribucionesScreen(controlador=controllers["distribuciones"], name='lista_distribuciones'),
             ListOtrasAreasScreen(controlador=controllers["otrasareas"], name='lista_otras_areas'),
+            ListLogisticaScreen(controlador=controllers["logistica"], name='lista_logisticas'),
         ]
 
         # Agregar pantallas al manejador
