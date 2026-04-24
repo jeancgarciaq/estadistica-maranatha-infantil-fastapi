@@ -1,149 +1,145 @@
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from datetime import datetime
+from kivy.properties import ObjectProperty, StringProperty
 from components.styled_popup import StyledPopup
 from components.styled_datepicker import StyledDatePicker
+from datetime import datetime
+import logging
 
+logger = logging.getLogger(__name__)
+
+# Cargar la vista a nivel de módulo para evitar errores de inicialización de IDs
+try:
+    Builder.load_file('views/logistica.kv')
+except Exception as e:
+    logger.error(f"Error cargando logistica.kv: {e}")
 
 class LogisticaScreen(Screen):
+    controlador = ObjectProperty(None)
+    
+    # Propiedades para el formulario
+    logistica_id_text = StringProperty('')
+    logistica_almacen_text = StringProperty('')
+    logistica_capitan_text = StringProperty('')
+    logistica_distribucion_text = StringProperty('')
+    logistica_hidratacion_text = StringProperty('')
+    logistica_pasillo_text = StringProperty('')
+    logistica_secretaria_text = StringProperty('')
+    logistica_fecha_text = StringProperty(datetime.now().strftime('%Y-%m-%d'))
+
     def __init__(self, controlador, **kwargs):
-        try:
-            Builder.load_file('views/logistica.kv')
-        except Exception as e:
-            print(f"Error cargando logistica.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+        logger.info("Inicializando LogisticaScreen")
+
+    def on_enter(self, *args):
+        # Limpiar el formulario al entrar a la pantalla
+        self.limpiar_formulario()
+        self.logistica_fecha_text = datetime.now().strftime('%Y-%m-%d')
 
     def abrir_datepicker(self, target_id):
-        """Abre el selector de fecha."""
+        """Abre el selector de fecha para el campo de fecha."""
         def set_date(date_str):
-            self.ids[target_id].text = date_str
-            
+            if target_id == 'logistica_fecha':
+                self.logistica_fecha_text = date_str
+            # Add other date fields if any
+
         picker = StyledDatePicker(callback=set_date)
         picker.open()
 
-    def obtener_datos_formulario(self):
-        almacen = self.ids.logistica_almacen.text.strip()
-        capitan = self.ids.logistica_capitan.text.strip()
-        distribucion = self.ids.logistica_distribucion.text.strip()
-        hidratacion = self.ids.logistica_hidratacion.text.strip()
-        pasillo = self.ids.logistica_pasillo.text.strip()
-        secretaria = self.ids.logistica_secretaria.text.strip()
-        fecha = self.ids.logistica_fecha.text.strip()
+    def limpiar_formulario(self):
+        self.logistica_id_text = ''
+        self.logistica_almacen_text = ''
+        self.logistica_capitan_text = ''
+        self.logistica_distribucion_text = ''
+        self.logistica_hidratacion_text = ''
+        self.logistica_pasillo_text = ''
+        self.logistica_secretaria_text = ''
+        self.logistica_fecha_text = datetime.now().strftime('%Y-%m-%d')
 
-        campos = {
-            "almacen": almacen, "capitan": capitan,
-            "distribucion": distribucion, "hidratacion": hidratacion,
-            "pasillo": pasillo, "secretaria": secretaria, "fecha": fecha
+    def _obtener_datos_formulario(self):
+        datos = {
+            'almacen': self.logistica_almacen_text.strip(),
+            'capitan': self.logistica_capitan_text.strip(),
+            'distribucion': self.logistica_distribucion_text.strip(),
+            'hidratacion': self.logistica_hidratacion_text.strip(),
+            'pasillo': self.logistica_pasillo_text.strip(),
+            'secretaria': self.logistica_secretaria_text.strip(),
+            'fecha': self.logistica_fecha_text.strip()
         }
-        for nombre, valor in campos.items():
-            if not valor:
-                StyledPopup.mostrar_popup("Error", f"El campo '{nombre}' es obligatorio.", tipo="error")
-                return None
-
-        try:
-            datetime.strptime(fecha, '%Y-%m-%d').date()
-        except ValueError:
-            StyledPopup.mostrar_popup("Error", "Formato de fecha incorrecto. Debe ser YYYY-MM-DD.", tipo="error")
-            return None
-
-        try:
-            return {
-                "almacen": int(almacen),
-                "capitan": int(capitan),
-                "distribucion": int(distribucion),
-                "hidratacion": int(hidratacion),
-                "pasillo": int(pasillo),
-                "secretaria": int(secretaria),
-                "fecha": fecha
-            }
-        except ValueError:
-            StyledPopup.mostrar_popup("Error", "Los campos numéricos deben ser números enteros.", tipo="error")
-            return None
-
-    def _limpiar_campos(self):
-        for campo in ['logistica_almacen', 'logistica_capitan', 'logistica_distribucion',
-                      'logistica_hidratacion', 'logistica_pasillo', 'logistica_secretaria', 'logistica_fecha']:
-            if hasattr(self.ids, campo):
-                getattr(self.ids, campo).text = ""
-        if hasattr(self.ids, 'logistica_id'):
-            self.ids.logistica_id.text = ""
+        return datos
 
     def crear_logistica(self):
-        datos = self.obtener_datos_formulario()
-        if not datos:
-            return
-        exito, mensaje = self.controlador.crear_logistica(
-            datos["almacen"], datos["capitan"], datos["distribucion"],
-            datos["hidratacion"], datos["pasillo"], datos["secretaria"], datos["fecha"]
-        )
+        datos = self._obtener_datos_formulario()
+        exito, mensaje = self.controlador.crear_logistica(datos)
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
-            self._limpiar_campos()
-            self.cargar_logisticas()
+            self.limpiar_formulario()
         else:
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def actualizar_logistica(self):
-        logistica_id = self.ids.logistica_id.text.strip() if hasattr(self.ids, 'logistica_id') else ""
-        if not logistica_id or not logistica_id.isdigit():
-            StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para actualizar.", tipo="error")
+        log_id_str = self.logistica_id_text.strip()
+        if not log_id_str:
+            StyledPopup.mostrar_popup("Error", "Debe ingresar un ID de logística para actualizar.", tipo="error")
             return
-        datos = self.obtener_datos_formulario()
-        if not datos:
+        try:
+            log_id = int(log_id_str)
+        except ValueError:
+            StyledPopup.mostrar_popup("Error", "El ID de logística debe ser un número entero.", tipo="error")
             return
-        exito, mensaje = self.controlador.actualizar_logistica(
-            int(logistica_id), datos["almacen"], datos["capitan"], datos["distribucion"],
-            datos["hidratacion"], datos["pasillo"], datos["secretaria"], datos["fecha"]
+
+        datos = self._obtener_datos_formulario()
+        exito, mensaje = self.controlador.actualizar_logistica(log_id, datos)
+        if exito:
+            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
+            self.limpiar_formulario()
+        else:
+            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
+
+    def eliminar_logistica(self, log_id_str):
+        if not log_id_str:
+            StyledPopup.mostrar_popup("Error", "Debe ingresar un ID de logística para eliminar.", tipo="error")
+            return
+        try:
+            log_id = int(log_id_str)
+        except ValueError:
+            StyledPopup.mostrar_popup("Error", "El ID de logística debe ser un número entero.", tipo="error")
+            return
+
+        StyledPopup.mostrar_confirmacion(
+            "Confirmar Eliminación",
+            f"¿Está seguro de que desea eliminar la logística ID {log_id}?",
+            on_confirm=lambda: self._ejecutar_eliminacion(log_id)
         )
+
+    def _ejecutar_eliminacion(self, log_id):
+        exito, mensaje = self.controlador.eliminar_logistica(log_id)
         if exito:
             StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
-            self._limpiar_campos()
-            self.cargar_logisticas()
+            self.limpiar_formulario()
         else:
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
-    def eliminar_logistica(self, id):
-        exito, mensaje = self.controlador.eliminar_logistica(id)
-        if exito:
-            StyledPopup.mostrar_popup("Éxito", mensaje, tipo="success")
-            self.cargar_logisticas()
-        else:
-            StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
-
-    def cargar_logisticas(self):
-        logisticas = self.controlador.listar_logisticas()
-        self.actualizar_lista_logisticas(logisticas)
-
-    def actualizar_lista_logisticas(self, logisticas):
-        lista_grid = self.ids.lista_logisticas
-        lista_grid.clear_widgets()
-        if not logisticas:
-            lista_grid.add_widget(Label(text="No hay registros de logística", size_hint_y=None, height=40))
-            return
-        for logistica in logisticas:
-            lista_grid.add_widget(Label(text=f"ID: {logistica.id} | Fecha: {logistica.fecha}", size_hint_y=None, height=40))
-            lista_grid.add_widget(Button(text="Editar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=logistica.id: self.editar_logistica(id)))
-            lista_grid.add_widget(Button(text="Eliminar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=logistica.id: self.eliminar_logistica(id)))
-
-    def editar_logistica(self, id):
-        logistica = self.controlador.obtener_logistica(id)
+    def cargar_logistica_para_edicion(self, log_id):
+        """Carga los datos de una logística en el formulario para su edición."""
+        logistica = self.controlador.obtener_logistica(log_id)
         if logistica:
-            self.ids.logistica_almacen.text = str(logistica.almacen)
-            self.ids.logistica_capitan.text = str(logistica.capitan)
-            self.ids.logistica_distribucion.text = str(logistica.distribucion)
-            self.ids.logistica_fecha.text = str(logistica.fecha)
-            self.ids.logistica_hidratacion.text = str(logistica.hidratacion)
-            self.ids.logistica_pasillo.text = str(logistica.pasillo)
-            self.ids.logistica_secretaria.text = str(logistica.secretaria)
-            if hasattr(self.ids, 'logistica_id'):
-                self.ids.logistica_id.text = str(logistica.id)
+            self.logistica_id_text = str(logistica.id)
+            self.logistica_almacen_text = logistica.almacen
+            self.logistica_capitan_text = logistica.capitan
+            self.logistica_distribucion_text = logistica.distribucion or ''
+            self.logistica_hidratacion_text = logistica.hidratacion or ''
+            self.logistica_pasillo_text = logistica.pasillo or ''
+            self.logistica_secretaria_text = logistica.secretaria or ''
+            self.logistica_fecha_text = logistica.fecha.strftime('%Y-%m-%d')
         else:
-            StyledPopup.mostrar_popup("Error", "Logística no encontrada.", tipo="error")
+            StyledPopup.mostrar_popup("Error", "Logística no encontrada para edición.", tipo="error")
 
-    def on_enter(self):
-        self.cargar_logisticas()
+    def ir_a_lista_logisticas(self):
+        """Navega a la lista, validando primero si la pantalla existe en el manager."""
+        if self.manager.has_screen('lista_logisticas'):
+            self.manager.current = 'lista_logisticas'
+        else:
+            logger.error("La pantalla 'lista_logisticas' no ha sido registrada en el ScreenManager.")
+            StyledPopup.mostrar_popup("Error", "La vista de listado no está registrada en el sistema.", tipo="error")
