@@ -48,7 +48,7 @@ class ListPreparadosScreen(Screen):
             StyledPopup.mostrar_popup("Error", "Formato de fecha inválido.", tipo="error")
             return None
 
-    def on_enter(self):
+    def on_enter(self): # type: ignore
         if not self.fecha_filtro:
             self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
         self.actualizar_lista([]) # Iniciar con la lista vacía hasta filtrar
