@@ -137,7 +137,7 @@ class ListDonacionesScreen(Screen):
             # Inicializar filtro con la fecha actual para mantener el flujo de trabajo por día.
             if not self.fecha_filtro:
                 self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
-            self.cargar_donaciones()
+            self.actualizar_lista_donaciones([]) # Iniciar vacío por defecto
         except Exception as e:
             logger.error(f"Error consultando donaciones: {e}")
             self.actualizar_lista_donaciones([])
