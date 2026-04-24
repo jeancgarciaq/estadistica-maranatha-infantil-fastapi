@@ -1,3 +1,63 @@
+<PreparadoCard@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: dp(15)
+    spacing: dp(8)
+
+    preparado_id: ''
+    nombre: ''
+    cantidad: ''
+    fecha: ''
+
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.25, 0.45, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12),]
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(30)
+        Label:
+            text: root.nombre
+            bold: True
+            font_size: '18sp'
+            halign: 'left'
+            text_size: self.size
+        Label:
+            text: root.fecha
+            font_size: '14sp'
+            halign: 'right'
+            text_size: self.size
+            color: 0.7, 0.7, 0.7, 1
+
+    Label:
+        text: 'ID: ' + root.preparado_id + ' | Cantidad: ' + root.cantidad
+        font_size: '14sp'
+        halign: 'left'
+        text_size: self.size
+        color: 0.6, 0.6, 0.6, 1
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(40)
+        spacing: dp(10)
+        Button:
+            text: 'Editar'
+            font_size: '14sp'
+            background_normal: ''
+            background_color: (0, 0.47, 0.76, 1)
+            on_press: app.root.get_screen('lista_preparados').editar_registro(root.preparado_id)
+        Button:
+            text: 'Eliminar'
+            font_size: '14sp'
+            background_normal: ''
+            background_color: (0.8, 0, 0, 1)
+            on_press: app.root.get_screen('lista_preparados').confirmar_eliminacion(root.preparado_id)
+
 <ListPreparadosScreen>:
     name: 'lista_preparados'
     BoxLayout:
@@ -11,34 +71,41 @@
 
         Label:
             text: 'Lista de Alimentos Preparados'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '22sp'
             size_hint_y: None
-            height: 50
+            height: dp(60)
+            bold: True
 
         ScrollView:
-            BoxLayout:
+            do_scroll_x: False
+            do_scroll_y: True
+            GridLayout:
                 id: lista_preparados
-                orientation: 'vertical'
+                cols: 1
                 size_hint_y: None
                 height: self.minimum_height
-                spacing: 10
-                padding: 10
+                spacing: dp(12)
+                padding: dp(15)
 
-        BoxLayout:
+        GridLayout:
+            cols: 2
             size_hint_y: None
-            height: 50
-            padding: 10
-            spacing: 10
+            height: dp(120)
+            padding: dp(10)
+            spacing: dp(10)
+
             Button:
-                text: 'Recargar'
-                font_size: 24
+                text: 'RECARGAR'
+                font_size: '16sp'
+                bold: True
                 background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
+                background_color: (0, 0.6, 0.2, 1) # Verde
                 on_press: root.cargar_preparados()
+
             Button:
-                text: 'Volver a Preparados'
-                font_size: 24
+                text: 'VOLVER'
+                font_size: '16sp'
+                bold: True
                 background_normal: ''
-                background_color: (0.5, 0.5, 0.5, 1)
+                background_color: (0.5, 0.5, 0.5, 1) # Gris
                 on_press: app.root.current = 'combinar_donaciones'
