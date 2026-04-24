@@ -1,0 +1,192 @@
+<LogisticaCard@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: dp(15)
+    spacing: dp(8)
+
+    log_id: ''
+    capitan: ''
+    almacen: ''
+    fecha: ''
+    distribucion: ''
+    hidratacion: ''
+    pasillo: ''
+    secretaria: ''
+
+    canvas.before:
+        Color:
+            rgba: 0.18, 0.28, 0.48, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10),]
+
+    BoxLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        Label:
+            text: 'Capitán: ' + root.capitan
+            bold: True
+            font_size: '17sp'
+            halign: 'left'
+            valign: 'middle'
+            text_size: (self.width, None)
+            size_hint_y: None
+            height: self.texture_size[1]
+        Label:
+            text: root.fecha
+            font_size: '12sp'
+            halign: 'right'
+            valign: 'top'
+            text_size: (self.width, None)
+            color: 0.7, 0.7, 0.7, 1
+            size_hint_x: 0.35
+            size_hint_y: None
+            height: self.texture_size[1]
+
+    Label:
+        text: 'ID: ' + root.log_id + ' | Almacén: ' + root.almacen
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+        halign: 'left'
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Distribución: ' + root.distribucion
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+        halign: 'left'
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Hidratación: ' + root.hidratacion
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+        halign: 'left'
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Pasillo: ' + root.pasillo
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+        halign: 'left'
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Secretaría: ' + root.secretaria
+        font_size: '14sp'
+        size_hint_y: None
+        height: self.texture_size[1]
+        halign: 'left'
+        text_size: (self.width, None)
+        color: 0.8, 0.8, 0.8, 1
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(40)
+        spacing: dp(10)
+        padding: [0, dp(5), 0, 0]
+
+        Button:
+            text: 'Editar'
+            font_size: '14sp'
+            bold: True
+            size_hint_x: 0.5
+            background_normal: ''
+            background_color: (0, 0.47, 0.76, 1)
+            on_press: app.root.get_screen('lista_logisticas').editar_registro(root.log_id)
+
+        Button:
+            text: 'Eliminar'
+            font_size: '14sp'
+            bold: True
+            size_hint_x: 0.5
+            background_normal: ''
+            background_color: (0.8, 0, 0, 1)
+            on_press: app.root.get_screen('lista_logisticas').confirmar_eliminacion(root.log_id)
+
+<ListLogisticaScreen>:
+    name: 'lista_logisticas'
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.102, 0.2, 0.396, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Listado de Logísticas'
+            font_size: '22sp'
+            size_hint_y: None
+            height: dp(60)
+            bold: True
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: dp(10), 0, dp(10), dp(10)
+            spacing: dp(10)
+
+            TextInput:
+                id: fecha_filtro
+                text: root.fecha_filtro
+                readonly: True
+                hint_text: 'Seleccione fecha'
+                multiline: False
+                font_size: '16sp'
+
+            Button:
+                text: 'FECHA'
+                size_hint_x: None
+                width: dp(110)
+                font_size: '14sp'
+                bold: True
+                background_color: (0.2, 0.6, 0.2, 1)
+                on_press: root.abrir_datepicker_filtro()
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            bar_width: dp(4)
+            
+            GridLayout:
+                id: lista_logisticas
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(12)
+                padding: dp(15)
+
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            height: dp(120)
+            padding: dp(10)
+            spacing: dp(10)
+
+            Button:
+                text: 'RECARGAR'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0, 0.6, 0.2, 1) # Verde
+                on_press: root.cargar_logisticas()
+
+            Button:
+                text: 'VOLVER'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1) # Gris
+                on_press: app.root.current = 'logisticas'
