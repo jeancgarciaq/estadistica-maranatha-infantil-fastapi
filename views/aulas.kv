@@ -1,5 +1,6 @@
 <AulasScreen>:
     name: 'aulas'
+    
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -8,192 +9,291 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+        # 1. Título con altura fija y tamaño de fuente adaptable
         Label:
             text: 'Aulas de Maranatha Infantil'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '22sp'
             size_hint_y: None
-            height: 50
-        # Formulario
+            height: dp(60)
+            bold: True
+
+        # 2. Área de Formulario con ScrollView
         ScrollView:
-            size_hint_y: 1 # Ocupa todo el espacio vertical disponible
-            GridLayout:
-                cols: 2
-                padding: 20
-                spacing: 20
+            do_scroll_x: False
+            do_scroll_y: True
+            
+            BoxLayout:
+                orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 50
-                Label:
-                    text: 'Id Aulas:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_id
-                Label:
-                    text: 'Auxiliar:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_auxiliar
-                Label:
-                    text: 'Capitán:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_capitan
-                Label:
-                    text: 'Colaborador:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_colaborador
-                Label:
-                    text: 'Condición:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_condicion
-                Label:
-                    text: 'Maestra:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_maestra
-                Label:
-                    text: 'Niños:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_ninos
-                Label:
-                    text: 'Niñas:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_ninas
-                Label:
-                    text: 'Subcapitán:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: aula_subcapitan
-                Label:
-                    text: 'Fecha (YYYY-MM-DD):'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
+                padding: dp(15)
+                spacing: dp(15)
+
+                # Función auxiliar para crear campos (Simulada en el diseño)
+                # Usaremos un patrón repetitivo: Label arriba, Input abajo.
+
+                # --- BLOQUE DE CAMPOS ---
+                # Repetiremos este patrón para cada campo para asegurar legibilidad
+                
+                # ID Aulas
                 BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: 10
-                    TextInput:
-                        id: aula_fecha
-                        readonly: True
-                        hint_text: 'YYYY-MM-DD'
-                    Button:
-                        size_hint_x: None
-                        width: 50
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.abrir_datepicker('aula_fecha')
-                        Image:
-                            source: 'images/calendar_icon.png'
-                            center_x: self.parent.center_x
-                            center_y: self.parent.center_y
-                            size: 30, 30
-                            allow_stretch: True
-                Label:
-                    text: 'ID Salón:'
-                    font_size: 16
-                    color: 1, 1, 1, 1
+                    orientation: 'vertical'
                     size_hint_y: None
-                    height: 30
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: 10
+                    height: dp(70)
+                    Label:
+                        text: 'Id Aulas:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
                     TextInput:
-                        id: aula_id_salon
-                    Button:
-                        text: 'Seleccionar'
-                        font_size: 16
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
+                        id: aula_id
+                        multiline: False
+                        font_size: '18sp'
                         size_hint_y: None
-                        height: 50
-                        on_press: root.mostrar_popup_salones()
-        # Contenedor de Botones
-        BoxLayout:
+                        height: dp(40)
+
+                # Auxiliar
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Auxiliar:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_auxiliar
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Capitán
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Capitán:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_capitan
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Colaborador
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Colaborador:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_colaborador
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Condición
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Condición:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_condicion
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Maestra
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Maestra:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_maestra
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Niños y Niñas (Podemos ponerlos en una fila si queremos ahorrar espacio)
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: dp(130)
+                    spacing: dp(10)
+                    
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            text: 'Niños:'
+                            font_size: '16sp'
+                            halign: 'left'
+                            text_size: self.size
+                        TextInput:
+                            id: aula_ninos
+                            multiline: False
+                            font_size: '18sp'
+                            size_hint_y: None
+                            height: dp(40)
+                    
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Label:
+                            text: 'Niñas:'
+                            font_size: '16sp'
+                            halign: 'left'
+                            text_size: self.size
+                        TextInput:
+                            id: aula_ninas
+                            multiline: False
+                            font_size: '18sp'
+                            size_hint_y: None
+                            height: dp(40)
+
+                # Subcapitán
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Subcapitán:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: aula_subcapitan
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # --- CAMPO: FECHA (Con Icono Unicode) ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: 'Fecha:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(10)
+                        TextInput:
+                            id: fecha
+                            readonly: True
+                            hint_text: 'YYYY-MM-DD'
+                            multiline: False
+                            font_size: '16sp'
+                        Button:
+                            text: '\uf133'  
+                            font_name: 'LineAwesome'
+                            font_size: '24sp'
+                            size_hint_x: None
+                            width: dp(50)
+                            background_normal: ''
+                            background_color: (0, 0.47, 0.76, 1)
+                            on_press: root.abrir_datepicker('fecha')
+
+                # ID Salón
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: 'ID Salón:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(10)
+                        TextInput:
+                            id: aula_id_salon
+                            multiline: False
+                            font_size: '18sp'
+                        Button:
+                            text: 'Seleccionar'
+                            font_size: '16sp'
+                            background_normal: ''
+                            background_color: (0, 0.47, 0.76, 1)
+                            on_press: root.mostrar_popup_salones()
+
+        # 3. Panel de Botones de Acción (Fijos en la parte inferior)
+        # Usamos un GridLayout para que no ocupen una sola línea horizontal
+        GridLayout:
+            cols: 2
             size_hint_y: None
-            height: 50
-            spacing: 10
-            padding: 10
+            height: dp(110)
+            padding: dp(10)
+            spacing: dp(10)
+
             Button:
                 text: 'Crear'
-                font_size: 28
+                font_size: '18sp'
                 background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
+                background_color: (0, 0.6, 0.3, 1)
                 on_press: root.crear_aula()
             Button:
                 text: 'Actualizar'
-                font_size: 28
+                font_size: '18sp'
                 background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
+                background_color: (0, 0.47, 0.76, 1)
                 on_press: root.actualizar_aula()
             Button:
                 text: 'Eliminar'
-                font_size: 28
+                font_size: '18sp'
                 background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
+                background_color: (0.8, 0.2, 0.2, 1)
                 on_press: root.eliminar_aula(aula_id.text)
             Button:
-                text: 'Ver Lista'
-                font_size: 28
+                text: 'Buscar'
+                font_size: '18sp'
                 background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.manager.current = 'lista_aulas'
-            Button:
-                text: "Buscar"
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
+                background_color: (0.5, 0.5, 0.5, 1)
                 on_press:
                     root.buscar_aula()
                     aula_id.text=''
-        # Botón Volver al Menú
+            
+            # Botón Ver Lista que ocupa las dos columnas
+            Button:
+                text: 'Ver Lista de Aulas'
+                size_hint_x: 2 # Esto hace que el botón sea el doble de ancho en la cuadrícula
+                font_size: '18sp'
+                background_normal: ''
+                background_color: (0.2, 0.5, 0.7, 1)
+                on_press: root.manager.current = 'lista_aulas'
+
+        # 4. Botón Volver (Separado y claro)
         Button:
             text: 'Volver al Menú'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
             size_hint_y: None
-            height: 50
+            height: dp(50)
+            font_size: '18sp'
+            background_normal: ''
+            background_color: (0.3, 0.3, 0.3, 1)
             on_press: root.manager.current = 'salones'
