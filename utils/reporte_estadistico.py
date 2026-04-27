@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime
+from typing import Any
 
 import matplotlib
 matplotlib.use('Agg')
@@ -15,17 +16,17 @@ try:
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
     REPORTLAB_DISPONIBLE = True
 except ModuleNotFoundError:
-    colors = None
-    A4 = None
-    getSampleStyleSheet = None
-    ParagraphStyle = None
-    cm = None
-    SimpleDocTemplate = None
-    Paragraph = None
-    Spacer = None
-    Table = None
-    TableStyle = None
-    Image = None
+    colors: Any = None
+    A4: Any = None
+    getSampleStyleSheet: Any = None
+    ParagraphStyle: Any = None
+    cm: Any = None
+    SimpleDocTemplate: Any = None
+    Paragraph: Any = None
+    Spacer: Any = None
+    Table: Any = None
+    TableStyle: Any = None
+    Image: Any = None
     REPORTLAB_DISPONIBLE = False
 
 from sqlalchemy.orm import joinedload
@@ -63,6 +64,7 @@ class ResumenEstadistico:
     recepciones: list
     donaciones: list
     preparados: list
+    componentes: list
     distribuciones: list
     donaciones_sin_distribuir: list
     preparados_sin_distribuir: list
@@ -178,6 +180,18 @@ class ReporteEstadisticoService:
             'equipo': preparado.equipo or '',
         }
 
+    def _serializar_componente(self, componente):
+        materia = getattr(componente, 'materia_prima', None)
+        preparado = getattr(componente, 'alimento_preparado', None)
+        return {
+            'preparado_id': getattr(preparado, 'id', componente.alimento_preparado_id),
+            'preparado_descripcion': getattr(preparado, 'descripcion', f'Preparado ID {componente.alimento_preparado_id}'),
+            'materia_id': getattr(materia, 'id', componente.donacion_materia_id),
+            'materia_descripcion': getattr(materia, 'descripcion', f'Donación ID {componente.donacion_materia_id}'),
+            'cantidad_usada': float(componente.cantidad_usada or 0),
+            'unidad': getattr(materia, 'unidad', ''),
+        }
+
     def _serializar_distribucion(self, distribucion):
         return {
             'id': distribucion.id,
@@ -189,22 +203,25 @@ class ReporteEstadisticoService:
             'origen_tipo': 'donación' if distribucion.donacion_id else 'preparado',
         }
 
-    def _pendientes_por_fuente(self, fuentes, distribuciones, atributo_id):
+    def _pendientes_por_fuente(self, fuentes, distribuciones, atributo_id, consumo_extra=None):
         distribuidos = defaultdict(float)
         for distribucion in distribuciones:
             origen_id = getattr(distribucion, atributo_id, None)
             if origen_id:
                 distribuidos[origen_id] += float(distribucion.cantidad or 0)
 
+        consumo_extra = consumo_extra or defaultdict(float)
+
         pendientes = []
         for fuente in fuentes:
-            restante = float(fuente['cantidad']) - distribuidos.get(fuente['id'], 0.0)
+            restante = float(fuente['cantidad']) - distribuidos.get(fuente['id'], 0.0) - consumo_extra.get(fuente['id'], 0.0)
             if restante > 0.0001:
                 pendientes.append({
                     'id': fuente['id'],
                     'descripcion': fuente['descripcion'],
                     'cantidad_original': float(fuente['cantidad']),
                     'cantidad_distribuida': round(distribuidos.get(fuente['id'], 0.0), 2),
+                    'cantidad_usada_en_preparados': round(consumo_extra.get(fuente['id'], 0.0), 2),
                     'pendiente': round(restante, 2),
                     'unidad': fuente['unidad'],
                 })
@@ -236,7 +253,10 @@ class ReporteEstadisticoService:
         preparados = self.session.query(AlimentoPreparado).filter(AlimentoPreparado.fecha == fecha_corte).all()
         componentes = (
             self.session.query(AlimentoPreparadoComponente)
-            .options(joinedload(AlimentoPreparadoComponente.materia_prima))
+            .options(
+                joinedload(AlimentoPreparadoComponente.materia_prima),
+                joinedload(AlimentoPreparadoComponente.alimento_preparado),
+            )
             .join(AlimentoPreparado, AlimentoPreparado.id == AlimentoPreparadoComponente.alimento_preparado_id)
             .filter(AlimentoPreparado.fecha == fecha_corte)
             .all()
@@ -259,6 +279,7 @@ class ReporteEstadisticoService:
         recepciones_data = [self._serializar_recepcion(recepcion) for recepcion in recepciones]
         donaciones_data = [self._serializar_donacion(donacion) for donacion in donaciones]
         preparados_data = [self._serializar_preparado(preparado) for preparado in preparados]
+        componentes_data = [self._serializar_componente(componente) for componente in componentes]
         distribuciones_data = [self._serializar_distribucion(distribucion) for distribucion in distribuciones]
 
         asistencia_ninos = sum(item['ninos'] for item in aulas_data)
@@ -271,14 +292,19 @@ class ReporteEstadisticoService:
 
         donaciones_recibidas = sum(item['cantidad'] for item in donaciones_data)
         donaciones_combinadas = sum(item['cantidad'] for item in preparados_data)
-        materiales_usados = sum(float(getattr(c, 'cantidad_usada', 0) or 0) for c in componentes)
+        materiales_usados = sum(item['cantidad_usada'] for item in componentes_data)
         distribuciones_total = sum(item['cantidad'] for item in distribuciones_data)
+        distribuciones_donaciones = sum(item['cantidad'] for item in distribuciones_data if item['origen_tipo'] == 'donación')
         distribuciones_combinadas = sum(item['cantidad'] for item in distribuciones_data if item['origen_tipo'] == 'preparado')
-        inventario_actual = max(donaciones_recibidas - distribuciones_total, 0)
+        inventario_actual = max(donaciones_recibidas - distribuciones_donaciones - materiales_usados, 0)
         faltante_preparado = max(donaciones_combinadas - distribuciones_combinadas, 0)
         preparacion_completa = faltante_preparado == 0
 
-        donaciones_sin_distribuir = self._pendientes_por_fuente(donaciones_data, distribuciones, 'donacion_id')
+        consumo_materias_primas = defaultdict(float)
+        for componente in componentes_data:
+            consumo_materias_primas[componente['materia_id']] += componente['cantidad_usada']
+
+        donaciones_sin_distribuir = self._pendientes_por_fuente(donaciones_data, distribuciones, 'donacion_id', consumo_materias_primas)
         preparados_sin_distribuir = self._pendientes_por_fuente(preparados_data, distribuciones, 'alimento_preparado_id')
 
         return ResumenEstadistico(
@@ -303,6 +329,7 @@ class ReporteEstadisticoService:
             recepciones=recepciones_data,
             donaciones=donaciones_data,
             preparados=preparados_data,
+            componentes=componentes_data,
             distribuciones=distribuciones_data,
             donaciones_sin_distribuir=donaciones_sin_distribuir,
             preparados_sin_distribuir=preparados_sin_distribuir,
@@ -354,7 +381,24 @@ class ReporteEstadisticoService:
 
         lineas.extend([
             '',
-            '5. Distribución detallada',
+            '5. Conversión de donaciones en alimentos preparados',
+        ])
+        if resumen.componentes:
+            agrupados = defaultdict(list)
+            for componente in resumen.componentes:
+                agrupados[componente['preparado_id']].append(componente)
+            for items in agrupados.values():
+                lineas.append(f"- {items[0]['preparado_descripcion']}:")
+                for item in items:
+                    lineas.append(
+                        f"  * {item['materia_descripcion']}: {self._fmt(item['cantidad_usada'])} {item['unidad']}"
+                    )
+        else:
+            lineas.append('- Sin conversión registrada.')
+
+        lineas.extend([
+            '',
+            '6. Distribución detallada',
         ])
         if resumen.distribuciones:
             for distribucion in resumen.distribuciones:
@@ -366,12 +410,12 @@ class ReporteEstadisticoService:
 
         lineas.extend([
             '',
-            '6. Pendientes sin distribuir',
+            '7. Pendientes sin distribuir',
             f"Donaciones pendientes: {len(resumen.donaciones_sin_distribuir)}",
         ])
         for pendiente in resumen.donaciones_sin_distribuir:
             lineas.append(
-                f"- {pendiente['descripcion']}: pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
+                f"- {pendiente['descripcion']}: usada en preparados {self._fmt(pendiente['cantidad_usada_en_preparados'])} {pendiente['unidad']}, pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
             )
         lineas.append(f"Alimentos preparados pendientes: {len(resumen.preparados_sin_distribuir)}")
         for pendiente in resumen.preparados_sin_distribuir:
@@ -381,7 +425,7 @@ class ReporteEstadisticoService:
 
         lineas.extend([
             '',
-            '7. Servidores de otras áreas',
+            '8. Servidores de otras áreas',
         ])
         if resumen.otras_areas:
             for registro in resumen.otras_areas:
@@ -393,7 +437,7 @@ class ReporteEstadisticoService:
 
         lineas.extend([
             '',
-            '8. Recepción',
+            '9. Recepción',
         ])
         if resumen.recepciones:
             for recepcion in resumen.recepciones:
@@ -535,7 +579,22 @@ class ReporteEstadisticoService:
             story.append(self._tabla(preparados_data))
         story.append(Spacer(1, 0.25 * cm))
 
-        self._agregar_seccion(story, '6. Distribución detallada', styles)
+        self._agregar_seccion(story, '6. Conversión de donaciones en alimentos preparados', styles)
+        if resumen.componentes:
+            conversion_data = [['Preparado', 'Materia prima', 'Cantidad usada', 'Unidad']]
+            for componente in resumen.componentes:
+                conversion_data.append([
+                    componente['preparado_descripcion'],
+                    componente['materia_descripcion'],
+                    self._fmt(componente['cantidad_usada']),
+                    componente['unidad'],
+                ])
+            story.append(self._tabla(conversion_data))
+        else:
+            story.append(Paragraph('Sin conversión registrada.', styles['CuerpoInforme']))
+        story.append(Spacer(1, 0.25 * cm))
+
+        self._agregar_seccion(story, '7. Distribución detallada', styles)
         distribuciones_data = [['Origen', 'Destino', 'Cantidad', 'Unidad']]
         for distribucion in resumen.distribuciones:
             distribuciones_data.append([
@@ -550,17 +609,18 @@ class ReporteEstadisticoService:
             story.append(self._tabla(distribuciones_data))
         story.append(Spacer(1, 0.25 * cm))
 
-        self._agregar_seccion(story, '7. Alimentos o donaciones no distribuidos', styles)
+        self._agregar_seccion(story, '8. Alimentos o donaciones no distribuidos', styles)
         if not resumen.donaciones_sin_distribuir and not resumen.preparados_sin_distribuir:
             story.append(Paragraph('No hay elementos pendientes por distribuir.', styles['CuerpoInforme']))
         else:
             if resumen.donaciones_sin_distribuir:
                 story.append(Paragraph('Donaciones pendientes:', styles['CuerpoInforme']))
-                pendientes_donaciones = [['Descripción', 'Original', 'Distribuido', 'Pendiente', 'Unidad']]
+                pendientes_donaciones = [['Descripción', 'Original', 'Usado en preparados', 'Distribuido', 'Pendiente', 'Unidad']]
                 for pendiente in resumen.donaciones_sin_distribuir:
                     pendientes_donaciones.append([
                         pendiente['descripcion'],
                         self._fmt(pendiente['cantidad_original']),
+                        self._fmt(pendiente['cantidad_usada_en_preparados']),
                         self._fmt(pendiente['cantidad_distribuida']),
                         self._fmt(pendiente['pendiente']),
                         pendiente['unidad'],
@@ -581,7 +641,7 @@ class ReporteEstadisticoService:
                 story.append(self._tabla(pendientes_preparados))
         story.append(Spacer(1, 0.25 * cm))
 
-        self._agregar_seccion(story, '8. Servidores de otras áreas', styles)
+        self._agregar_seccion(story, '9. Servidores de otras áreas', styles)
         if resumen.otras_areas:
             otras_areas_data = [['ID', 'Alabanza', 'Protocolo', 'Semillitas', 'Sonido', 'Teatro', 'TV', 'Ujier', 'Seguridad', 'Total']]
             for registro in resumen.otras_areas:
@@ -602,7 +662,7 @@ class ReporteEstadisticoService:
             story.append(Paragraph('Sin registros de otras áreas.', styles['CuerpoInforme']))
         story.append(Spacer(1, 0.25 * cm))
 
-        self._agregar_seccion(story, '9. Recepción', styles)
+        self._agregar_seccion(story, '10. Recepción', styles)
         if resumen.recepciones:
             recepciones_data = [['ID', 'Nombre']]
             for recepcion in resumen.recepciones:
@@ -616,7 +676,7 @@ class ReporteEstadisticoService:
             f'Estas son las estadísticas del servicio de fecha {resumen.fecha_corte.strftime("%d/%m/%Y")}, '
             'sin más que agregar atentamente, Coordinación de Secretaria.'
         )
-        self._agregar_seccion(story, '10. Cierre', styles)
+        self._agregar_seccion(story, '11. Cierre', styles)
         story.append(Paragraph(conclusion, styles['CuerpoInforme']))
 
         doc = SimpleDocTemplate(
