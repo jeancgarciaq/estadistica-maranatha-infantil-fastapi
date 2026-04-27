@@ -1,4 +1,3 @@
-import os
 import logging
 from datetime import datetime
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class EstadisticaScreen(Screen):
     resumen_texto = StringProperty('Seleccione una fecha y genere el resumen.')
-    pdf_texto = StringProperty('')
+    pdf_texto = StringProperty('El PDF se genera desde la vista Reporte.')
 
     def __init__(self, **kwargs):
         Builder.load_file('views/estadistica.kv')
@@ -50,31 +49,14 @@ class EstadisticaScreen(Screen):
         try:
             servicio = self._obtener_servicio()
             resumen = servicio.obtener_resumen(fecha_texto)
-            graficos = servicio.generar_graficos(resumen)
-            pdf = servicio.generar_pdf(resumen, graficos)
-
-            self.resumen_texto = (
-                f'Fecha: {resumen.fecha_corte.strftime("%d/%m/%Y")}\n'
-                f'Total asistencia: {resumen.total_asistencia}\n'
-                f'Niños: {resumen.asistencia_ninos} | Niñas: {resumen.asistencia_ninas} | Servidores: {resumen.asistencia_servidores}\n'
-                f'Preparado: {resumen.donaciones_combinadas:.2f}\n'
-                f'Distribuido: {resumen.distribuciones_combinadas:.2f}\n'
-                f'Pendiente: {resumen.faltante_preparado:.2f}\n'
-                f'¿Se repartió todo?: {"Sí" if resumen.preparacion_completa else "No"}'
-            )
-            self.pdf_texto = f'PDF generado en: {pdf}'
-            self._ultimo_pdf = pdf
-            StyledPopup.mostrar_popup('Éxito', 'Resumen generado correctamente.', tipo='success')
+            self.resumen_texto = servicio.formatear_vista_previa(resumen)
+            self.pdf_texto = 'El PDF se genera desde la vista Reporte.'
+            StyledPopup.mostrar_popup('Éxito', 'Vista previa generada correctamente.', tipo='success')
         except Exception as e:
             logger.exception('Error al generar resumen')
             StyledPopup.mostrar_popup('Error', f'No se pudo generar el resumen: {e}', tipo='error')
 
-    def abrir_pdf(self):
-        pdf = getattr(self, '_ultimo_pdf', None)
-        if not pdf or not os.path.exists(pdf):
-            StyledPopup.mostrar_popup('Aviso', 'Primero debe generar el PDF.', tipo='info')
-            return
-        try:
-            os.startfile(pdf)
-        except Exception as e:
-            StyledPopup.mostrar_popup('Error', f'No se pudo abrir el PDF: {e}', tipo='error')
+    def ir_a_reporte(self):
+        app = App.get_running_app()
+        if app and app.root:
+            app.root.current = 'reporte'
