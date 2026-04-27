@@ -23,6 +23,7 @@ from models.donaciones import Donacion
 from models.alimento_preparado import AlimentoPreparado
 from models.salones import Salon
 from models.areas import Area
+from models.recepcion import Recepcion
 
 Builder.load_file('views/distribucion.kv')
 
@@ -55,6 +56,7 @@ class DistribucionesScreen(Screen):
         alimento_preparado_id = self.ids.alimento_preparado_id.text.strip()
         salon_id = self.ids.salon_id.text.strip()
         area_id = self.ids.area_id.text.strip()
+        recepcion_id = self.ids.recepcion_id.text.strip()
         cantidad = self.ids.donacion_cantidad.text.strip()
         fecha = self.ids.fecha.text.strip()
 
@@ -65,11 +67,11 @@ class DistribucionesScreen(Screen):
         if donacion_id and alimento_preparado_id:
             StyledPopup.mostrar_popup("Error", "Solo puede seleccionar un origen: donación o preparado.", tipo="error")
             return None
-        if not salon_id and not area_id:
-            StyledPopup.mostrar_popup("Error", "Debe seleccionar un salón o un área.", tipo="error")
+        if not salon_id and not area_id and not recepcion_id:
+            StyledPopup.mostrar_popup("Error", "Debe seleccionar un salón, un área o una recepción.", tipo="error")
             return None
-        if salon_id and area_id:
-            StyledPopup.mostrar_popup("Error", "Solo puede seleccionar un destino: salón o área.", tipo="error")
+        if sum(bool(x) for x in (salon_id, area_id, recepcion_id)) > 1:
+            StyledPopup.mostrar_popup("Error", "Solo puede seleccionar un destino: salón, área o recepción.", tipo="error")
             return None
         if not cantidad:
             StyledPopup.mostrar_popup("Error", "La cantidad es obligatoria.", tipo="error")
@@ -83,6 +85,7 @@ class DistribucionesScreen(Screen):
             alimento_preparado_id = int(alimento_preparado_id) if alimento_preparado_id else None
             salon_id = int(salon_id) if salon_id else None
             area_id = int(area_id) if area_id else None
+            recepcion_id = int(recepcion_id) if recepcion_id else None
             cantidad = float(cantidad)
             unidad = self.ids.donacion_unidad.text.strip()
             
@@ -100,7 +103,7 @@ class DistribucionesScreen(Screen):
             logger.error(f"⚠️ Error al convertir datos: {e}")
             StyledPopup.mostrar_popup("Error", "Error al procesar los datos del formulario.", tipo="error")
             return None
-        return donacion_id, alimento_preparado_id, salon_id, area_id, cantidad, fecha
+        return donacion_id, alimento_preparado_id, salon_id, area_id, recepcion_id, cantidad, fecha
 
     def listar_distribuciones(self):
         """Lista todas las distribuciones."""
@@ -123,6 +126,7 @@ class DistribucionesScreen(Screen):
                 self.ids.alimento_preparado_id.text = str(getattr(dist, 'alimento_preparado_id', '') or "")
                 self.ids.salon_id.text = str(dist.salon_id or "")
                 self.ids.area_id.text = str(dist.area_id or "")
+                self.ids.recepcion_id.text = str(getattr(dist, 'recepcion_id', '') or "")
                 self.ids.donacion_cantidad.text = str(dist.cantidad)
                 self.ids.donacion_unidad.text = str(dist.unidad or "")
                 self.ids.fecha.text = str(dist.fecha)
@@ -147,6 +151,8 @@ class DistribucionesScreen(Screen):
                 self.ids.salon_id.text = ""
             if 'area_id' in self.ids:
                 self.ids.area_id.text = ""
+            if 'recepcion_id' in self.ids:
+                self.ids.recepcion_id.text = ""
             if 'donacion_cantidad' in self.ids:
                 self.ids.donacion_cantidad.text = ""
             if 'fecha' in self.ids:
@@ -322,6 +328,49 @@ class DistribucionesScreen(Screen):
     def _seleccionar_area(self, a_id, popup):
         self.ids.area_id.text = str(a_id)
         self.ids.salon_id.text = ""
+        self.ids.recepcion_id.text = ""
+        popup.dismiss()
+
+    def abrir_popup_recepcion(self):
+        """Abre un popup para seleccionar una recepción."""
+        logger.debug("Obteniendo recepciones para el popup...")
+        db = self.controlador.get_db_session()
+        try:
+            recepciones = db.query(Recepcion).all()
+        except Exception as e:
+            StyledPopup.mostrar_popup("Error", f"Error al obtener recepciones: {e}", tipo="error")
+            return
+        finally:
+            db.close()
+
+        if not recepciones:
+            StyledPopup.mostrar_popup("Sin Recepciones", "No hay recepciones registradas.", tipo="info")
+            return
+
+        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        scroll = ScrollView()
+        grid = GridLayout(cols=1, size_hint_y=None, spacing=5)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for r in recepciones:
+            btn = Button(text=f"ID: {r.id} - {r.nombre}", size_hint_y=None, height=40)
+            btn.bind(on_press=lambda b, r_id=r.id: self._seleccionar_recepcion(r_id, popup))
+            grid.add_widget(btn)
+
+        scroll.add_widget(grid)
+        layout.add_widget(scroll)
+
+        close_btn = Button(text="Cerrar", size_hint_y=None, height=40)
+        layout.add_widget(close_btn)
+
+        popup = Popup(title="Seleccionar Recepción", content=layout, size_hint=(0.9, 0.9))
+        close_btn.bind(on_press=popup.dismiss)
+        popup.open()
+
+    def _seleccionar_recepcion(self, r_id, popup):
+        self.ids.recepcion_id.text = str(r_id)
+        self.ids.salon_id.text = ""
+        self.ids.area_id.text = ""
         popup.dismiss()
 
     def guardar_distribucion(self):
@@ -332,13 +381,14 @@ class DistribucionesScreen(Screen):
         if not datos_raw:
             return
 
-        donacion_id, alimento_preparado_id, salon_id, area_id, cantidad, fecha = datos_raw
+        donacion_id, alimento_preparado_id, salon_id, area_id, recepcion_id, cantidad, fecha = datos_raw
         
         datos = {
             "donacion_id": donacion_id,
             "alimento_preparado_id": alimento_preparado_id,
             "salon_id": salon_id,
             "area_id": area_id,
+            "recepcion_id": recepcion_id,
             "cantidad": cantidad,
             "unidad": self.ids.donacion_unidad.text.strip(),
             "fecha": str(fecha)
