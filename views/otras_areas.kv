@@ -212,44 +212,10 @@
                         size_hint_y: None
                         height: dp(40)
 
-                GridLayout:
-                    cols: 2
-                    spacing: dp(10)
-                    size_hint_y: None
-                    height: dp(120)
-
-                    Button:
-                        text: 'Crear'
-                        font_size: '18sp'
-                        background_normal: ''
-                        background_color: (0, 0.47, 0.76, 1)
-                        on_press: root.crear_otrasareas()
-
-                    Button:
-                        text: 'Actualizar'
-                        font_size: '18sp'
-                        background_normal: ''
-                        background_color: (0, 0.47, 0.76, 1)
-                        on_press: root.actualizar_otrasareas()
-
-                    Button:
-                        text: 'Listar'
-                        font_size: '18sp'
-                        background_normal: ''
-                        background_color: (0.2, 0.6, 0.2, 1)
-                        on_press: app.root.current = 'lista_otras_areas'
-
-                    Button:
-                        text: 'Limpiar'
-                        font_size: '18sp'
-                        background_normal: ''
-                        background_color: (0.5, 0.5, 0.5, 1)
-                        on_press: root._limpiar_campos()
-
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: None
-            height: dp(110)
+            height: dp(180)
             padding: dp(10)
             spacing: dp(8)
             canvas.before:
@@ -259,9 +225,42 @@
                     pos: self.pos
                     size: self.size
 
+            GridLayout:
+                cols: 2
+                spacing: dp(10)
+                size_hint_y: 0.75
+
+                Button:
+                    text: 'Crear'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.crear_otrasareas()
+
+                Button:
+                    text: 'Actualizar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.actualizar_otrasareas()
+
+                Button:
+                    text: 'Listar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0.2, 0.6, 0.2, 1)
+                    on_press: app.root.current = 'lista_otras_areas'
+
+                Button:
+                    text: 'Limpiar'
+                    font_size: '18sp'
+                    background_normal: ''
+                    background_color: (0.5, 0.5, 0.5, 1)
+                    on_press: root._limpiar_campos()
+
             Button:
                 text: 'Volver al Menú'
-                size_hint_y: 1
+                size_hint_y: 0.25
                 font_size: '18sp'
                 background_normal: ''
                 background_color: (0.5, 0.5, 0.5, 1)
