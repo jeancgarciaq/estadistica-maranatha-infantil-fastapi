@@ -207,6 +207,34 @@
                             background_color: (0, 0.47, 0.76, 1)
                             on_press: root.abrir_popup_area()
 
+                # --- CAMPO: RECEPCIÓN ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: 'Recepción:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(10)
+                        TextInput:
+                            id: recepcion_id
+                            hint_text: 'ID de Recepción'
+                            readonly: True
+                            multiline: False
+                            font_size: '16sp'
+                        Button:
+                            text: 'Seleccionar'
+                            size_hint_x: None
+                            width: dp(110)
+                            font_size: '14sp'
+                            background_normal: ''
+                            background_color: (0, 0.47, 0.76, 1)
+                            on_press: root.abrir_popup_recepcion()
+
         # 3. BOTONES DE ACCIÓN (Fijos abajo)
         BoxLayout:
             orientation: 'vertical'
