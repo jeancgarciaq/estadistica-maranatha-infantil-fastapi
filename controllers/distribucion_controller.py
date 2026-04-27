@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from collections import defaultdict
 from models.donaciones import Donacion
 from models.alimento_preparado import AlimentoPreparado
 from models.salones import Salon
@@ -73,6 +74,125 @@ class DistribucionesController(BaseController):
             return distribuciones
         except SQLAlchemyError as e:
             logger.error(f"Error al listar distribuciones: {e}")
+            return []
+        finally:
+            db.close()
+
+    def listar_distribuciones_concentradas(self, fecha):
+        """
+        Lista distribuciones de una fecha y arma una vista concentrada:
+        - Si un origen se repite, se agrupa por origen + unidad.
+        - Si no se repite, se devuelve como registro simple.
+        """
+        if not fecha:
+            logger.warning("Se requiere una fecha para listar distribuciones concentradas.")
+            return []
+
+        fecha_filtro = fecha
+        if isinstance(fecha, str):
+            try:
+                fecha_filtro = datetime.strptime(fecha, '%Y-%m-%d').date()
+            except ValueError:
+                logger.warning(f"Fecha inválida recibida para distribución concentrada: {fecha}")
+                return []
+
+        db = self.get_db_session()
+        try:
+            distribuciones = db.query(Distribucion).options(
+                joinedload(Distribucion.donacion),
+                joinedload(Distribucion.alimento_preparado),
+                joinedload(Distribucion.salon),
+                joinedload(Distribucion.area)
+            ).filter(Distribucion.fecha == fecha_filtro).all()
+
+            grupos = {}
+            for dist in distribuciones:
+                origen_tipo = 'sin_origen'
+                origen_id = None
+                origen_nombre = 'Sin origen'
+
+                if dist.donacion:
+                    origen_tipo = 'donacion'
+                    origen_id = dist.donacion.id
+                    origen_nombre = dist.donacion.descripcion
+                elif dist.alimento_preparado:
+                    origen_tipo = 'preparado'
+                    origen_id = dist.alimento_preparado.id
+                    origen_nombre = dist.alimento_preparado.descripcion
+                elif dist.donacion_id:
+                    origen_tipo = 'donacion'
+                    origen_id = dist.donacion_id
+                    origen_nombre = f"Donación ID {dist.donacion_id}"
+                elif dist.alimento_preparado_id:
+                    origen_tipo = 'preparado'
+                    origen_id = dist.alimento_preparado_id
+                    origen_nombre = f"Preparado ID {dist.alimento_preparado_id}"
+
+                if dist.salon:
+                    destino_nombre = f"Salón: {dist.salon.salon}"
+                elif dist.area:
+                    destino_nombre = f"Área: {dist.area.area}"
+                elif dist.salon_id:
+                    destino_nombre = f"Salón ID {dist.salon_id}"
+                elif dist.area_id:
+                    destino_nombre = f"Área ID {dist.area_id}"
+                else:
+                    destino_nombre = 'Sin destino'
+
+                unidad = str(dist.unidad or '').strip()
+
+                if origen_tipo == 'sin_origen':
+                    clave = ('simple', dist.id)
+                else:
+                    clave = (origen_tipo, origen_id, unidad)
+
+                if clave not in grupos:
+                    grupos[clave] = {
+                        'origen_tipo': origen_tipo,
+                        'origen_id': origen_id,
+                        'origen_nombre': origen_nombre,
+                        'unidad': unidad,
+                        'fecha': dist.fecha,
+                        'items': [],
+                        'destinos': defaultdict(float),
+                    }
+
+                grupos[clave]['items'].append(dist)
+                grupos[clave]['destinos'][destino_nombre] += float(dist.cantidad or 0)
+
+            salida = []
+            for grupo in grupos.values():
+                items = grupo['items']
+                if len(items) > 1 and grupo['origen_tipo'] != 'sin_origen':
+                    salida.append({
+                        'modo': 'agrupado',
+                        'origen_tipo': grupo['origen_tipo'],
+                        'origen_id': grupo['origen_id'],
+                        'origen_nombre': grupo['origen_nombre'],
+                        'unidad': grupo['unidad'],
+                        'fecha': grupo['fecha'],
+                        'total_cantidad': sum(float(x.cantidad or 0) for x in items),
+                        'cantidad_registros': len(items),
+                        'destinos': dict(sorted(grupo['destinos'].items(), key=lambda x: x[0])),
+                        'distribuciones_ids': [x.id for x in items],
+                    })
+                else:
+                    dist = items[0]
+                    salida.append({
+                        'modo': 'simple',
+                        'distribucion': dist,
+                    })
+
+            salida.sort(
+                key=lambda x: (
+                    0 if x.get('modo') == 'agrupado' else 1,
+                    str(x.get('origen_nombre') if x.get('modo') == 'agrupado' else getattr(x.get('distribucion'), 'id', '')),
+                )
+            )
+            logger.info(f"{len(salida)} filas concentradas generadas para {fecha_filtro}.")
+            return salida
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar distribuciones concentradas: {e}")
             return []
         finally:
             db.close()
