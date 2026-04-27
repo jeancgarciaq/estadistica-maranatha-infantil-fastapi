@@ -18,12 +18,11 @@
             height: dp(50)
             bold: True
 
-        # 2. ÁREA DE FORMULARIO (Scrollable)
+        # 2. ÁREA DE CONTENIDO (Scrollable)
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True
-            size_hint_y: 0.5  # Le damos la mitad de la pantalla al formulario
-            
+
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
@@ -111,73 +110,83 @@
                             background_color: (0, 0.47, 0.76, 1)
                             on_press: root.abrir_datepicker('ensenanza_fecha')
 
-        # 3. CONTENEDOR DE BOTONES DE ACCIÓN (Fijos)
-        GridLayout:
-            cols: 2
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: dp(110)
+                    padding: dp(10)
+                    spacing: dp(10)
+
+                    Button:
+                        text: 'Crear'
+                        font_size: '16sp'
+                        bold: True
+                        background_normal: ''
+                        background_color: (0, 0.6, 0.3, 1)
+                        on_press: root.crear_ensenanza()
+
+                    Button:
+                        text: 'Actualizar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0, 0.47, 0.76, 1)
+                        on_press: root.actualizar_ensenanza()
+
+                    Button:
+                        text: 'Eliminar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0.8, 0.2, 0.2, 1)
+                        on_press: root.eliminar_ensenanza(ensenanza_id.text)
+
+                    Button:
+                        text: 'Listar/Cargar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0.5, 0.5, 0.5, 1)
+                        on_press: root.cargar_ensenanzas()
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(260)
+                    padding: dp(10)
+
+                    Label:
+                        text: 'Listado de Enseñanzas'
+                        font_size: '16sp'
+                        size_hint_y: None
+                        height: dp(30)
+                        color: 0.8, 0.8, 0.8, 1
+
+                    ScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        GridLayout:
+                            id: lista_ensenanzas
+                            cols: 3
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(5)
+                            padding: dp(5)
+
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: None
             height: dp(110)
             padding: dp(10)
-            spacing: dp(10)
+            spacing: dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.2
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
             Button:
-                text: 'Crear'
-                font_size: '16sp'
-                bold: True
-                background_normal: ''
-                background_color: (0, 0.6, 0.3, 1)
-                on_press: root.crear_ensenanza()
-
-            Button:
-                text: 'Actualizar'
+                text: 'Volver al Menú'
+                size_hint_y: 1
                 font_size: '16sp'
                 background_normal: ''
-                background_color: (0, 0.47, 0.76, 1)
-                on_press: root.actualizar_ensenanza()
-
-            Button:
-                text: 'Eliminar'
-                font_size: '16sp'
-                background_normal: ''
-                background_color: (0.8, 0.2, 0.2, 1)
-                on_press: root.eliminar_ensenanza(ensenanza_id.text)
-
-            Button:
-                text: 'Listar/Cargar'
-                font_size: '16sp'
-                background_normal: ''
-                background_color: (0.5, 0.5, 0.5, 1)
-                on_press: root.cargar_ensenanzas()
-
-        # 4. SECCIÓN DE LISTA (La parte inferior)
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: 0.4 # Le damos el 40% restante a la lista
-            padding: dp(10)
-            
-            Label:
-                text: 'Listado de Enseñanzas'
-                font_size: '16sp'
-                size_hint_y: None
-                height: dp(30)
-                color: 0.8, 0.8, 0.8, 1
-
-            ScrollView:
-                do_scroll_x: False
-                do_scroll_y: True
-                GridLayout:
-                    id: lista_ensenanzas
-                    cols: 3 # Mantengo tus 3 columnas
-                    size_hint_y: None
-                    height: self.minimum_height
-                    spacing: dp(5)
-                    padding: dp(5)
-
-        # 5. BOTÓN VOLVER
-        Button:
-            text: 'Volver al Menú'
-            size_hint_y: None
-            height: dp(50)
-            font_size: '16sp'
-            background_normal: ''
-            background_color: (0.3, 0.3, 0.3, 1)
-            on_press: root.manager.current = 'menu'
+                background_color: (0.3, 0.3, 0.3, 1)
+                on_press: root.manager.current = 'menu'
