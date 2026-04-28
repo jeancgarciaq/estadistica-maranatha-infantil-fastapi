@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Aula(Base):
+class Aula(SyncMixin, Base):
     __tablename__ = 'aulas'
 
     id = Column(Integer, primary_key=True, index=True)
