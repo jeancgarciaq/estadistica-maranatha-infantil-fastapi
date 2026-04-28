@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 MODEL_REGISTRY = {
     'donaciones': Donacion,
     'distribuciones': Distribucion,
+    'usuarios': Usuario,
 }
 
 
