@@ -18,6 +18,16 @@ GitHub: [jeancgarciaq](https://github.com/jeancgarciaq)
 - Gestión de donaciones de meriendas.
 - Registro de meriendas repartidas (a niños, maestros y auxiliares).
 - Navegación intuitiva mediante Kivy con `ScreenManager`.
+- Autenticación de usuarios con roles y permisos.
+- Gestión de usuarios exclusiva para el rol `root`.
+
+## Usuarios Iniciales
+- Usuario root: `root`
+- Contraseña root: `root123`
+- Usuario administrador: `admin`
+- Contraseña administrador: `admin123`
+
+El usuario `root` es el único que puede acceder a la pantalla de gestión de usuarios para crear cuentas, cambiar contraseñas y asignar roles.
 
 ## Instalación
 1. Clona este repositorio:
