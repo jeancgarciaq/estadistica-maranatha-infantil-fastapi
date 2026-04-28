@@ -1,7 +1,10 @@
+#:import dp kivy.metrics.dp
+
 <MenuScreen>:
-    # Contenedor principal que asegura fondo completo y layout vertical
     BoxLayout:
         orientation: 'vertical'
+        spacing: dp(8)
+        padding: dp(10)
         canvas.before:
             Color:
                 rgba: 0.102, 0.2, 0.396, 1
@@ -9,21 +12,38 @@
                 pos: self.pos
                 size: self.size
 
+        Label:
+            text: 'Menu Principal'
+            size_hint_y: None
+            height: dp(40)
+            font_size: '22sp'
+            bold: True
+            color: 1, 1, 1, 1
+
+        Label:
+            text: root.saludo
+            size_hint_y: None
+            height: dp(24)
+            font_size: '13sp'
+            color: 0.86, 0.9, 1, 1
+
         ScrollView:
             do_scroll_x: False
-            # Grid de 2 columnas: estándar para menús táctiles en móvil
+            bar_width: dp(4)
+
             GridLayout:
                 cols: 2
-                row_force_default: True
-                row_default_height: dp(120)
                 size_hint_y: None
                 height: self.minimum_height
-                padding: dp(16)
                 spacing: dp(12)
+                padding: dp(8)
 
-                # --- ÍTEM 1: ÁREAS ---
                 BoxLayout:
                     orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_areas else 0
+                    opacity: 1 if root.can_areas else 0
+                    disabled: not root.can_areas
                     spacing: dp(4)
                     padding: dp(4)
                     Image:
@@ -32,16 +52,19 @@
                         allow_stretch: True
                         keep_ratio: True
                     Button:
-                        text: 'ÁREAS'
+                        text: 'AREAS'
                         font_size: sp(15)
                         size_hint_y: 0.25
                         background_normal: ''
                         background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "areas"
+                        on_press: root.ir_a('areas')
 
-                # --- ÍTEM 2: SALONES ---
                 BoxLayout:
                     orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_salones else 0
+                    opacity: 1 if root.can_salones else 0
+                    disabled: not root.can_salones
                     spacing: dp(4)
                     padding: dp(4)
                     Image:
@@ -55,11 +78,14 @@
                         size_hint_y: 0.25
                         background_normal: ''
                         background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "salones"
+                        on_press: root.ir_salones()
 
-                # --- ÍTEM 3: ESTADÍSTICA ---
                 BoxLayout:
                     orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_aulas else 0
+                    opacity: 1 if root.can_aulas else 0
+                    disabled: not root.can_aulas
                     spacing: dp(4)
                     padding: dp(4)
                     Image:
@@ -68,16 +94,61 @@
                         allow_stretch: True
                         keep_ratio: True
                     Button:
-                        text: 'ESTADÍSTICA'
+                        text: 'AULAS'
                         font_size: sp(15)
                         size_hint_y: 0.25
                         background_normal: ''
                         background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "estadistica"
+                        on_press: root.ir_a('aulas')
 
-                # --- ÍTEM 4: DONACIONES ---
                 BoxLayout:
                     orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_lista_aulas else 0
+                    opacity: 1 if root.can_lista_aulas else 0
+                    disabled: not root.can_lista_aulas
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/aulas.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'LISTA AULAS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('lista_aulas')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_estadistica else 0
+                    opacity: 1 if root.can_estadistica else 0
+                    disabled: not root.can_estadistica
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/report.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'ESTADISTICA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('estadistica')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_donaciones else 0
+                    opacity: 1 if root.can_donaciones else 0
+                    disabled: not root.can_donaciones
                     spacing: dp(4)
                     padding: dp(4)
                     Image:
@@ -91,137 +162,14 @@
                         size_hint_y: 0.25
                         background_normal: ''
                         background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "donaciones"
+                        on_press: root.ir_a('donaciones')
 
-                # --- ÍTEM 5: DISTRIBUCIÓN ---
                 BoxLayout:
                     orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/distribucion.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'DISTRIBUCIÓN'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "distribuciones"
-
-                # --- ÍTEM 6: LOGÍSTICA ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/logistic.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'LOGÍSTICA'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "logisticas"
-
-                # --- ÍTEM 7: OTRAS ÁREAS ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/otras.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'OTRAS ÁREAS'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "otrasareas"
-
-                # --- ÍTEM 8: ENSEÑANZA ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/ensenanza.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'ENSEÑANZA'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "ensenanza"
-
-                # --- ÍTEM 9: RECEPCIÓN ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/recepcion.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'RECEPCIÓN'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "recepcion"
-
-                # --- ÍTEM 10: REPORTE ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/report.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'REPORTE'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "reporte"
-
-                # --- ÍTEM 11: AYUDA ---
-                BoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(4)
-                    padding: dp(4)
-                    Image:
-                        source: 'images/ayuda.png'
-                        size_hint_y: 0.75
-                        allow_stretch: True
-                        keep_ratio: True
-                    Button:
-                        text: 'AYUDA'
-                        font_size: sp(15)
-                        size_hint_y: 0.25
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "ayuda"
-
-                # --- ÍTEM 12: PREPARADOS ---
-                BoxLayout:
-                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_preparados else 0
+                    opacity: 1 if root.can_preparados else 0
+                    disabled: not root.can_preparados
                     spacing: dp(4)
                     padding: dp(4)
                     Image:
@@ -235,14 +183,192 @@
                         size_hint_y: 0.25
                         background_normal: ''
                         background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.manager.current = "combinar_donaciones"
+                        on_press: root.ir_a('combinar_donaciones')
 
-        # Botón SALIR fijo en la parte inferior (patrón Android estándar)
-        Button:
-            text: 'SALIR'
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_distribuciones else 0
+                    opacity: 1 if root.can_distribuciones else 0
+                    disabled: not root.can_distribuciones
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/distribucion.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'DISTRIBUCION'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('distribuciones')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_logistica else 0
+                    opacity: 1 if root.can_logistica else 0
+                    disabled: not root.can_logistica
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/logistic.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'LOGISTICA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('logisticas')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_otras_areas else 0
+                    opacity: 1 if root.can_otras_areas else 0
+                    disabled: not root.can_otras_areas
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/otras.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'OTRAS AREAS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('otrasareas')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_ensenanza else 0
+                    opacity: 1 if root.can_ensenanza else 0
+                    disabled: not root.can_ensenanza
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/ensenanza.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'ENSEÑANZA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('ensenanza')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_recepcion else 0
+                    opacity: 1 if root.can_recepcion else 0
+                    disabled: not root.can_recepcion
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/recepcion.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'RECEPCION'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('recepcion')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_reporte else 0
+                    opacity: 1 if root.can_reporte else 0
+                    disabled: not root.can_reporte
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/report.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'REPORTE'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('reporte')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_ayuda else 0
+                    opacity: 1 if root.can_ayuda else 0
+                    disabled: not root.can_ayuda
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/ayuda.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'AYUDA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('ayuda')
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(132) if root.can_usuarios else 0
+                    opacity: 1 if root.can_usuarios else 0
+                    disabled: not root.can_usuarios
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/globo-maranatha.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'USUARIOS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.ir_a('usuarios')
+
+        BoxLayout:
             size_hint_y: None
-            height: dp(48)
-            font_size: sp(16)
-            background_normal: ''
-            background_color: (180/255, 0, 0, 1)
-            on_press: app.stop()
+            height: dp(52)
+            spacing: dp(8)
+            padding: dp(2), dp(0)
+
+            Button:
+                text: 'Cerrar sesion'
+                background_normal: ''
+                background_color: (0.7, 0.2, 0.2, 1)
+                font_size: '15sp'
+                on_press: root.cerrar_sesion()
+
+            Button:
+                text: 'Salir'
+                background_normal: ''
+                background_color: (0.4, 0.4, 0.4, 1)
+                font_size: '15sp'
+                on_press: app.stop()
