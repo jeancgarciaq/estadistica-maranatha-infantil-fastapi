@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
 from kivy.lang import Builder
 from kivy.properties import StringProperty
+from kivy.app import App
 import logging
 from datetime import datetime
 from components import StyledPopup
@@ -26,6 +27,16 @@ class ListDonacionesScreen(Screen):
         super().__init__(**kwargs)
         logger.info("Inicializando ListDonacionesScreen")
         self.controlador = controlador
+        self.can_manage = False
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('lista_donaciones'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver la lista de donaciones.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+        self.can_manage = app.has_permission('donaciones.manage')
 
     def abrir_datepicker_filtro(self):
         """Abre el selector de fecha para filtrar donaciones."""
@@ -100,6 +111,7 @@ class ListDonacionesScreen(Screen):
                     card.equipo = str(donacion.equipo)
                     card.fecha = fecha_str
                     card.es_compuesta = bool(getattr(donacion, 'es_compuesta', False))
+                    card.puede_editar = self.can_manage
                     
                     lista_donaciones.add_widget(card)
             except Exception as e:
@@ -148,6 +160,9 @@ class ListDonacionesScreen(Screen):
 
     def editar_donacion(self, id_donacion):
         """Regresa a la pantalla de donaciones y carga los datos para editar."""
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar donaciones.', tipo='error')
+            return
         logger.info(f"Editando donación con ID: {id_donacion}")
         self.manager.current = 'donaciones'
         donaciones_screen = self.manager.get_screen('donaciones')
@@ -155,6 +170,9 @@ class ListDonacionesScreen(Screen):
 
     def confirmar_eliminacion(self, id_donacion):
         """Muestra el popup de confirmación antes de eliminar."""
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar donaciones.', tipo='error')
+            return
         StyledPopup.mostrar_confirmacion(
             "Confirmar Eliminación",
             "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminar este registro?",
