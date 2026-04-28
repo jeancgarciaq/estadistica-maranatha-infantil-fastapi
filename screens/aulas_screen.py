@@ -8,6 +8,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+from kivy.app import App
 from components import StyledPopup
 from components.styled_datepicker import StyledDatePicker
 
@@ -21,6 +22,18 @@ class AulasScreen(Screen):
     def __init__(self, controlador, **kwargs):
         super().__init__(**kwargs)
         self.controlador = controlador
+
+    def _tiene_permiso(self, codigo):
+        app = App.get_running_app()
+        return bool(app and app.has_permission(codigo))
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('aulas'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver Aulas.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
 
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha."""
@@ -218,6 +231,9 @@ class AulasScreen(Screen):
             StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def crear_aula(self):
+        if not self._tiene_permiso('aulas.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para crear aulas.', tipo='error')
+            return
         datos = self.obtener_datos_formulario()
         if datos:
             exito, mensaje = self.controlador.crear_aula(datos)
@@ -228,6 +244,9 @@ class AulasScreen(Screen):
                 StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def actualizar_aula(self):
+        if not self._tiene_permiso('aulas.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para actualizar aulas.', tipo='error')
+            return
         id_texto = self.ids.aula_id.text.strip()
         if not id_texto or not id_texto.isdigit():
             StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para actualizar.", tipo="error")
@@ -243,6 +262,9 @@ class AulasScreen(Screen):
                 StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def eliminar_aula(self, aula_id_val):
+        if not self._tiene_permiso('aulas.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para eliminar aulas.', tipo='error')
+            return
         if not aula_id_val:
             StyledPopup.mostrar_popup("Error", "ID de aula no válido.", tipo="error")
             return
