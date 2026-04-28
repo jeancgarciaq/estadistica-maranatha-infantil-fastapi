@@ -38,20 +38,26 @@ class UsuariosController(BaseController):
 
         db = self.get_db_session()
         try:
-            user = (
+            # Buscamos el usuario por nombre para validar password y estado de forma separada en logs internos
+            user_record = (
                 db.query(Usuario)
                 .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
                 .filter(
                     Usuario.username == username.strip(),
-                    Usuario.password == password,
-                    Usuario.activo == True,
                     Usuario.is_deleted.is_(False),
                 )
                 .first()
             )
-            if not user:
+
+            if not user_record:
+                logger.warning("Fallo login local: Usuario '%s' no encontrado o eliminado.", username)
+                return False, None, 'Credenciales inválidas o usuario inactivo.'
+            
+            if user_record.password != password or not user_record.activo:
+                logger.warning("Fallo login local para '%s': Contraseña incorrecta o usuario inactivo (activo=%s).", username, user_record.activo)
                 return False, None, 'Credenciales inválidas o usuario inactivo.'
 
+            user = user_record
             db.expunge(user)
             if user.rol:
                 db.expunge(user.rol)
@@ -108,66 +114,58 @@ class UsuariosController(BaseController):
         if not username or not password or not rol_nombre:
             return False, 'Usuario, contraseña y rol son obligatorios.'
 
-        db = self.get_db_session()
-        try:
+        def operacion(db):
             existe = db.query(Usuario).filter(Usuario.username == username.strip(), Usuario.is_deleted.is_(False)).first()
             if existe:
-                return False, 'Ya existe un usuario con ese nombre.'
+                raise ValueError('Ya existe un usuario con ese nombre.')
 
             rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
             if not rol:
-                return False, 'Rol inválido.'
+                raise ValueError('Rol inválido.')
 
             nuevo_usuario = Usuario()
             setattr(nuevo_usuario, 'username', username.strip())
             setattr(nuevo_usuario, 'password', password)
             setattr(nuevo_usuario, 'rol_id', rol.id)
             setattr(nuevo_usuario, 'activo', True)
+
             db.add(nuevo_usuario)
-            db.commit()
-            return True, 'Usuario creado exitosamente.'
-        except SQLAlchemyError as e:
-            db.rollback()
-            logger.error('Error creando usuario: %s', e)
-            return False, 'No se pudo crear el usuario.'
-        finally:
-            db.close()
+            db.flush()  # Necesario para obtener el ID antes de encolar
+            self.registrar_evento_sync(db, 'usuarios', nuevo_usuario, 'upsert')
+            logger.info("Usuario creado localmente y encolado para sync.")
+
+        return self.ejecutar_transaccion(operacion, 'Usuario creado exitosamente.')
 
     def actualizar_usuario(self, user_id, password=None, rol_nombre=None, activo=None):
         if not user_id:
             return False, 'Debe indicar el usuario a actualizar.'
 
-        db = self.get_db_session()
-        try:
+        def operacion(db):
             usuario = db.query(Usuario).filter(Usuario.id == int(user_id), Usuario.is_deleted.is_(False)).first()
             if not usuario:
-                return False, 'Usuario no encontrado.'
+                raise ValueError('Usuario no encontrado.')
 
             if getattr(usuario, 'username', None) == 'root' and activo is False:
-                return False, 'El usuario root no puede desactivarse.'
+                raise ValueError('El usuario root no puede desactivarse.')
 
-            if password is not None and password.strip() != '':
-                setattr(usuario, 'password', password.strip())
+            if password and password.strip():
+                setattr(usuario, 'password', password)
 
             if rol_nombre:
                 rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
                 if not rol:
-                    return False, 'Rol inválido.'
+                    raise ValueError('Rol inválido.')
                 if getattr(usuario, 'username', None) == 'root' and getattr(rol, 'nombre', None) != ROLE_ROOT:
-                    return False, 'El usuario root debe mantener el rol root.'
+                    raise ValueError('El usuario root debe mantener el rol root.')
                 setattr(usuario, 'rol_id', rol.id)
 
             if activo is not None:
                 setattr(usuario, 'activo', bool(activo))
 
-            db.commit()
-            return True, 'Usuario actualizado exitosamente.'
-        except SQLAlchemyError as e:
-            db.rollback()
-            logger.error('Error actualizando usuario: %s', e)
-            return False, 'No se pudo actualizar el usuario.'
-        finally:
-            db.close()
+            self.registrar_evento_sync(db, 'usuarios', usuario, 'upsert')
+            logger.info("Usuario actualizado localmente y encolado para sync: ID %s", user_id)
+
+        return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.')
 
     def obtener_usuario(self, user_id):
         db = self.get_db_session()
