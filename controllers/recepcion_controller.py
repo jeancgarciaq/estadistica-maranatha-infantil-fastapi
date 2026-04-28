@@ -1,6 +1,6 @@
 import logging
 from models.recepcion import Recepcion
-from models.database import SessionLocal
+from controllers.base_controller import BaseController
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -8,13 +8,10 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class RecepcionController:
+class RecepcionController(BaseController):
     def __init__(self, session=None):
-        self.session = session
+        super().__init__(model=Recepcion, session=session)
         logger.info("RecepcionController inicializado.")
-
-    def get_db_session(self):
-        return SessionLocal()
 
     def crear_recepcion(self, nombre, fecha=None):
         """
@@ -54,12 +51,12 @@ class RecepcionController:
         db = self.get_db_session()
         try:
             with db.begin():
-                recepcion = db.query(Recepcion).filter(Recepcion.id == id).first()
+                recepcion = db.query(Recepcion).filter(Recepcion.id == id, Recepcion.is_deleted.is_(False)).first()
                 if recepcion:
                     recepcion.nombre = nombre
                     if fecha:
                         try:
-                            recepcion.fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                            setattr(recepcion, "fecha", datetime.strptime(fecha, '%Y-%m-%d').date())
                         except ValueError:
                             return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
                     logger.info(f"Recepción actualizada: ID {id}")
@@ -80,9 +77,9 @@ class RecepcionController:
         db = self.get_db_session()
         try:
             with db.begin():
-                recepcion = db.query(Recepcion).filter(Recepcion.id == id).first()
+                recepcion = db.query(Recepcion).filter(Recepcion.id == id, Recepcion.is_deleted.is_(False)).first()
                 if recepcion:
-                    db.delete(recepcion)
+                    self.marcar_eliminado(recepcion, db)
                     logger.info(f"Recepción eliminada: ID {id}")
                     return True, "Recepción eliminada exitosamente."
                 else:
@@ -100,7 +97,7 @@ class RecepcionController:
         """
         db = self.get_db_session()
         try:
-            recepciones = db.query(Recepcion).all()
+            recepciones = db.query(Recepcion).filter(Recepcion.is_deleted.is_(False)).all()
             logger.info("Recepciones listadas.")
             return recepciones
         except SQLAlchemyError as e:
@@ -116,7 +113,7 @@ class RecepcionController:
         """
         db = self.get_db_session()
         try:
-            return db.query(Recepcion).filter(Recepcion.id == id).first()
+            return db.query(Recepcion).filter(Recepcion.id == id, Recepcion.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener recepción: {e}")
             return None
