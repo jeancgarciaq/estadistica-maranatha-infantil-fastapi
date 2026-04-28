@@ -26,6 +26,7 @@ from models.ensenanza import Ensenanza
 from models.logistica import Logistica
 from models.otras_areas import OtrasAreas
 from models.recepcion import Recepcion
+from models.security import Usuario, Rol, Permiso
 
 # Función para crear la base de datos si no existe
 def create_database():
