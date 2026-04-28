@@ -12,12 +12,11 @@
     cantidad: ''
     unidad: ''
     equipo: ''
-    es_compuesta: False
     puede_editar: False
 
     canvas.before:
         Color:
-            rgba: (0.2, 0.15, 0.45, 1) if self.es_compuesta else (0.15, 0.25, 0.45, 1)
+            rgba: (0.15, 0.25, 0.45, 1)
         RoundedRectangle:
             pos: self.pos
             size: self.size
