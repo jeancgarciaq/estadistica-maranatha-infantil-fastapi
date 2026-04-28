@@ -21,6 +21,7 @@ import models.ensenanza
 import models.logistica
 import models.otras_areas
 import models.recepcion
+import models.security
 
 
 # this is the Alembic Config object, which provides
