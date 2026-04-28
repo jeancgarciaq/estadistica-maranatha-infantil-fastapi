@@ -24,6 +24,13 @@ class EstadisticaScreen(Screen):
         super().__init__(**kwargs)
 
     def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('estadistica'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver estadisticas.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+
         if not self.ids.fecha_reporte.text:
             self.ids.fecha_reporte.text = datetime.now().strftime('%Y-%m-%d')
 
