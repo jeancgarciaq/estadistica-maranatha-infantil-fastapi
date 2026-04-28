@@ -49,6 +49,8 @@ class DistribucionesController(BaseController):
 
             distribucion = Distribucion(**datos_normalizados)
             db.add(distribucion)
+            db.flush()
+            self.registrar_evento_sync(db, 'distribuciones', distribucion, 'upsert')
             db.commit()
             logger.info("Distribución creada.")
             return True, "Distribución creada exitosamente."
@@ -71,7 +73,7 @@ class DistribucionesController(BaseController):
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area),
                 joinedload(Distribucion.recepcion)
-            ).all()
+            ).filter(Distribucion.is_deleted.is_(False)).all()
             logger.info(f"{len(distribuciones)} distribuciones obtenidas.")
             return distribuciones
         except SQLAlchemyError as e:
@@ -106,7 +108,10 @@ class DistribucionesController(BaseController):
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area),
                 joinedload(Distribucion.recepcion)
-            ).filter(Distribucion.fecha == fecha_filtro).all()
+            ).filter(
+                Distribucion.fecha == fecha_filtro,
+                Distribucion.is_deleted.is_(False),
+            ).all()
 
             grupos = {}
             for dist in distribuciones:
@@ -217,7 +222,7 @@ class DistribucionesController(BaseController):
         db = self.get_db_session()
         try:
             datos_normalizados = self._normalizar_datos(datos)
-            distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
+            distribucion = db.query(Distribucion).filter(Distribucion.id == id, Distribucion.is_deleted.is_(False)).first()
             if not distribucion:
                 return False, "Distribución no encontrada."
 
@@ -245,6 +250,7 @@ class DistribucionesController(BaseController):
 
             for key, value in datos_normalizados.items():
                 setattr(distribucion, key, value)
+            self.registrar_evento_sync(db, 'distribuciones', distribucion, 'upsert')
             db.commit()
             logger.info(f"Distribución actualizada: ID {id}")
             return True, "Distribución actualizada exitosamente."
@@ -265,9 +271,10 @@ class DistribucionesController(BaseController):
 
         db = self.get_db_session()
         try:
-            distribucion = db.query(Distribucion).filter(Distribucion.id == id).first()
+            distribucion = db.query(Distribucion).filter(Distribucion.id == id, Distribucion.is_deleted.is_(False)).first()
             if distribucion:
-                db.delete(distribucion)
+                self.marcar_eliminado(distribucion, db)
+                self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
                 db.commit()
                 logger.info(f"Distribución eliminada: ID {id}")
                 return True, "Distribución eliminada exitosamente."
@@ -293,7 +300,7 @@ class DistribucionesController(BaseController):
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area),
                 joinedload(Distribucion.recepcion)
-            ).filter(Distribucion.id == id).first()
+            ).filter(Distribucion.id == id, Distribucion.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener distribución: {e}")
             return None
