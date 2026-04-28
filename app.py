@@ -6,6 +6,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from models.database import SessionLocal
+from utils.firebase_sync import SyncManager
 from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
     LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController,
@@ -49,6 +50,9 @@ class EmiApp(App):
         # Inicialización de la sesión de SQLAlchemy
         self.session = SessionLocal()
         logger.debug("SQLAlchemy sesión inicializada.")
+
+        # Sincronización piloto con Firebase.
+        self.sync_manager = SyncManager()
 
         # Inicializa roles/permisos y usuarios base si aún no existen.
         try:
@@ -124,6 +128,31 @@ class EmiApp(App):
         sm.current = 'login'
 
         return sm
+
+    def sincronizar_piloto(self):
+        """Sincroniza la cola local y descarga cambios de donaciones/distribuciones si Firebase está configurado."""
+        if not hasattr(self, 'sync_manager'):
+            self.sync_manager = SyncManager()
+
+        self.sync_manager.set_auth_token_provider(
+            lambda: self.usuarios_controller.obtener_token_firebase(self.current_user)
+        )
+
+        if not self.sync_manager.client.is_configured():
+            logger.info("Firebase no está configurado; sincronización piloto omitida.")
+            return {'pushed': [], 'pulled': []}
+
+        pushed = self.sync_manager.push_pending(self.session)
+        pulled_donaciones = self.sync_manager.pull_collection(self.session, 'donaciones')
+        pulled_distribuciones = self.sync_manager.pull_collection(self.session, 'distribuciones')
+
+        return {
+            'pushed': pushed,
+            'pulled': {
+                'donaciones': pulled_donaciones,
+                'distribuciones': pulled_distribuciones,
+            },
+        }
 
     def set_current_user(self, user):
         self.current_user = user
