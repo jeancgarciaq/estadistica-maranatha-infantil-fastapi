@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Distribucion(Base):
+class Distribucion(SyncMixin, Base):
     __tablename__ = 'distribuciones'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
