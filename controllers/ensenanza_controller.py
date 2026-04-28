@@ -1,6 +1,6 @@
 import logging
 from models.ensenanza import Ensenanza
-from models.database import SessionLocal
+from controllers.base_controller import BaseController
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -8,13 +8,10 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class EnsenanzaController:
+class EnsenanzaController(BaseController):
     def __init__(self, session=None):
-        self.session = session
+        super().__init__(model=Ensenanza, session=session)
         logger.info("EnsenanzaController inicializado.")
-
-    def get_db_session(self):
-        return SessionLocal()
 
     def crear_ensenanza(self, capitan, fecha, subcapitan):
         """
@@ -51,12 +48,12 @@ class EnsenanzaController:
         db = self.get_db_session()
         try:
             with db.begin():
-                ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id).first()
+                ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id, Ensenanza.is_deleted.is_(False)).first()
                 if ensenanza:
                     fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    ensenanza.capitan = capitan
-                    ensenanza.subcapitan = subcapitan
-                    ensenanza.fecha = fecha_date
+                    setattr(ensenanza, 'capitan', capitan)
+                    setattr(ensenanza, 'subcapitan', subcapitan)
+                    setattr(ensenanza, 'fecha', fecha_date)
                     logger.info(f"Enseñanza actualizada: ID {id}")
                     return True, "Enseñanza actualizada exitosamente."
                 else:
@@ -77,9 +74,9 @@ class EnsenanzaController:
         db = self.get_db_session()
         try:
             with db.begin():
-                ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id).first()
+                ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id, Ensenanza.is_deleted.is_(False)).first()
                 if ensenanza:
-                    db.delete(ensenanza)
+                    self.marcar_eliminado(ensenanza, db)
                     logger.info(f"Enseñanza eliminada: ID {id}")
                     return True, "Enseñanza eliminada exitosamente."
                 else:
@@ -97,7 +94,7 @@ class EnsenanzaController:
         """
         db = self.get_db_session()
         try:
-            ensenanzas = db.query(Ensenanza).all()
+            ensenanzas = db.query(Ensenanza).filter(Ensenanza.is_deleted.is_(False)).all()
             logger.info("Enseñanzas listadas.")
             return ensenanzas
         except SQLAlchemyError as e:
@@ -113,7 +110,7 @@ class EnsenanzaController:
         """
         db = self.get_db_session()
         try:
-            return db.query(Ensenanza).filter(Ensenanza.id == id).first()
+            return db.query(Ensenanza).filter(Ensenanza.id == id, Ensenanza.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener enseñanza: {e}")
             return None
