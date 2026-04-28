@@ -1,6 +1,7 @@
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import ListProperty
+from kivy.app import App
 from datetime import datetime
 from components import StyledPopup
 from components.styled_datepicker import StyledDatePicker
@@ -17,6 +18,18 @@ class DonacionesScreen(Screen):
             print(f"Error al cargar la vista donaciones: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+
+    def _tiene_permiso(self, codigo):
+        app = App.get_running_app()
+        return bool(app and app.has_permission(codigo))
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('donaciones'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver Donaciones.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
 
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha."""
@@ -76,6 +89,9 @@ class DonacionesScreen(Screen):
         }
 
     def crear_donacion(self):
+        if not self._tiene_permiso('donaciones.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para crear donaciones.', tipo='error')
+            return
         datos = self.obtener_datos_formulario()
         if datos:
             exito, mensaje = self.controlador.crear_donacion(datos)
@@ -86,6 +102,9 @@ class DonacionesScreen(Screen):
                 StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def actualizar_donacion(self):
+        if not self._tiene_permiso('donaciones.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para actualizar donaciones.', tipo='error')
+            return
         id_texto = self.ids.donacion_id.text.strip()
         if not id_texto or not id_texto.isdigit():
             StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para actualizar.", tipo="error")
@@ -101,6 +120,9 @@ class DonacionesScreen(Screen):
                 StyledPopup.mostrar_popup("Error", mensaje, tipo="error")
 
     def eliminar_donacion(self, id_val):
+        if not self._tiene_permiso('donaciones.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para eliminar donaciones.', tipo='error')
+            return
         if not id_val or not id_val.isdigit():
             StyledPopup.mostrar_popup("Error", "Debe proporcionar un ID válido para eliminar.", tipo="error")
             return
