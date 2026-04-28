@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Salon(Base):
+class Salon(SyncMixin, Base):
     __tablename__ = 'salones'
 
     id = Column(Integer, primary_key=True, index=True)
