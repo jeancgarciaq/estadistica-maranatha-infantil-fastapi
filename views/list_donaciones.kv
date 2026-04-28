@@ -13,6 +13,7 @@
     unidad: ''
     equipo: ''
     es_compuesta: False
+    puede_editar: False
 
     canvas.before:
         Color:
@@ -77,12 +78,16 @@
             font_size: '14sp'
             background_normal: ''
             background_color: (0, 0.47, 0.76, 1)
+            opacity: 1 if root.puede_editar else 0
+            disabled: not root.puede_editar
             on_press: app.root.get_screen('lista_donaciones').editar_donacion(root.donacion_id)
         Button:
             text: 'Borrar'
             font_size: '14sp'
             background_normal: ''
             background_color: (0.8, 0, 0, 1)
+            opacity: 1 if root.puede_editar else 0
+            disabled: not root.puede_editar
             on_press: app.root.get_screen('lista_donaciones').confirmar_eliminacion(root.donacion_id)
 
 <ListDonacionesScreen>:
