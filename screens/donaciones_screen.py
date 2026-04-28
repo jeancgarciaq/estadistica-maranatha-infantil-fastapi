@@ -84,8 +84,7 @@ class DonacionesScreen(Screen):
             "cantidad": float_cantidad,
             "unidad": unidad,
             "equipo": equipo,
-            "fecha": fecha,
-            "es_compuesta": self.ids.es_compuesta.active
+            "fecha": fecha
         }
 
     def crear_donacion(self):
@@ -141,7 +140,6 @@ class DonacionesScreen(Screen):
         self.ids.donacion_unidad.text = "Unidad(es)"
         self.ids.donacion_fecha.text = ""
         self.ids.donacion_equipo.text = ""
-        self.ids.es_compuesta.active = False
 
     def actualizar_lista_donaciones(self, donaciones):
         lista_donaciones_grid = self.ids.lista_donaciones
@@ -164,7 +162,6 @@ class DonacionesScreen(Screen):
             self.ids.donacion_cantidad.text = str(donacion.cantidad)
             self.ids.donacion_unidad.text = donacion.unidad
             self.ids.donacion_equipo.text = donacion.equipo
-            self.ids.es_compuesta.active = bool(donacion.es_compuesta)
             if hasattr(donacion, 'fecha') and donacion.fecha:
                 self.ids.donacion_fecha.text = donacion.fecha.strftime('%Y-%m-%d') if hasattr(donacion.fecha, 'strftime') else str(donacion.fecha)
 
