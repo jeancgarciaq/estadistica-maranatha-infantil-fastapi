@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, Date
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from models.base import Base, SyncMixin
 
-class Logistica(Base):
+class Logistica(SyncMixin, Base):
     __tablename__ = 'logisticas'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
