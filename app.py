@@ -145,12 +145,14 @@ class EmiApp(App):
         pushed = self.sync_manager.push_pending(self.session)
         pulled_donaciones = self.sync_manager.pull_collection(self.session, 'donaciones')
         pulled_distribuciones = self.sync_manager.pull_collection(self.session, 'distribuciones')
+        pulled_usuarios = self.sync_manager.pull_collection(self.session, 'usuarios')
 
         return {
             'pushed': pushed,
             'pulled': {
                 'donaciones': pulled_donaciones,
                 'distribuciones': pulled_distribuciones,
+                'usuarios': pulled_usuarios,
             },
         }
 
