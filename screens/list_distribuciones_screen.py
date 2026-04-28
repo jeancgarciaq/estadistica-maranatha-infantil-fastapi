@@ -1,5 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
+from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
@@ -30,6 +31,16 @@ class ListDistribucionesScreen(Screen):
         logger.info("Inicializado ListAreasScreen")
         # Asignar el controlador correctamente
         self.controlador = controlador
+        self.can_manage = False
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('lista_distribuciones'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver distribuciones.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+        self.can_manage = app.has_permission('distribuciones.manage')
 
     def actualizar_lista_distribuciones(self, distribuciones):
         """Actualiza la lista concentrada para móvil (agrupados + simples)."""
@@ -180,6 +191,8 @@ class ListDistribucionesScreen(Screen):
             font_size='13sp',
             background_normal='',
             background_color=(0, 0.5, 1, 1),
+            opacity=1 if self.can_manage else 0,
+            disabled=not self.can_manage,
         )
         btn_editar.bind(on_release=lambda *_: self.editar_distribucion(distribucion.id))
         btn_borrar = Button(
@@ -187,6 +200,8 @@ class ListDistribucionesScreen(Screen):
             font_size='13sp',
             background_normal='',
             background_color=(1, 0.2, 0.2, 1),
+            opacity=1 if self.can_manage else 0,
+            disabled=not self.can_manage,
         )
         btn_borrar.bind(on_release=lambda *_: self.confirmar_eliminacion(distribucion.id))
         acciones.add_widget(btn_editar)
@@ -278,6 +293,9 @@ class ListDistribucionesScreen(Screen):
 
     def editar_distribucion(self, dist_id):
         """Navega al formulario para editar la distribución."""
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar distribuciones.', tipo='error')
+            return
         logger.info(f"Editando distribución ID: {dist_id}")
         dist_screen = self.manager.get_screen('distribuciones')
         dist_screen.preparar_edicion(dist_id)
@@ -285,6 +303,9 @@ class ListDistribucionesScreen(Screen):
 
     def confirmar_eliminacion(self, dist_id):
         """Muestra confirmación antes de eliminar."""
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar distribuciones.', tipo='error')
+            return
         StyledPopup.mostrar_confirmacion(
             "Confirmar Eliminación",
             f"¿Está seguro que desea eliminar la distribución ID {dist_id}?",
