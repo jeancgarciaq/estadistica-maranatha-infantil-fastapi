@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Ensenanza(Base):
+class Ensenanza(SyncMixin, Base):
     __tablename__ = 'ensenanzas'
 
     id = Column(Integer, primary_key=True, index=True)
