@@ -1,6 +1,6 @@
 import logging
 from models.otras_areas import OtrasAreas
-from models.database import SessionLocal
+from controllers.base_controller import BaseController
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
@@ -8,13 +8,10 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class OtrasAreasController:
+class OtrasAreasController(BaseController):
     def __init__(self, session=None):
-        self.session = session
+        super().__init__(model=OtrasAreas, session=session)
         logger.info("OtrasAreasController inicializado.")
-
-    def get_db_session(self):
-        return SessionLocal()
 
     def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha):
         """
@@ -54,18 +51,18 @@ class OtrasAreasController:
         db = self.get_db_session()
         try:
             with db.begin():
-                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
+                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
                 if otrasareas:
                     fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    otrasareas.alabanza = alabanza
-                    otrasareas.protocolo = protocolo
-                    otrasareas.semillitas = semillitas
-                    otrasareas.sonido = sonido
-                    otrasareas.teatro = teatro
-                    otrasareas.tv = tv
-                    otrasareas.ujier = ujier
-                    otrasareas.seguridad = seguridad
-                    otrasareas.fecha = fecha_date
+                    setattr(otrasareas, 'alabanza', alabanza)
+                    setattr(otrasareas, 'protocolo', protocolo)
+                    setattr(otrasareas, 'semillitas', semillitas)
+                    setattr(otrasareas, 'sonido', sonido)
+                    setattr(otrasareas, 'teatro', teatro)
+                    setattr(otrasareas, 'tv', tv)
+                    setattr(otrasareas, 'ujier', ujier)
+                    setattr(otrasareas, 'seguridad', seguridad)
+                    setattr(otrasareas, 'fecha', fecha_date)
                     logger.info(f"Otras áreas actualizadas: ID {id}")
                     return True, "Otras áreas actualizadas exitosamente."
                 else:
@@ -86,9 +83,9 @@ class OtrasAreasController:
         db = self.get_db_session()
         try:
             with db.begin():
-                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
+                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
                 if otrasareas:
-                    db.delete(otrasareas)
+                    self.marcar_eliminado(otrasareas, db)
                     logger.info(f"Otras áreas eliminadas: ID {id}")
                     return True, "Otras áreas eliminadas exitosamente."
                 else:
@@ -107,7 +104,7 @@ class OtrasAreasController:
         """
         db = self.get_db_session()
         try:
-            query = db.query(OtrasAreas)
+            query = db.query(OtrasAreas).filter(OtrasAreas.is_deleted.is_(False))
 
             if fecha:
                 if isinstance(fecha, str):
@@ -134,7 +131,7 @@ class OtrasAreasController:
         """
         db = self.get_db_session()
         try:
-            return db.query(OtrasAreas).filter(OtrasAreas.id == id).first()
+            return db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener otras áreas: {e}")
             return None
