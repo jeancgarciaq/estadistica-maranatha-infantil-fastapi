@@ -24,7 +24,8 @@ class AreasController(BaseController):
         db = self.get_db_session()  # Usar el método de la clase madre
         try:
             with db.begin():
-                area = Area(area=nombre)
+                area = Area()
+                area.area = nombre
                 db.add(area)
                 logger.info(f"Área creada: {nombre}")
                 return True, "Área creada exitosamente."
@@ -44,7 +45,7 @@ class AreasController(BaseController):
         db = self.get_db_session()  # Usar el método de la clase madre
         try:
             with db.begin():
-                area = db.query(Area).filter(Area.id == id).first()
+                area = db.query(Area).filter(Area.id == id, Area.is_deleted.is_(False)).first()
                 if area:
                     area.area = nombre  
                     logger.info(f"Área actualizada: {nombre}")
@@ -61,9 +62,9 @@ class AreasController(BaseController):
         db = self.get_db_session()  # Usar el método de la clase madre
         try:
             with db.begin():
-                area = db.query(Area).filter(Area.id == id).first()
+                area = db.query(Area).filter(Area.id == id, Area.is_deleted.is_(False)).first()
                 if area:
-                    db.delete(area)
+                    self.marcar_eliminado(area, db)
                     logger.info(f"Área eliminada: {area.area}")
                     return True, "Área eliminada exitosamente."
                 else:
@@ -79,7 +80,7 @@ class AreasController(BaseController):
         """Método para listar las áreas y manejar errores."""
         db = self.get_db_session()  # Usar el método de la clase madre
         try:
-            areas = db.query(Area).all()
+            areas = db.query(Area).filter(Area.is_deleted.is_(False)).all()
             logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
             return areas
         except SQLAlchemyError as e:
