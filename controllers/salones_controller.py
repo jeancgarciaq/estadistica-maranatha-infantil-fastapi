@@ -45,7 +45,7 @@ class SalonesController(BaseController):
         db = self.get_db_session()
         try:
             with db.begin():
-                salon = db.query(Salon).filter(Salon.id == id).first()
+                salon = db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
                 if salon:
                     salon.salon = nombre  
                     salon.edad = edad
@@ -65,9 +65,9 @@ class SalonesController(BaseController):
         db = self.get_db_session()
         try:
             with db.begin():
-                salon = db.query(Salon).filter(Salon.id == id).first()
+                salon = db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
                 if salon:
-                    db.delete(salon)
+                    self.marcar_eliminado(salon, db)
                     logger.info(f"Salón eliminado: ID {id}")
                     return True, "Salón eliminado exitosamente."
                 else:
@@ -82,7 +82,7 @@ class SalonesController(BaseController):
         """Método para listar los salones y manejar errores."""
         db = self.get_db_session()
         try:
-            salones = db.query(Salon).all()
+            salones = db.query(Salon).filter(Salon.is_deleted.is_(False)).all()
             logger.info(f"{len(salones)} salones obtenidos de la base de datos.")
             return salones
         except SQLAlchemyError as e:
@@ -96,7 +96,7 @@ class SalonesController(BaseController):
         """Obtiene un salón por su ID."""
         db = self.get_db_session()
         try:
-            return db.query(Salon).filter(Salon.id == id).first()
+            return db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener salón: {e}")
             return None
