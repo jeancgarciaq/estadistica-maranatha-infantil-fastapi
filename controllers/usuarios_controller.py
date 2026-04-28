@@ -10,6 +10,7 @@ from models.security import (
     Rol,
     Usuario,
 )
+from utils.firebase_auth import FirebaseAuthService
 
 logger = logging.getLogger(__name__)
 
@@ -17,17 +18,35 @@ logger = logging.getLogger(__name__)
 class UsuariosController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Usuario, session=session)
+        self.firebase_auth = FirebaseAuthService()
 
     def autenticar(self, username, password):
         if not username or not password:
             return False, None, 'Debe indicar usuario y contraseña.'
+
+        if self.firebase_auth.is_configured():
+            try:
+                auth_session = self.firebase_auth.sign_in(username, password)
+                role_assignment = self.firebase_auth.fetch_role_assignment(auth_session)
+                if not role_assignment.get('active', True):
+                    return False, None, 'Usuario desactivado para acceso en la aplicación.'
+
+                runtime_user = self.firebase_auth.build_runtime_user(auth_session, role_assignment)
+                return True, runtime_user, 'Inicio de sesión exitoso con Firebase.'
+            except Exception as exc:
+                logger.warning('Autenticación Firebase falló, usando autenticación local: %s', exc)
 
         db = self.get_db_session()
         try:
             user = (
                 db.query(Usuario)
                 .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
-                .filter(Usuario.username == username.strip(), Usuario.password == password, Usuario.activo == True)
+                .filter(
+                    Usuario.username == username.strip(),
+                    Usuario.password == password,
+                    Usuario.activo == True,
+                    Usuario.is_deleted.is_(False),
+                )
                 .first()
             )
             if not user:
@@ -45,12 +64,27 @@ class UsuariosController(BaseController):
         finally:
             db.close()
 
+    def obtener_token_firebase(self, usuario):
+        if not usuario:
+            return None
+
+        auth_session = getattr(usuario, 'firebase_session', None)
+        if not auth_session:
+            return None
+
+        try:
+            return self.firebase_auth.get_valid_id_token(auth_session)
+        except Exception as exc:
+            logger.error('No se pudo refrescar token Firebase: %s', exc)
+            return None
+
     def listar_usuarios(self):
         db = self.get_db_session()
         try:
             return (
                 db.query(Usuario)
                 .options(joinedload(Usuario.rol))
+                .filter(Usuario.is_deleted.is_(False))
                 .order_by(Usuario.username.asc())
                 .all()
             )
@@ -63,7 +97,7 @@ class UsuariosController(BaseController):
     def listar_roles(self):
         db = self.get_db_session()
         try:
-            return db.query(Rol).order_by(Rol.nombre.asc()).all()
+            return db.query(Rol).filter(Rol.is_deleted.is_(False)).order_by(Rol.nombre.asc()).all()
         except SQLAlchemyError as e:
             logger.error('Error listando roles: %s', e)
             return []
@@ -76,15 +110,20 @@ class UsuariosController(BaseController):
 
         db = self.get_db_session()
         try:
-            existe = db.query(Usuario).filter(Usuario.username == username.strip()).first()
+            existe = db.query(Usuario).filter(Usuario.username == username.strip(), Usuario.is_deleted.is_(False)).first()
             if existe:
                 return False, 'Ya existe un usuario con ese nombre.'
 
-            rol = db.query(Rol).filter(Rol.nombre == rol_nombre).first()
+            rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
             if not rol:
                 return False, 'Rol inválido.'
 
-            db.add(Usuario(username=username.strip(), password=password, rol_id=rol.id, activo=True))
+            nuevo_usuario = Usuario()
+            setattr(nuevo_usuario, 'username', username.strip())
+            setattr(nuevo_usuario, 'password', password)
+            setattr(nuevo_usuario, 'rol_id', rol.id)
+            setattr(nuevo_usuario, 'activo', True)
+            db.add(nuevo_usuario)
             db.commit()
             return True, 'Usuario creado exitosamente.'
         except SQLAlchemyError as e:
@@ -100,26 +139,26 @@ class UsuariosController(BaseController):
 
         db = self.get_db_session()
         try:
-            usuario = db.query(Usuario).filter(Usuario.id == int(user_id)).first()
+            usuario = db.query(Usuario).filter(Usuario.id == int(user_id), Usuario.is_deleted.is_(False)).first()
             if not usuario:
                 return False, 'Usuario no encontrado.'
 
-            if usuario.username == 'root' and activo is False:
+            if getattr(usuario, 'username', None) == 'root' and activo is False:
                 return False, 'El usuario root no puede desactivarse.'
 
             if password is not None and password.strip() != '':
-                usuario.password = password.strip()
+                setattr(usuario, 'password', password.strip())
 
             if rol_nombre:
-                rol = db.query(Rol).filter(Rol.nombre == rol_nombre).first()
+                rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
                 if not rol:
                     return False, 'Rol inválido.'
-                if usuario.username == 'root' and rol.nombre != ROLE_ROOT:
+                if getattr(usuario, 'username', None) == 'root' and getattr(rol, 'nombre', None) != ROLE_ROOT:
                     return False, 'El usuario root debe mantener el rol root.'
-                usuario.rol_id = rol.id
+                setattr(usuario, 'rol_id', rol.id)
 
             if activo is not None:
-                usuario.activo = bool(activo)
+                setattr(usuario, 'activo', bool(activo))
 
             db.commit()
             return True, 'Usuario actualizado exitosamente.'
@@ -136,7 +175,7 @@ class UsuariosController(BaseController):
             return (
                 db.query(Usuario)
                 .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
-                .filter(Usuario.id == int(user_id))
+                .filter(Usuario.id == int(user_id), Usuario.is_deleted.is_(False))
                 .first()
             )
         except SQLAlchemyError as e:
