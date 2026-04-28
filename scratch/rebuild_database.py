@@ -1,4 +1,8 @@
 import os
+import sys
+
+# Añadir el directorio raíz del proyecto a la ruta de Python
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models.base import Base
 from models.database import DATABASE_PATH, engine
