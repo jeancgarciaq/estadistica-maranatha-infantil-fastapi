@@ -72,7 +72,7 @@ class AulasController(BaseController):
                     return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
 
             with db.begin():
-                aula = db.query(Aula).filter(Aula.id == id).first()
+                aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
                 if aula:
                     for key, value in datos.items():
                         setattr(aula, key, value)
@@ -97,9 +97,9 @@ class AulasController(BaseController):
         db = self.get_db_session()
         try:
             with db.begin():
-                aula = db.query(Aula).filter(Aula.id == id).first()
+                aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
                 if aula:
-                    db.delete(aula)
+                    self.marcar_eliminado(aula, db)
                     logger.info(f"Aula eliminada: ID {id}")
                     return True, "Aula eliminada exitosamente."
                 else:
@@ -125,6 +125,7 @@ class AulasController(BaseController):
         db = self.get_db_session()
         try:
             query = db.query(Aula).options(selectinload(Aula.salon))
+            query = query.filter(Aula.is_deleted.is_(False))
             if fecha:
                 if isinstance(fecha, str):
                     fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
@@ -149,7 +150,7 @@ class AulasController(BaseController):
         """
         db = self.get_db_session()
         try:
-            salones = db.query(Salon).all()
+            salones = db.query(Salon).filter(Salon.is_deleted.is_(False)).all()
             logger.info(f"{len(salones)} salones obtenidos para AulasController.")
             return salones
         except SQLAlchemyError as e:
@@ -166,7 +167,7 @@ class AulasController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(Aula).filter(Aula.id == id).first()
+            return db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener aula: {e}")
             return None
