@@ -454,7 +454,6 @@ class ReporteEstadisticoService:
     def generar_graficos(self, resumen):
         fecha_texto = resumen.fecha_corte.strftime('%Y%m%d')
         ruta_asistencia = os.path.join(self.output_dir, f'asistencia_{fecha_texto}.png')
-        ruta_alimentos = os.path.join(self.output_dir, f'alimentos_{fecha_texto}.png')
 
         plt.figure(figsize=(7, 4))
         categorias = ['Niños', 'Niñas', 'Servidores']
@@ -467,22 +466,8 @@ class ReporteEstadisticoService:
         plt.savefig(ruta_asistencia, dpi=180)
         plt.close()
 
-        plt.figure(figsize=(7, 4))
-        valores_alimentos = [resumen.donaciones_combinadas, resumen.distribuciones_combinadas, resumen.faltante_preparado]
-        etiquetas = ['Preparado', 'Distribuido', 'Pendiente']
-        colores = ['#F2994A', '#9B51E0', '#56CCF2']
-        if sum(valores_alimentos) > 0:
-            plt.pie(valores_alimentos, labels=etiquetas, autopct='%1.1f%%', colors=colores, startangle=90)
-        else:
-            plt.pie([1], labels=['Sin datos'], colors=['#BDBDBD'], startangle=90)
-        plt.title('Estado de alimentos preparados')
-        plt.tight_layout()
-        plt.savefig(ruta_alimentos, dpi=180)
-        plt.close()
-
         return {
             'asistencia': ruta_asistencia,
-            'alimentos': ruta_alimentos,
         }
 
     def generar_pdf(self, resumen, graficos=None, archivo_salida=None):
