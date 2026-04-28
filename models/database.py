@@ -26,12 +26,20 @@ from models.ensenanza import Ensenanza
 from models.logistica import Logistica
 from models.otras_areas import OtrasAreas
 from models.recepcion import Recepcion
+from models.sync_queue import SyncQueue
 from models.security import Usuario, Rol, Permiso
 
 # Función para crear la base de datos si no existe
 def create_database():
     if not os.path.exists(DATABASE_PATH):
         Base.metadata.create_all(bind=engine)
+
+
+def reset_database():
+    """Elimina la base local y la recrea desde el esquema actual."""
+    if os.path.exists(DATABASE_PATH):
+        os.remove(DATABASE_PATH)
+    Base.metadata.create_all(bind=engine)
 
 # Llama a la función para crear la base de datos
 create_database()
