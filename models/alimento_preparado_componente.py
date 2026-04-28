@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+from models.base import Base, SyncMixin
 
 
-class AlimentoPreparadoComponente(Base):
+class AlimentoPreparadoComponente(SyncMixin, Base):
     __tablename__ = 'alimentos_preparados_componentes'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
