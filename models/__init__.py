@@ -9,4 +9,5 @@ from .ensenanza import Ensenanza
 from .logistica import Logistica
 from .otras_areas import OtrasAreas
 from .recepcion import Recepcion
+from .sync_queue import SyncQueue
 from .security import Usuario, Rol, Permiso
