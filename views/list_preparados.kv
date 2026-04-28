@@ -9,6 +9,7 @@
     nombre: ''
     cantidad: ''
     fecha: ''
+    puede_editar: False
 
     canvas.before:
         Color:
@@ -66,6 +67,8 @@
             size_hint_x: 0.5
             background_normal: ''
             background_color: (0, 0.47, 0.76, 1)
+            opacity: 1 if root.puede_editar else 0
+            disabled: not root.puede_editar
             on_press: app.root.get_screen('lista_preparados').editar_registro(root.preparado_id)
 
         Button:
@@ -74,6 +77,8 @@
             bold: True
             background_normal: ''
             background_color: (0.8, 0, 0, 1)
+            opacity: 1 if root.puede_editar else 0
+            disabled: not root.puede_editar
             on_press: app.root.get_screen('lista_preparados').confirmar_eliminacion(root.preparado_id)
             size_hint_x: 0.5
 
