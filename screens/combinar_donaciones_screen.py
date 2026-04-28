@@ -1,4 +1,5 @@
 import logging
+from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import ListProperty
@@ -31,6 +32,12 @@ class CombinarDonacionesScreen(Screen):
         self.componentes_seleccionados = [] # Lista de {'id': id, 'descripcion': desc, 'cantidad_usada': cant}
 
     def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('combinar_donaciones'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver Preparados.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
         self.limpiar_todo()
 
     def abrir_datepicker(self, target_id):
@@ -143,6 +150,11 @@ class CombinarDonacionesScreen(Screen):
             self.actualizar_lista_ui()
 
     def realizar_combinacion(self):
+        app = App.get_running_app()
+        if not app or not app.has_permission('preparados.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para registrar preparados.', tipo='error')
+            return
+
         desc = self.ids.res_descripcion.text.strip()
         cant = self.ids.res_cantidad.text.strip()
         unid = self.ids.res_unidad.text
@@ -195,4 +207,8 @@ class CombinarDonacionesScreen(Screen):
         self.ids.lista_componentes.clear_widgets()
 
     def ver_lista_preparados(self):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('lista_preparados'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver preparados.', tipo='error')
+            return
         self.manager.current = 'lista_preparados'
