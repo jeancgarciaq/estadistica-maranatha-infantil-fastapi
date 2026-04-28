@@ -1,5 +1,6 @@
 <EnsenanzaScreen>:
     name: 'ensenanzas'
+    
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -8,120 +9,184 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+        # 1. TÍTULO
         Label:
             text: 'Enseñanza de Maranatha Infantil'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '20sp'
             size_hint_y: None
-            height: 50
-        # Formulario
+            height: dp(50)
+            bold: True
+
+        # 2. ÁREA DE CONTENIDO (Scrollable)
         ScrollView:
-            size_hint_y: 1
-            GridLayout:
-                cols: 2
-                spacing: 10
-                padding: 10
-                size_hint_y: None
-                row_default_height: 50
-                Label:
-                    text: 'Capitán:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: ensenanza_capitan
-                Label:
-                    text: 'Subcapitán:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: ensenanza_subcapitan
-                Label:
-                    text: 'Fecha (YYYY-MM-DD):'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: 10
-                    TextInput:
-                        id: ensenanza_fecha
-                        readonly: True
-                        hint_text: 'YYYY-MM-DD'
-                    Button:
-                        size_hint_x: None
-                        width: 50
-                        background_normal: ''
-                        background_color: (0, 119/255, 194/255, 1)
-                        on_press: root.abrir_datepicker('ensenanza_fecha')
-                        Image:
-                            source: 'images/calendar_icon.png'
-                            center_x: self.parent.center_x
-                            center_y: self.parent.center_y
-                            size: 30, 30
-                            allow_stretch: True
-                Label:
-                    text: 'ID Enseñanza:'
-                    font_size: 20
-                    color: 1, 1, 1, 1
-                    size_hint_y: None
-                    height: 30
-                TextInput:
-                    id: ensenanza_id
-        #Contenedor de botones 
-        BoxLayout:
-            size_hint_y: None
-            height: 50
-            spacing: 10
-            padding: 10        
-            Button:
-                text: 'Crear'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.crear_ensenanza()
-            Button:
-                text: 'Actualizar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.actualizar_ensenanza()
-            Button:
-                text: 'Eliminar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.eliminar_ensenanza(ensenanza_id.text)
-            Button:
-                text: 'Listar'
-                font_size: 28
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                size_hint_y: None
-                height: 50
-                on_press: root.cargar_ensenanzas()
-        # Lista de enseñanzas
-        ScrollView:
-            GridLayout:
-                id: lista_ensenanzas
-                cols: 3 # Nombre, Editar, Eliminar
+            do_scroll_x: False
+            do_scroll_y: True
+
+            BoxLayout:
+                orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
-        Button:
-            text: 'Volver al Menú'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
+                padding: dp(15)
+                spacing: dp(15)
+
+                # Campo: ID Enseñanza
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'ID Enseñanza:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: ensenanza_id
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Campo: Capitán
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Capitán:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: ensenanza_capitan
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Campo: Subcapitán
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(70)
+                    Label:
+                        text: 'Subcapitán:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    TextInput:
+                        id: ensenanza_subcapitan
+                        multiline: False
+                        font_size: '18sp'
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Campo: Fecha (Con Icono Unicode)
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(80)
+                    Label:
+                        text: 'Fecha:'
+                        font_size: '16sp'
+                        halign: 'left'
+                        text_size: self.size
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(10)
+                        TextInput:
+                            id: ensenanza_fecha
+                            readonly: True
+                            hint_text: 'YYYY-MM-DD'
+                            multiline: False
+                            font_size: '16sp'
+                        Button:
+                            text: '\uf133'  # <--- Unicode Line Awesome
+                            font_name: 'LineAwesome'
+                            font_size: '24sp'
+                            size_hint_x: None
+                            width: dp(50)
+                            background_normal: ''
+                            background_color: (0, 0.47, 0.76, 1)
+                            on_press: root.abrir_datepicker('ensenanza_fecha')
+
+                GridLayout:
+                    cols: 2
+                    size_hint_y: None
+                    height: dp(110)
+                    padding: dp(10)
+                    spacing: dp(10)
+
+                    Button:
+                        text: 'Crear'
+                        font_size: '16sp'
+                        bold: True
+                        background_normal: ''
+                        background_color: (0, 0.6, 0.3, 1)
+                        on_press: root.crear_ensenanza()
+
+                    Button:
+                        text: 'Actualizar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0, 0.47, 0.76, 1)
+                        on_press: root.actualizar_ensenanza()
+
+                    Button:
+                        text: 'Eliminar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0.8, 0.2, 0.2, 1)
+                        on_press: root.eliminar_ensenanza(ensenanza_id.text)
+
+                    Button:
+                        text: 'Listar/Cargar'
+                        font_size: '16sp'
+                        background_normal: ''
+                        background_color: (0.5, 0.5, 0.5, 1)
+                        on_press: root.cargar_ensenanzas()
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: dp(260)
+                    padding: dp(10)
+
+                    Label:
+                        text: 'Listado de Enseñanzas'
+                        font_size: '16sp'
+                        size_hint_y: None
+                        height: dp(30)
+                        color: 0.8, 0.8, 0.8, 1
+
+                    ScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        GridLayout:
+                            id: lista_ensenanzas
+                            cols: 3
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: dp(5)
+                            padding: dp(5)
+
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: None
-            height: 50
-            on_press: root.manager.current = 'menu'
+            height: dp(110)
+            padding: dp(10)
+            spacing: dp(8)
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.2
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: 'Volver al Menú'
+                size_hint_y: 1
+                font_size: '16sp'
+                background_normal: ''
+                background_color: (0.3, 0.3, 0.3, 1)
+                on_press: root.manager.current = 'menu'

@@ -3,16 +3,17 @@ kivy.require('2.3.1')
 
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
+from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from models.database import SessionLocal
 from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
-    LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController, EstadisticaController )
+    LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController )
 from screens import (
     MenuScreen, AreasScreen, SalonesScreen, EstadisticaScreen, DonacionesScreen, CombinarDonacionesScreen,
     DistribucionesScreen, LogisticaScreen, OtrasAreasScreen, EnsenanzaScreen, RecepcionScreen, ReporteScreen,
     AyudaScreen, AulasScreen, ListAreasScreen, ListSalonesScreen, ListAulasScreen, ListDonacionesScreen,
-    ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen )
+    ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen, ListLogisticaScreen)
 import logging
 
 # Configure logging
@@ -27,6 +28,11 @@ class EmiApp(App):
                 logging.FileHandler("app.log"),
                 logging.StreamHandler()
             ]
+        )
+
+        LabelBase.register(
+            name='LineAwesome', 
+            fn_regular='assets/fonts/la-regular-400.ttf'
         )
         
         Window.clearcolor = (20/255, 40/255, 80/255, 1)
@@ -44,7 +50,6 @@ class EmiApp(App):
             "salones": SalonesController(session=self.session),
             "aulas": AulasController(session=self.session),
             "donaciones": DonacionesController(session=self.session),
-            "estadistica": EstadisticaController(session=self.session),
             "ensenanza": EnsenanzaController(session=self.session),
             "logistica": LogisticaController(session=self.session),
             "otrasareas": OtrasAreasController(session=self.session),
@@ -58,9 +63,8 @@ class EmiApp(App):
         self.salones_controller = controllers["salones"]
         self.aulas_controller = controllers["aulas"]
         self.donaciones_controller = controllers["donaciones"]
-        self.estadistica_controller = controllers["estadistica"]
         self.distribuciones_controller = controllers["distribuciones"]  
-        logger.debug("Controladores principales fueron asignados a EmiApp.")
+        logger.debug("AreasController, SalonesController, AulasController, DonacionesController y DistribucionesController fueron asignados a EmiApp.")
 
         # Manejador de las ventanas
         sm = ScreenManager()
@@ -71,11 +75,11 @@ class EmiApp(App):
             AreasScreen(controllers["areas"], name='areas'),
             SalonesScreen(controllers["salones"], name='salones'),
             AulasScreen(controllers["aulas"], name='aulas'),
-            EstadisticaScreen(controllers["estadistica"], name='estadistica'),
+            EstadisticaScreen(name='estadistica'),
             DonacionesScreen(controllers["donaciones"], name='donaciones'),
             CombinarDonacionesScreen(controllers["donaciones"], name='combinar_donaciones'),
             DistribucionesScreen(controllers["distribuciones"], name='distribuciones'),
-            LogisticaScreen(controllers["logistica"], name='logistica'),
+            LogisticaScreen(controllers["logistica"], name='logisticas'),
             OtrasAreasScreen(controllers["otrasareas"], name='otrasareas'),
             EnsenanzaScreen(controllers["ensenanza"], name='ensenanza'),
             RecepcionScreen(controllers["recepcion"], name='recepcion'),
@@ -88,6 +92,7 @@ class EmiApp(App):
             ListPreparadosScreen(controlador=controllers["donaciones"], name='lista_preparados'),
             ListDistribucionesScreen(controlador=controllers["distribuciones"], name='lista_distribuciones'),
             ListOtrasAreasScreen(controlador=controllers["otrasareas"], name='lista_otras_areas'),
+            ListLogisticaScreen(controlador=controllers["logistica"], name='lista_logisticas'),
         ]
 
         # Agregar pantallas al manejador

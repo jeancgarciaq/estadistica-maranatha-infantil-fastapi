@@ -1,32 +1,69 @@
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
+from kivy.properties import StringProperty
+from kivy.factory import Factory
+from components.styled_datepicker import StyledDatePicker
+from datetime import datetime
 import logging
 
 from components.styled_popup import StyledPopup
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Cargar la vista a nivel de módulo para evitar errores de inicialización de IDs
+try:
+    Builder.load_file('views/list_preparados.kv')
+except Exception as e:
+    logger.error(f"Error cargando list_preparados.kv: {e}")
 
 class ListPreparadosScreen(Screen):
+    fecha_filtro = StringProperty("")
+
     def __init__(self, controlador, **kwargs):
-        try:
-            Builder.load_file('views/list_preparados.kv')
-        except Exception as e:
-            logger.error(f"Error cargando list_preparados.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
 
-    def on_enter(self):
-        self.cargar_preparados()
+    def abrir_datepicker_filtro(self):
+        """Abre el selector de fecha para filtrar registros."""
+        def set_date(date_str):
+            self.fecha_filtro = date_str
+            self.cargar_preparados()
+
+        picker = StyledDatePicker(callback=set_date)
+        picker.open()
+
+    def _obtener_fecha_filtro(self):
+        """Valida y devuelve la fecha seleccionada para el filtro."""
+        fecha = (self.fecha_filtro or "").strip()
+        if not fecha:
+            StyledPopup.mostrar_popup("Error", "Debe seleccionar una fecha para listar los datos.", tipo="error")
+            return None
+
+        try:
+            datetime.strptime(fecha, '%Y-%m-%d')
+            return fecha
+        except ValueError:
+            StyledPopup.mostrar_popup("Error", "Formato de fecha inválido.", tipo="error")
+            return None
+
+    def on_enter(self): # type: ignore
+        if not self.fecha_filtro:
+            self.fecha_filtro = datetime.now().strftime('%Y-%m-%d')
+        self.actualizar_lista([]) # Iniciar con la lista vacía hasta filtrar
 
     def cargar_preparados(self):
-        preparados = self.controlador.listar_preparados()
-        self.actualizar_lista(preparados)
+        fecha = self._obtener_fecha_filtro()
+        if not fecha:
+            return
+
+        try:
+            preparados = self.controlador.listar_preparados(fecha=fecha)
+            self.actualizar_lista(preparados)
+        except Exception as e:
+            logger.error(f"Error al cargar preparados: {e}")
+            self.actualizar_lista([])
 
     def actualizar_lista(self, preparados):
         contenedor = self.ids.lista_preparados
@@ -37,47 +74,19 @@ class ListPreparadosScreen(Screen):
             return
 
         for preparado in preparados:
-            tarjeta = BoxLayout(orientation='vertical', size_hint_y=None, height=170, padding=10, spacing=6)
-            tarjeta.add_widget(Label(
-                text=f"ID {preparado.id} | {preparado.descripcion}",
-                bold=True,
-                size_hint_y=None,
-                height=28,
-                halign='left',
-                text_size=(900, None)
-            ))
-            tarjeta.add_widget(Label(
-                text=f"Cantidad: {preparado.cantidad} {preparado.unidad} | Equipo: {preparado.equipo} | Fecha: {preparado.fecha}",
-                size_hint_y=None,
-                height=24,
-                halign='left',
-                text_size=(900, None)
-            ))
-
-            if preparado.componentes:
-                detalle = ', '.join(
-                    f"{c.materia_prima.descripcion if c.materia_prima else c.donacion_materia_id}: {c.cantidad_usada}"
-                    for c in preparado.componentes
-                )
-            else:
-                detalle = 'Sin componentes registrados'
-
-            tarjeta.add_widget(Label(
-                text=f"Materias primas usadas: {detalle}",
-                size_hint_y=None,
-                height=56,
-                halign='left',
-                valign='top',
-                text_size=(900, None)
-            ))
-
-            acciones = BoxLayout(size_hint_y=None, height=34, spacing=8)
-            boton = Button(text='Eliminar', background_normal='', background_color=(180/255, 0, 0, 1))
-            boton.bind(on_release=lambda btn, p_id=preparado.id: self.confirmar_eliminacion(p_id))
-            acciones.add_widget(boton)
-            tarjeta.add_widget(acciones)
-
+            # Usamos la Factory para instanciar la tarjeta definida en el .kv
+            tarjeta = Factory.PreparadoCard()
+            tarjeta.preparado_id = str(preparado.id)
+            tarjeta.nombre = preparado.descripcion
+            tarjeta.cantidad = f"{preparado.cantidad} {preparado.unidad}"
+            tarjeta.fecha = str(preparado.fecha)
+            
             contenedor.add_widget(tarjeta)
+
+    def editar_registro(self, preparado_id):
+        """Lógica para editar el registro (redirigir a pantalla de combinación)."""
+        # Aquí puedes implementar la lógica para cargar los datos en la pantalla de edición
+        logger.info(f"Editando preparado ID: {preparado_id}")
 
     def confirmar_eliminacion(self, preparado_id):
         StyledPopup.mostrar_confirmacion(

@@ -172,15 +172,28 @@ class DonacionesController(BaseController):
         finally:
             db.close()
 
-    def listar_preparados(self):
+    def listar_preparados(self, fecha=None):
         """
-        Lista los alimentos preparados con sus componentes.
+        Lista los alimentos preparados con sus componentes, opcionalmente filtrados por fecha.
         """
         db = self.get_db_session()
         try:
-            return db.query(AlimentoPreparado).options(
+            query = db.query(AlimentoPreparado).options(
                 joinedload(AlimentoPreparado.componentes).joinedload(AlimentoPreparadoComponente.materia_prima)
-            ).order_by(AlimentoPreparado.fecha.desc(), AlimentoPreparado.id.desc()).all()
+            )
+
+            if fecha:
+                if isinstance(fecha, str):
+                    try:
+                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    except ValueError:
+                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
+                        return []
+                query = query.filter(AlimentoPreparado.fecha == fecha)
+
+            preparados = query.order_by(AlimentoPreparado.fecha.desc(), AlimentoPreparado.id.desc()).all()
+            logger.info(f"{len(preparados)} preparados obtenidos.")
+            return preparados
         except SQLAlchemyError as e:
             logger.error(f"Error al listar preparados: {e}")
             return []
@@ -207,14 +220,26 @@ class DonacionesController(BaseController):
         finally:
             db.close()
 
-    def listar_donaciones(self):
+    def listar_donaciones(self, fecha=None):
         """
         Obtiene la lista de donaciones desde la base de datos.
+        :param fecha: Fecha en formato YYYY-MM-DD o date para filtrar resultados (opcional).
         :return: Lista de objetos Donacion.
         """
         db = self.get_db_session()
         try:
-            donaciones = db.query(Donacion).all()
+            query = db.query(Donacion)
+
+            if fecha:
+                if isinstance(fecha, str):
+                    try:
+                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    except ValueError:
+                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
+                        return []
+                query = query.filter(Donacion.fecha == fecha)
+
+            donaciones = query.order_by(Donacion.id.desc()).all()
             logger.info(f"{len(donaciones)} donaciones obtenidas de la base de datos.")
             return donaciones
         except SQLAlchemyError as e:

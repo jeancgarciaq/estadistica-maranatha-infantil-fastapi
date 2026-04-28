@@ -1,6 +1,7 @@
 from models.aulas import Aula
 from models.salones import Salon
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import selectinload
 from controllers.base_controller import BaseController
 from datetime import datetime
 import logging
@@ -113,13 +114,30 @@ class AulasController(BaseController):
         Lista todas las aulas.
         :return: Lista de objetos Aula.
         """
+        return self.listar_aulas_por_fecha()
+
+    def listar_aulas_por_fecha(self, fecha=None):
+        """
+        Lista las aulas filtrando por fecha cuando se proporciona.
+        :param fecha: Fecha en formato YYYY-MM-DD o datetime.date.
+        :return: Lista de objetos Aula.
+        """
         db = self.get_db_session()
         try:
-            aulas = db.query(Aula).all()
+            query = db.query(Aula).options(selectinload(Aula.salon))
+            if fecha:
+                if isinstance(fecha, str):
+                    fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                query = query.filter(Aula.fecha == fecha)
+
+            aulas = query.all()
             logger.info(f"{len(aulas)} aulas obtenidas de la base de datos.")
             return aulas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar aulas: {e}")
+            return []
+        except ValueError as e:
+            logger.error(f"Formato de fecha inválido al listar aulas: {e}")
             return []
         finally:
             db.close()

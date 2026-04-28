@@ -1,3 +1,77 @@
+<SalonListCard@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: dp(15)
+    spacing: dp(5)
+
+    salon_id: ''
+    nombre: ''
+    edad: ''
+    editar_callback: None
+    eliminar_callback: None
+
+    canvas.before:
+        Color:
+            rgba: 0.18, 0.28, 0.48, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10),]
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: dp(30)
+        Label:
+            text: 'ID: ' + str(root.salon_id)
+            bold: True
+            font_size: '14sp'
+            halign: 'left'
+            text_size: self.size
+            color: 0.8, 0.8, 0.8, 1
+
+    Label:
+        text: 'Salón: ' + root.nombre
+        bold: True
+        font_size: '18sp'
+        halign: 'left'
+        valign: 'middle'
+        text_size: (self.width, None)
+        size_hint_y: None
+        height: self.texture_size[1]
+        color: 1, 1, 1, 1
+
+    Label:
+        text: 'Edad: ' + root.edad
+        font_size: '16sp'
+        halign: 'left'
+        valign: 'middle'
+        text_size: (self.width, None)
+        size_hint_y: None
+        height: self.texture_size[1]
+        color: 0.9, 0.9, 0.9, 1
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(40)
+        spacing: dp(10)
+
+        Button:
+            text: 'Editar'
+            font_size: '14sp'
+            background_normal: ''
+            background_color: (0, 0.47, 0.76, 1)
+            on_press: root.editar_callback(root.salon_id, root.nombre, root.edad) if root.editar_callback else None
+
+        Button:
+            text: 'Eliminar'
+            font_size: '14sp'
+            background_normal: ''
+            background_color: (0.8, 0, 0, 1)
+            on_press: root.eliminar_callback(root.salon_id) if root.eliminar_callback else None
+
+
 <ListSalonesScreen>:
     name: 'lista_salones'
     BoxLayout:
@@ -10,45 +84,45 @@
                 size: self.size
         Label:
             text: 'Lista de Salones'
-            font_size: 30
+            font_size: '22sp'
+            bold: True
             color: 1, 1, 1, 1
             size_hint_y: None
-            height: 50
+            height: dp(60)
         ScrollView:
+            do_scroll_x: False
             GridLayout:
                 id: lista_salones
-                cols: 3 # ID, Salon and Edad
+                cols: 1 # Optimizado para móvil: una columna
                 size_hint_y: None
                 height: self.minimum_height
-                row_default_height: 40
-                row_force_default: True
+                spacing: dp(10)
+                padding: dp(15)
+
         #Contenedor de botones
         BoxLayout:
             orientation: 'vertical'
-            spacing: 10
-            padding: 10
+            spacing: dp(10)
+            padding: dp(10)
             size_hint_y: None
             height: self.minimum_height
             GridLayout:
                 cols: 2
-                spacing: 10
-                padding: 10
+                spacing: dp(10)
                 size_hint_y: None
-                height: self.minimum_height
+                height: dp(70)
                 
                 Button:
-                    text: 'Listar'
-                    font_size: 28
+                    text: 'LISTAR'
+                    font_size: '18sp'
+                    bold: True
                     background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
-                    on_press: root.controlador.listar_salones(root)
+                    background_color: (0, 0.6, 0.2, 1)
+                    on_press: root.cargar_salones()
                 Button:
-                    text: 'Cerrar'
-                    font_size: 28
+                    text: 'VOLVER'
+                    font_size: '18sp'
+                    bold: True
                     background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
+                    background_color: (0.5, 0.5, 0.5, 1)
                     on_press: root.manager.current = 'salones'

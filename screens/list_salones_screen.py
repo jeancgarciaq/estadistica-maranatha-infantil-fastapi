@@ -2,7 +2,11 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
+from kivy.factory import Factory
 from kivy.lang import Builder
+from kivy.app import App
+
+from components.styled_popup import StyledPopup
 import logging
 
 # Configure logging
@@ -35,10 +39,35 @@ class ListSalonesScreen(Screen):
             lista_salones.add_widget(Label(text="No hay salones registrados", font_size='18sp', size_hint_y=None, height=40))
         else:
             for salon in salones:
-                logger.debug(f"Agregando salón: ID={salon.id}, Nombre={salon.salon}, Edad={salon.edad}")
-                lista_salones.add_widget(Label(text=f"{salon.id}", size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=f"{salon.salon}", size_hint_y=None, height=40))
-                lista_salones.add_widget(Label(text=f"{salon.edad}", size_hint_y=None, height=40))
+                # Usamos Factory para crear la tarjeta definida en el KV
+                card = Factory.SalonListCard()
+                card.salon_id = str(salon.id)
+                card.nombre = str(salon.salon)
+                card.edad = str(salon.edad)
+                card.editar_callback = self.editar_salon_desde_lista
+                card.eliminar_callback = self.eliminar_salon_desde_lista
+                
+                lista_salones.add_widget(card)
+
+    def editar_salon_desde_lista(self, salon_id, nombre, edad):
+        app = App.get_running_app()
+        if not app or not app.root:
+            StyledPopup.mostrar_popup('Error', 'No se pudo abrir la pantalla de salones.', tipo='error')
+            return
+
+        salones_screen = app.root.get_screen('salones')
+        salones_screen.ids.salon_id.text = str(salon_id)
+        salones_screen.ids.salon_nombre.text = str(nombre)
+        salones_screen.ids.salon_edad.text = str(edad)
+        app.root.current = 'salones'
+
+    def eliminar_salon_desde_lista(self, salon_id):
+        exito, mensaje = self.controlador.eliminar_salon(int(salon_id))
+        if exito:
+            StyledPopup.mostrar_popup('Éxito', mensaje, tipo='success')
+            self.cargar_salones()
+        else:
+            StyledPopup.mostrar_popup('Error', mensaje, tipo='error')
             
     def cargar_salones(self):
         """Consultando y llenando la lista salones."""
@@ -53,12 +82,10 @@ class ListSalonesScreen(Screen):
             logger.error(f"Error consultando salones: {e}")
             self.actualizar_lista_salones([])
     
-    def on_enter(self):
+    def on_enter(self): # type: ignore
         """Llamando cuando la pantalla está completa."""
         self.cargar_salones()
 
     def volver(self, instance):
         """Regresa a la pantalla de salones"""
         self.manager.current = 'salones'
-
-

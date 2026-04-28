@@ -2,6 +2,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from datetime import datetime
 from components.styled_popup import StyledPopup
 from components.styled_datepicker import StyledDatePicker
@@ -15,6 +17,14 @@ class RecepcionScreen(Screen):
             print(f"Error cargando recepcion.kv: {e}")
         super().__init__(**kwargs)
         self.controlador = controlador
+
+
+class RecepcionCard(BoxLayout):
+    recepcion_id = NumericProperty(0)
+    nombre = StringProperty('')
+    fecha = StringProperty('')
+    editar_callback = ObjectProperty(allownone=True)
+    eliminar_callback = ObjectProperty(allownone=True)
 
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha."""
@@ -97,11 +107,14 @@ class RecepcionScreen(Screen):
             lista_grid.add_widget(Label(text="No hay recepciones registradas", size_hint_y=None, height=40))
             return
         for recepcion in recepciones:
-            lista_grid.add_widget(Label(text=f"ID: {recepcion.id} | {recepcion.nombre}", size_hint_y=None, height=40))
-            lista_grid.add_widget(Button(text="Editar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=recepcion.id: self.editar_recepcion(id)))
-            lista_grid.add_widget(Button(text="Eliminar", size_hint_y=None, height=40,
-                                          on_press=lambda *a, id=recepcion.id: self.eliminar_recepcion(id)))
+            card = RecepcionCard(
+                recepcion_id=recepcion.id,
+                nombre=str(recepcion.nombre),
+                fecha=(recepcion.fecha.strftime('%Y-%m-%d') if hasattr(recepcion.fecha, 'strftime') else str(recepcion.fecha)),
+                editar_callback=self.editar_recepcion,
+                eliminar_callback=self.eliminar_recepcion,
+            )
+            lista_grid.add_widget(card)
 
     def editar_recepcion(self, id):
         recepcion = self.controlador.obtener_recepcion(id)

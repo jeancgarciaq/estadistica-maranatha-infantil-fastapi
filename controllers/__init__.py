@@ -8,4 +8,3 @@ from .otras_areas_controller import OtrasAreasController
 from .recepcion_controller import RecepcionController
 from .salones_controller import SalonesController
 from .distribucion_controller import DistribucionesController
-from .estadistica_controller import EstadisticaController

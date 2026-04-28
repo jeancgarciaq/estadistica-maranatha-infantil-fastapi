@@ -99,14 +99,26 @@ class OtrasAreasController:
         finally:
             db.close()
 
-    def listar_otrasareas(self):
+    def listar_otrasareas(self, fecha=None):
         """
         Lista todos los registros de otras áreas.
+        :param fecha: Fecha en formato YYYY-MM-DD o date para filtrar resultados (opcional).
         :return: Lista de objetos OtrasAreas.
         """
         db = self.get_db_session()
         try:
-            otrasareas = db.query(OtrasAreas).all()
+            query = db.query(OtrasAreas)
+
+            if fecha:
+                if isinstance(fecha, str):
+                    try:
+                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
+                    except ValueError:
+                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
+                        return []
+                query = query.filter(OtrasAreas.fecha == fecha)
+
+            otrasareas = query.order_by(OtrasAreas.id.desc()).all()
             logger.info("Otras áreas listadas.")
             return otrasareas
         except SQLAlchemyError as e:

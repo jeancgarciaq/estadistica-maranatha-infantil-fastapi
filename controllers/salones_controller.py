@@ -92,6 +92,18 @@ class SalonesController(BaseController):
             db.close()
             logger.info("Conexión cerrada")
 
+    def obtener_salon(self, id):
+        """Obtiene un salón por su ID."""
+        db = self.get_db_session()
+        try:
+            return db.query(Salon).filter(Salon.id == id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error al obtener salón: {e}")
+            return None
+        finally:
+            db.close()
+            logger.info("Conexión cerrada")
+
     def buscar_salon(self, id=None, nombre=None):
         """
         Busca un salón por ID o nombre.

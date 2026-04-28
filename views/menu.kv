@@ -1,10 +1,7 @@
 <MenuScreen>:
-    GridLayout:
-        cols: 4
-        rows: 8
-        size: root.width, root.height
-        padding: 10
-        spacing: 10
+    # Contenedor principal que asegura fondo completo y layout vertical
+    BoxLayout:
+        orientation: 'vertical'
         canvas.before:
             Color:
                 rgba: 0.102, 0.2, 0.396, 1
@@ -12,154 +9,240 @@
                 pos: self.pos
                 size: self.size
 
-        # Fila 1: Imágenes
-        Image:
-            source: 'images/areas.png'
-        Image:
-            source: 'images/salones.png'
-        Image:
-            source: 'images/aulas.png'
-        Image:
-            source: 'images/donacion.png'
+        ScrollView:
+            do_scroll_x: False
+            # Grid de 2 columnas: estándar para menús táctiles en móvil
+            GridLayout:
+                cols: 2
+                row_force_default: True
+                row_default_height: dp(120)
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(16)
+                spacing: dp(12)
 
-        # Fila 2: Botones
-        Button:
-            text: 'AREAS'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "areas"
-        Button:
-            text: 'SALONES'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "salones"
-        Button:
-            text: 'ESTADISTICA'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "estadistica"
-        Button:
-            text: 'DONACIONES'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "donaciones"
+                # --- ÍTEM 1: ÁREAS ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/areas.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'ÁREAS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "areas"
 
-        # Fila 3: Imágenes
-        Image:
-            source: 'images/distribucion.png'
-        Image:
-            source: 'images/logistic.png'
-        Image:
-            source: 'images/otras.png'
-        Image:
-            source: 'images/ensenanza.png'
+                # --- ÍTEM 2: SALONES ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/salones.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'SALONES'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "salones"
 
-        # Fila 4: Botones
-        Button:
-            text: 'DISTRIBUCION'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "distribuciones"
-        Button:
-            text: 'LOGISTICA'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "logistica"
-        Button:
-            text: 'OTRAS AREAS'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "otrasareas"
-        Button:
-            text: 'ENSEÑANZA'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "ensenanza"
+                # --- ÍTEM 3: ESTADÍSTICA ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/aulas.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'ESTADÍSTICA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "estadistica"
 
-        # Fila 5: Imágenes
-        Image:
-            source: 'images/recepcion.png'
-        Image:
-            source: 'images/report.png'
-        Image:
-            source: 'images/ayuda.png'
-        Image:
-            source: 'images/combinar.png'
+                # --- ÍTEM 4: DONACIONES ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/donacion.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'DONACIONES'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "donaciones"
 
-        # Fila 6: Botones
-        Button:
-            text: 'RECEPCION'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "recepcion"
-        Button:
-            text: 'REPORTE'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "reporte"
-        Button:
-            text: 'AYUDA'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "ayuda"
-        Button:
-            text: 'PREPARADOS'
-            font_size: 28
-            background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
-            size_hint_y: None
-            height: 50
-            on_press: root.manager.current = "combinar_donaciones"
+                # --- ÍTEM 5: DISTRIBUCIÓN ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/distribucion.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'DISTRIBUCIÓN'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "distribuciones"
 
-        # Fila 7: Imagen de Salir
-        Image:
-            source: 'images/exit.png'
-        Widget: # Spacers
-        Widget:
-        Widget:
+                # --- ÍTEM 6: LOGÍSTICA ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/logistic.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'LOGÍSTICA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "logisticas"
 
-        # Fila 8: Botón Salir
+                # --- ÍTEM 7: OTRAS ÁREAS ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/otras.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'OTRAS ÁREAS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "otrasareas"
+
+                # --- ÍTEM 8: ENSEÑANZA ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/ensenanza.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'ENSEÑANZA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "ensenanza"
+
+                # --- ÍTEM 9: RECEPCIÓN ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/recepcion.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'RECEPCIÓN'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "recepcion"
+
+                # --- ÍTEM 10: REPORTE ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/report.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'REPORTE'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "reporte"
+
+                # --- ÍTEM 11: AYUDA ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/ayuda.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'AYUDA'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "ayuda"
+
+                # --- ÍTEM 12: PREPARADOS ---
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(4)
+                    padding: dp(4)
+                    Image:
+                        source: 'images/combinar.png'
+                        size_hint_y: 0.75
+                        allow_stretch: True
+                        keep_ratio: True
+                    Button:
+                        text: 'PREPARADOS'
+                        font_size: sp(15)
+                        size_hint_y: 0.25
+                        background_normal: ''
+                        background_color: (0, 119/255, 194/255, 1)
+                        on_press: root.manager.current = "combinar_donaciones"
+
+        # Botón SALIR fijo en la parte inferior (patrón Android estándar)
         Button:
             text: 'SALIR'
-            font_size: 28
-            background_normal: ''
-            background_color: (180/255, 0, 0, 1) # Rojo para salir
             size_hint_y: None
-            height: 50
+            height: dp(48)
+            font_size: sp(16)
+            background_normal: ''
+            background_color: (180/255, 0, 0, 1)
             on_press: app.stop()
-        Widget:
-        Widget:
-        Widget:

@@ -2,8 +2,10 @@
     orientation: 'vertical'
     size_hint_y: None
     height: self.minimum_height
-    padding: 15
-    spacing: 8
+    padding: dp(15)
+    spacing: dp(8)
+    
+    # Propiedades (se mantienen igual)
     donacion_id: ''
     fecha: ''
     descripcion: ''
@@ -11,70 +13,81 @@
     unidad: ''
     equipo: ''
     es_compuesta: False
+
     canvas.before:
         Color:
             rgba: (0.2, 0.15, 0.45, 1) if self.es_compuesta else (0.15, 0.25, 0.45, 1)
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [15,]
-    
+            radius: [dp(15),] # Usamos dp para el radio
+
+    # Fila 1: ID y Fecha
     BoxLayout:
         size_hint_y: None
-        height: 30
+        height: dp(30)
         Label:
             text: "ID: " + root.donacion_id
             bold: True
-            font_size: 18
+            font_size: '16sp'
             halign: 'left'
             text_size: self.size
         Label:
             text: root.fecha
             halign: 'right'
             text_size: self.size
+            font_size: '14sp'
             color: 0.8, 0.8, 0.8, 1
 
+    # Fila 2: Descripción (con ajuste de texto automático)
     Label:
         text: root.descripcion
         size_hint_y: None
-        height: self.texture_size[1] + 10
-        text_size: self.width, None
+        height: self.texture_size[1] + dp(10)
+        text_size: self.width, None # Esto permite que el texto salte de línea
         halign: 'left'
         valign: 'middle'
-        font_size: 20
+        font_size: '17sp'
         color: 1, 1, 1, 1
 
+    # Fila 3: Cantidad y Equipo
     BoxLayout:
         size_hint_y: None
-        height: 30
+        height: dp(30)
         Label:
             text: "Cant: " + root.cantidad + " " + root.unidad
             halign: 'left'
             text_size: self.size
-            color: 0.5, 0.9, 1, 1  # Cyan-ish blue
+            font_size: '15sp'
+            color: 0.5, 0.9, 1, 1 
         Label:
             text: "Equipo: " + root.equipo
             halign: 'right'
             text_size: self.size
+            font_size: '14sp'
             color: 0.9, 0.9, 0.9, 1
 
+    # Fila 4: Botones de Acción de la Tarjeta
     BoxLayout:
         size_hint_y: None
-        height: 40
-        spacing: 10
+        height: dp(45) # Un poco más alto para que sea fácil de tocar
+        spacing: dp(10)
         Button:
             text: 'Editar'
+            font_size: '14sp'
             background_normal: ''
-            background_color: (0, 119/255, 194/255, 1)
+            background_color: (0, 0.47, 0.76, 1)
             on_press: app.root.get_screen('lista_donaciones').editar_donacion(root.donacion_id)
         Button:
             text: 'Borrar'
+            font_size: '14sp'
             background_normal: ''
-            background_color: (180/255, 0, 0, 1)
+            background_color: (0.8, 0, 0, 1)
             on_press: app.root.get_screen('lista_donaciones').confirmar_eliminacion(root.donacion_id)
 
 <ListDonacionesScreen>:
     name: 'lista_donaciones'
+    
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -83,46 +96,72 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+        # 1. TÍTULO (Fijo)
         Label:
             text: 'Lista de Donaciones'
-            font_size: 30
-            color: 1, 1, 1, 1
+            font_size: '24sp'
             size_hint_y: None
-            height: 50
+            height: dp(60)
+            bold: True
+
+        # 2. FILTRO POR FECHA (Fijo)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: dp(10), 0, dp(10), dp(10)
+            spacing: dp(10)
+
+            TextInput:
+                id: fecha_filtro
+                text: root.fecha_filtro
+                readonly: True
+                hint_text: 'Seleccione fecha (YYYY-MM-DD)'
+                multiline: False
+                font_size: '16sp'
+
+            Button:
+                text: 'FECHA'
+                size_hint_x: None
+                width: dp(110)
+                font_size: '14sp'
+                bold: True
+                background_normal: ''
+                background_color: (0.2, 0.6, 0.2, 1)
+                on_press: root.abrir_datepicker_filtro()
+
+        # 3. LISTA (Scrollable)
         ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
             BoxLayout:
                 id: lista_donaciones
                 orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
-                padding: 10
-                spacing: 15
-        # Contenedor de botones
-        BoxLayout:
-            orientation: 'vertical'
-            spacing: 10
-            padding: 10
+                padding: dp(10)
+                spacing: dp(12) # Espacio entre tarjetas
+
+        # 4. FOOTER DE ACCIÓN (Fijo abajo)
+        GridLayout:
+            cols: 2
             size_hint_y: None
-            height: self.minimum_height
-            GridLayout:
-                cols: 2
-                spacing: 10
-                padding: 10
-                size_hint_y: None
-                height: self.minimum_height
-                Button: 
-                    text: 'Listar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
-                    on_press: root.controlador.listar_donaciones(root)
-                Button:
-                    text: 'Cerrar'
-                    font_size: 28
-                    background_normal: ''
-                    background_color: (0, 119/255, 194/255, 1)
-                    size_hint: 1, None
-                    height: 50
-                    on_press: app.root.current = 'donaciones'
+            height: dp(120)
+            padding: dp(10)
+            spacing: dp(10)
+
+            Button: 
+                text: 'LISTAR'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0, 0.47, 0.76, 1)
+                on_press: root.cargar_donaciones()
+            
+            Button:
+                text: 'CERRAR'
+                font_size: '16sp'
+                bold: True
+                background_normal: ''
+                background_color: (0.5, 0.5, 0.5, 1)
+                on_press: app.root.current = 'donaciones'

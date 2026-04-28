@@ -1,5 +1,6 @@
 <EstadisticaScreen>:
     name: 'estadistica'
+    
     BoxLayout:
         orientation: 'vertical'
         canvas.before:
@@ -8,58 +9,121 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+        # 1. TÍTULO
         Label:
             text: 'Estadísticas'
-            font_size: 34
-            color: 1, 1, 1, 1
+            font_size: '24sp'
             size_hint_y: None
-            height: 60
-        Label:
-            text: root.resumen_texto
-            color: 0.9, 0.95, 1, 1
-            font_size: 14
-            size_hint_y: None
-            height: 28
+            height: dp(60)
+            bold: True
+
+        # 2. SECCIÓN DE FILTRO (Fecha)
         BoxLayout:
-            orientation: 'horizontal'
+            orientation: 'vertical'
             size_hint_y: None
-            height: 56
-            padding: 10
-            spacing: 10
-            TextInput:
-                id: fecha_reporte
-                hint_text: 'YYYY-MM-DD'
-                readonly: True
-            Button:
-                text: 'Fecha'
-                size_hint_x: None
-                width: 120
-                background_normal: ''
-                background_color: (0, 119/255, 194/255, 1)
-                on_press: root.abrir_datepicker('fecha_reporte')
-            Button:
-                text: 'Consultar Estadística'
-                size_hint_x: None
-                width: 170
-                background_normal: ''
-                background_color: (0.18, 0.5, 0.22, 1)
-                on_press: root.actualizar_vista()
-        ScrollView:
-            GridLayout:
-                id: informe_container
-                cols: 1
-                spacing: 14
-                padding: [14, 12, 14, 12]
+            height: dp(100)
+            padding: [dp(15), 0, dp(15), dp(10)]
+            spacing: dp(5)
+
+            Label:
+                text: 'Seleccionar Fecha de Reporte:'
+                font_size: '16sp'
+                halign: 'left'
+                text_size: self.size
+                color: 0.8, 0.8, 0.8, 1
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: dp(10)
+                TextInput:
+                    id: fecha_reporte
+                    hint_text: 'YYYY-MM-DD'
+                    readonly: True
+                    multiline: False
+                    font_size: '18sp'
+                    size_hint_x: 1
+                Button:
+                    text: '\uf133'  # <--- Icono Line Awesome
+                    font_name: 'LineAwesome'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: dp(50)
+                    background_normal: ''
+                    background_color: (0, 0.47, 0.76, 1)
+                    on_press: root.abrir_datepicker('fecha_reporte')
+
+        # 3. ÁREA DE RESULTADOS (El Resumen)
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(15)
+            spacing: dp(10)
+
+            Label:
+                text: 'RESUMEN DE DATOS'
+                font_size: '14sp'
+                bold: True
                 size_hint_y: None
-                height: self.minimum_height
-        BoxLayout:
+                height: dp(30)
+                color: 0.7, 0.7, 0.7, 1
+
+            ScrollView:
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 0.05
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                
+                Label:
+                    id: resumen_label # Referencia para el texto
+                    text: root.resumen_texto
+                    color: 1, 1, 1, 1
+                    font_size: '17sp'
+                    halign: 'left'
+                    valign: 'top'
+                    text_size: self.width, None  # Crucial para el wrap de texto
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(20)
+
+            # Estado del PDF (Pequeño aviso debajo del texto)
+            Label:
+                text: root.pdf_texto
+                font_size: '14sp'
+                italic: True
+                size_hint_y: None
+                height: dp(30)
+                color: 0.6, 0.6, 0.6, 1
+
+        # 4. BOTONES DE ACCIÓN (Footer)
+        GridLayout:
+            cols: 2
             size_hint_y: None
-            height: 40
-            spacing: 10
-            padding: 10
+            height: dp(170)
+            padding: dp(10)
+            spacing: dp(10)
+
             Button:
-                text: 'Volver al Menú'
-                font_size: 18
+                text: 'GENERAR\nINFORME'
+                font_size: '15sp'
+                bold: True
                 background_normal: ''
-                background_color: (0.5, 0.5, 0.5, 1)
+                background_color: (0, 0.6, 0.3, 1) # Verde
+                on_press: root.generar_resumen()
+
+            Button:
+                text: 'GENERAR\nREPORTE PDF'
+                font_size: '15sp'
+                bold: True
+                background_normal: ''
+                background_color: (0.18, 0.5, 0.22, 1) # Verde oscuro
+                on_press: root.ir_a_reporte()
+
+            # Botón Volver (Ocupa las dos columnas para evitar errores táctiles)
+            Button:
+                text: 'VOLVER AL MENÚ'
+                font_size: '16sp'
+                size_hint_x: 2
+                background_normal: ''
+                background_color: (0.3, 0.3, 0.3, 1) # Gris
                 on_press: root.manager.current = 'menu'
