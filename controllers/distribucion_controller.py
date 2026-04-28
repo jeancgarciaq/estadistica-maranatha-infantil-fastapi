@@ -33,32 +33,23 @@ class DistribucionesController(BaseController):
         if not isinstance(datos, dict):
             return False, "Los datos proporcionados no son válidos."
 
-        db = self.get_db_session()
-        try:
-            datos_normalizados = self._normalizar_datos(datos)
+        datos_normalizados = self._normalizar_datos(datos)
+        fecha = self.validar_y_convertir_fecha(datos_normalizados.get('fecha'))
+        if not fecha:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos_normalizados['fecha'] = fecha
+
+        def operacion(db):
             errores = self.validar_datos(datos_normalizados, db)
             if errores:
-                return False, "\n".join(errores)
-
-            # Convertir fecha de string a objeto date
-            if 'fecha' in datos_normalizados and isinstance(datos_normalizados['fecha'], str):
-                try:
-                    datos_normalizados['fecha'] = datetime.strptime(datos_normalizados['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+                raise ValueError("\n".join(errores))
 
             distribucion = Distribucion(**datos_normalizados)
             db.add(distribucion)
             db.flush()
             self.registrar_evento_sync(db, 'distribuciones', distribucion, 'upsert')
-            db.commit()
-            logger.info("Distribución creada.")
-            return True, "Distribución creada exitosamente."
-        except SQLAlchemyError as e:
-            db.rollback()
-            return self.manejar_excepcion(e, "Error al crear distribución")
-        finally:
-            db.close()
+
+        return self.ejecutar_transaccion(operacion, "Distribución creada exitosamente.")
 
     def listar_distribuciones(self):
         """
