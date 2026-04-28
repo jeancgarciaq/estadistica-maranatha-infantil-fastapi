@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
@@ -36,6 +36,18 @@ class BaseController:
         logger.error(f"{mensaje_error}: {e}")
         return False, f"{mensaje_error}: {e}"
 
+    def validar_y_convertir_fecha(self, fecha):
+        """Valida y convierte una fecha de string a objeto date."""
+        if isinstance(fecha, date):
+            return fecha
+        if not isinstance(fecha, str):
+            return None
+        try:
+            return datetime.strptime(fecha, '%Y-%m-%d').date()
+        except ValueError:
+            logger.error(f"Formato de fecha inválido: {fecha}")
+            return None
+
     def ejecutar_transaccion(self, operacion, mensaje_exito=None):
         """
         Ejecuta una operación dentro de una transacción de base de datos.
@@ -50,8 +62,8 @@ class BaseController:
             if mensaje_exito:
                 return True, mensaje_exito
             return True, "Operación exitosa"
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al ejecutar la operación")
+        except (SQLAlchemyError, ValueError) as e:
+            return self.manejar_excepcion(e, "Error en la transacción")
         finally:
             db.close()
             logger.info("Conexión a la base de datos cerrada.")
