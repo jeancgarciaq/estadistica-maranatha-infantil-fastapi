@@ -7,7 +7,7 @@ from kivy.uix.button import Button
 from kivy.metrics import dp
 from kivy.lang import Builder
 from kivy.app import App
-from kivy.properties import NumericProperty, StringProperty, ObjectProperty
+from kivy.properties import NumericProperty, StringProperty, ObjectProperty, BooleanProperty
 from datetime import datetime
 import logging
 
@@ -24,6 +24,7 @@ class AulaCard(BoxLayout):
     info = StringProperty('')
     editar_callback = ObjectProperty(allownone=True)
     eliminar_callback = ObjectProperty(allownone=True)
+    can_manage = BooleanProperty(True)
 
 
 class ListAulasScreen(Screen):
@@ -38,6 +39,16 @@ class ListAulasScreen(Screen):
         # Crear el controlador como atributo
         self.controlador = controlador
         self.fecha_filtro = ""
+        self.can_manage = False
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('lista_aulas'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver la lista de aulas.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+        self.can_manage = app.has_permission('aulas.manage')
 
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha para filtrar la lista."""
@@ -48,6 +59,9 @@ class ListAulasScreen(Screen):
         picker.open()
 
     def editar_aula(self, aula_id):
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar aulas.', tipo='error')
+            return
         app = App.get_running_app()
         if not app or not app.root:
             StyledPopup.mostrar_popup('Error', 'No se pudo abrir la pantalla de aulas.', tipo='error')
@@ -58,6 +72,9 @@ class ListAulasScreen(Screen):
         app.root.current = 'aulas'
 
     def eliminar_aula(self, aula_id):
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar aulas.', tipo='error')
+            return
         exito, mensaje = self.controlador.eliminar_aula(int(aula_id))
         if exito:
             StyledPopup.mostrar_popup('Éxito', mensaje, tipo='success')
@@ -131,6 +148,7 @@ class ListAulasScreen(Screen):
                     ),
                     editar_callback=self.editar_aula,
                     eliminar_callback=self.eliminar_aula,
+                    can_manage=self.can_manage,
                 ))
             
     def cargar_aulas(self):
