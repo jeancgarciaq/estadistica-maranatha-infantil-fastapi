@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Area(Base):
+class Area(SyncMixin, Base):
     """
     Modelo que representa un área en la base de datos.
 
