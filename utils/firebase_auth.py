@@ -2,6 +2,11 @@ import json
 import logging
 import os
 import time
+import sys
+
+# Añadir el directorio raíz del proyecto a la ruta de Python para resolver importaciones de modelos
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from dataclasses import dataclass
 from types import SimpleNamespace
 from urllib import error, parse, request
@@ -24,7 +29,8 @@ class FirebaseAuthService:
     """Autenticación Firebase con email/password + resolución de rol en Realtime Database."""
 
     def __init__(self, api_key=None, database_url=None, email_domain=None, timeout=15):
-        self.api_key = api_key or os.getenv('FIREBASE_WEB_API_KEY', '').strip()
+        # Busca tanto FIREBASE_API_KEY como FIREBASE_WEB_API_KEY para mayor flexibilidad
+        self.api_key = api_key or os.getenv('FIREBASE_API_KEY') or os.getenv('FIREBASE_WEB_API_KEY', '').strip()
         self.database_url = (database_url or os.getenv('FIREBASE_DATABASE_URL', '')).rstrip('/')
         self.email_domain = (email_domain or os.getenv('FIREBASE_AUTH_EMAIL_DOMAIN', '')).strip().lower()
         self.timeout = timeout
