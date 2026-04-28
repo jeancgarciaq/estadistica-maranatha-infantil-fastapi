@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, Date, Boolean
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class Donacion(Base):
+class Donacion(SyncMixin, Base):
     """
     Modelo que representa una donación en la base de datos.
 
