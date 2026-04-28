@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Date
-from models.base import Base
+from models.base import Base, SyncMixin
 
-class OtrasAreas(Base):
+class OtrasAreas(SyncMixin, Base):
     __tablename__ = 'otrasareas'
 
     id = Column(Integer, primary_key=True, index=True)
