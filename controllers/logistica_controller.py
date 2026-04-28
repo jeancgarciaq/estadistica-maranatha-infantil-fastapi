@@ -68,7 +68,7 @@ class LogisticaController(BaseController):
                     return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
 
             with db.begin():
-                logistica = db.query(Logistica).filter(Logistica.id == id).first()
+                logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
                 if logistica:
                     for key, value in datos.items():
                         setattr(logistica, key, value)
@@ -93,10 +93,10 @@ class LogisticaController(BaseController):
         db = self.get_db_session()
         try:
             with db.begin():
-                logistica = db.query(Logistica).filter(Logistica.id == id).first()
+                logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
                 if not logistica:
                     return False, "Logística no encontrada."
-                db.delete(logistica)
+                self.marcar_eliminado(logistica, db)
                 logger.info(f"Logística eliminada: ID {id}")
             return True, "Logística eliminada exitosamente."
         except SQLAlchemyError as e:
@@ -110,7 +110,7 @@ class LogisticaController(BaseController):
         """
         db = self.get_db_session()
         try:
-            query = db.query(Logistica)
+            query = db.query(Logistica).filter(Logistica.is_deleted.is_(False))
 
             if fecha:
                 if isinstance(fecha, str):
@@ -138,7 +138,7 @@ class LogisticaController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(Logistica).filter(Logistica.id == id).first()
+            return db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener logística: {e}")
             return None
