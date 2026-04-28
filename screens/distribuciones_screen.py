@@ -1,4 +1,5 @@
 import logging
+from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import ListProperty
@@ -47,6 +48,13 @@ class DistribucionesScreen(Screen):
 
     def on_pre_enter(self, *args):
         """Se ejecuta antes de que la pantalla sea visible."""
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('distribuciones'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver Distribuciones.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+
         logger.debug(f"Ejecutando on_pre_enter... edit_id: {self.edit_id}")
         if self.edit_id is None:
             Clock.schedule_once(self.cargar_datos, 1)
@@ -375,6 +383,11 @@ class DistribucionesScreen(Screen):
 
     def guardar_distribucion(self):
         """Guarda una nueva distribución."""
+        app = App.get_running_app()
+        if not app or not app.has_permission('distribuciones.manage'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para gestionar distribuciones.', tipo='error')
+            return
+
         logger.debug("Intentando guardar una nueva distribución...")
         
         datos_raw = self.obtener_datos_formulario()
