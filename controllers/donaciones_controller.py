@@ -34,25 +34,19 @@ class DonacionesController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha
 
-            with db.begin():
-                donacion = Donacion(**datos)
-                db.add(donacion)
-                db.flush()
-                self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
-                logger.info("Donacion creada.")
-            return True, "Donacion creada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al crear donacion")
-        finally:
-            db.close()
+        def operacion(db):
+            donacion = Donacion(**datos)
+            db.add(donacion)
+            db.flush()
+            self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
+            logger.info("Donacion creada localmente y encolada para sync.")
+
+        return self.ejecutar_transaccion(operacion, "Donacion creada exitosamente.")
 
     def actualizar_donacion(self, id, datos):
         """
@@ -68,29 +62,23 @@ class DonacionesController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha
 
-            with db.begin():
-                donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
-                if not donacion:
-                    return False, "Donacion no encontrada."
+        def operacion(db):
+            donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
+            if not donacion:
+                raise ValueError("Donacion no encontrada.")
 
-                for key, value in datos.items():
-                    setattr(donacion, key, value)
+            for key, value in datos.items():
+                setattr(donacion, key, value)
 
-                self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
-                logger.info("Donacion actualizada: ID %s", id)
-                return True, "Donacion actualizada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al actualizar donacion")
-        finally:
-            db.close()
+            self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
+            logger.info("Donacion actualizada: ID %s", id)
+
+        return self.ejecutar_transaccion(operacion, "Donacion actualizada exitosamente.")
 
     def eliminar_donacion(self, id):
         """
@@ -101,40 +89,33 @@ class DonacionesController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID de la donacion es obligatorio y debe ser un numero entero."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
-                if not donacion:
-                    return False, "Donacion no encontrada."
+        def operacion(db):
+            donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
+            if not donacion:
+                raise ValueError("Donacion no encontrada.")
 
-                uso_en_preparados = db.query(AlimentoPreparadoComponente).filter(
-                    AlimentoPreparadoComponente.donacion_materia_id == id,
-                    AlimentoPreparadoComponente.is_deleted.is_(False),
-                ).count()
-                if uso_en_preparados > 0:
-                    return (
-                        False,
-                        "No se puede eliminar la donacion porque esta asociada a alimentos preparados. "
-                        "Elimine primero los preparados relacionados.",
-                    )
+            uso_en_preparados = db.query(AlimentoPreparadoComponente).filter(
+                AlimentoPreparadoComponente.donacion_materia_id == id,
+                AlimentoPreparadoComponente.is_deleted.is_(False),
+            ).count()
+            
+            if uso_en_preparados > 0:
+                raise ValueError("No se puede eliminar la donacion porque esta asociada a alimentos preparados.")
 
-                distribuciones_vinculadas = db.query(Distribucion).filter(
-                    Distribucion.donacion_id == id,
-                    Distribucion.is_deleted.is_(False),
-                ).all()
-                for distribucion in distribuciones_vinculadas:
-                    self.marcar_eliminado(distribucion, db)
-                    self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
+            distribuciones_vinculadas = db.query(Distribucion).filter(
+                Distribucion.donacion_id == id,
+                Distribucion.is_deleted.is_(False),
+            ).all()
+            
+            for distribucion in distribuciones_vinculadas:
+                self.marcar_eliminado(distribucion, db)
+                self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
 
-                self.marcar_eliminado(donacion, db)
-                self.registrar_evento_sync(db, 'donaciones', donacion, 'delete')
-                logger.info("Donacion eliminada: ID %s", id)
-                return True, "Donacion eliminada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al eliminar donacion")
-        finally:
-            db.close()
+            self.marcar_eliminado(donacion, db)
+            self.registrar_evento_sync(db, 'donaciones', donacion, 'delete')
+            logger.info("Donacion eliminada: ID %s", id)
+
+        return self.ejecutar_transaccion(operacion, "Donacion eliminada exitosamente.")
 
     def combinar_donaciones(self, datos_resultado, lista_componentes):
         """
