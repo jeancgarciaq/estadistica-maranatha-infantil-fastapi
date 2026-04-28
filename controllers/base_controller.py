@@ -1,6 +1,9 @@
 import logging
+from datetime import datetime
+
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
+from utils.firebase_sync import SyncManager
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +20,7 @@ class BaseController:
         self.vista = vista
         self.model = model
         self.session = session or SessionLocal()
+        self.sync_manager = SyncManager()
 
     def get_db_session(self):
         """Obtiene una nueva sesión de base de datos."""
@@ -51,6 +55,31 @@ class BaseController:
         finally:
             db.close()
             logger.info("Conexión a la base de datos cerrada.")
+
+    def marcar_eliminado(self, registro, db):
+        """Marca un registro como eliminado sin borrarlo físicamente."""
+        if registro is None:
+            return False
+
+        if hasattr(registro, 'is_deleted'):
+            registro.is_deleted = True
+
+        if hasattr(registro, 'updated_at'):
+            registro.updated_at = datetime.utcnow()
+
+        db.add(registro)
+        return True
+
+    def registrar_evento_sync(self, db, entity_name, registro, operation='upsert'):
+        """Encola un cambio local para sincronización con Firebase."""
+        return self.sync_manager.enqueue_model(db, entity_name, registro, operation=operation)
+
+    def query_activa(self, db):
+        """Devuelve una query filtrada por registros activos cuando el modelo lo soporta."""
+        query = db.query(self.model)
+        if hasattr(self.model, 'is_deleted'):
+            return query.filter(self.model.is_deleted.is_(False))
+        return query
     
     def buscar_por_id_o_nombre(self, id=None, nombre=None, nombre_campo="nombre"):
         """
@@ -66,7 +95,7 @@ class BaseController:
 
         db = self.get_db_session()
         try:
-            query = db.query(self.model)
+            query = self.query_activa(db)
             if id:
                 registro = query.filter(self.model.id == id).first()
             elif nombre:
@@ -100,7 +129,7 @@ class BaseController:
         
         db = self.get_db_session()
         try:
-            query = db.query(self.model)
+            query = self.query_activa(db)
             if id:
                 registro = query.filter(self.model.id == id).first()
             elif fecha:
