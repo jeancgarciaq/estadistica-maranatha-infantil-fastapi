@@ -110,7 +110,6 @@ class ListDonacionesScreen(Screen):
                     card.unidad = str(donacion.unidad)
                     card.equipo = str(donacion.equipo)
                     card.fecha = fecha_str
-                    card.es_compuesta = bool(getattr(donacion, 'es_compuesta', False))
                     card.puede_editar = self.can_manage
                     
                     lista_donaciones.add_widget(card)
