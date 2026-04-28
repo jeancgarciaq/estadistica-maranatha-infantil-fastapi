@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+from models.base import Base, SyncMixin
 
 
 ROLE_ROOT = 'root'
@@ -52,7 +52,7 @@ role_permissions = Table(
 )
 
 
-class Rol(Base):
+class Rol(SyncMixin, Base):
     __tablename__ = 'roles'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -66,7 +66,7 @@ class Rol(Base):
         return f"<Rol(id={self.id}, nombre='{self.nombre}')>"
 
 
-class Permiso(Base):
+class Permiso(SyncMixin, Base):
     __tablename__ = 'permissions'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -79,7 +79,7 @@ class Permiso(Base):
         return f"<Permiso(id={self.id}, codigo='{self.codigo}')>"
 
 
-class Usuario(Base):
+class Usuario(SyncMixin, Base):
     __tablename__ = 'usuarios'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
