@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Boolean
+from sqlalchemy import Column, Integer, String, Float, Date
 from sqlalchemy.orm import relationship
 from models.base import Base, SyncMixin
 
@@ -13,7 +13,6 @@ class Donacion(SyncMixin, Base):
         unidad (str): Unidad de medida de la donación.
         equipo (str): Equipo asociado con la donación.
         fecha (date): Fecha en la que se realizó la donación.
-        es_compuesta (bool): Indica si la donación es resultado de una mezcla/composición.
     """
     __tablename__ = 'donaciones'
 
@@ -23,7 +22,6 @@ class Donacion(SyncMixin, Base):
     unidad = Column(String(50), nullable=False)
     equipo = Column(String(100))
     fecha = Column(Date, nullable=False)
-    es_compuesta = Column(Boolean, default=False)
 
     distribuciones = relationship("Distribucion", back_populates="donacion")
 
