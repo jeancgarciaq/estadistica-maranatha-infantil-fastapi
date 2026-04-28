@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.uix.label import Label
 from kivy.properties import StringProperty
+from kivy.app import App
 from kivy.factory import Factory
 from components.styled_datepicker import StyledDatePicker
 from datetime import datetime
@@ -24,6 +25,16 @@ class ListPreparadosScreen(Screen):
     def __init__(self, controlador, **kwargs):
         super().__init__(**kwargs)
         self.controlador = controlador
+        self.can_manage = False
+
+    def on_pre_enter(self, *args):
+        app = App.get_running_app()
+        if not app or not app.can_access_screen('lista_preparados'):
+            StyledPopup.mostrar_popup('Acceso denegado', 'No tiene permisos para ver preparados.', tipo='error')
+            if app and app.root:
+                app.root.current = 'menu'
+            return
+        self.can_manage = app.has_permission('preparados.manage')
 
     def abrir_datepicker_filtro(self):
         """Abre el selector de fecha para filtrar registros."""
@@ -80,6 +91,7 @@ class ListPreparadosScreen(Screen):
             tarjeta.nombre = preparado.descripcion
             tarjeta.cantidad = f"{preparado.cantidad} {preparado.unidad}"
             tarjeta.fecha = str(preparado.fecha)
+            tarjeta.puede_editar = self.can_manage
             
             contenedor.add_widget(tarjeta)
 
@@ -89,6 +101,9 @@ class ListPreparadosScreen(Screen):
         logger.info(f"Editando preparado ID: {preparado_id}")
 
     def confirmar_eliminacion(self, preparado_id):
+        if not self.can_manage:
+            StyledPopup.mostrar_popup('Acceso denegado', 'Solo puede visualizar preparados.', tipo='error')
+            return
         StyledPopup.mostrar_confirmacion(
             'Confirmar Eliminación',
             f'¿Desea eliminar el preparado ID {preparado_id}?',
@@ -96,7 +111,7 @@ class ListPreparadosScreen(Screen):
         )
 
     def eliminar_preparado(self, preparado_id):
-        exito, mensaje = self.controlador.eliminar_preparado(preparado_id)
+        exito, mensaje = self.controlador.eliminar_preparado(int(preparado_id))
         if exito:
             StyledPopup.mostrar_popup('Éxito', mensaje, tipo='success')
             self.cargar_preparados()
