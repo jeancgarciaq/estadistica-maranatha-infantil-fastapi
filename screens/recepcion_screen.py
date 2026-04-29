@@ -18,19 +18,11 @@ class RecepcionScreen(Screen):
         super().__init__(**kwargs)
         self.controlador = controlador
 
-
-class RecepcionCard(BoxLayout):
-    recepcion_id = NumericProperty(0)
-    nombre = StringProperty('')
-    fecha = StringProperty('')
-    editar_callback = ObjectProperty(allownone=True)
-    eliminar_callback = ObjectProperty(allownone=True)
-
     def abrir_datepicker(self, target_id):
         """Abre el selector de fecha."""
         def set_date(date_str):
             self.ids[target_id].text = date_str
-            
+
         picker = StyledDatePicker(callback=set_date)
         picker.open()
 
@@ -129,3 +121,11 @@ class RecepcionCard(BoxLayout):
 
     def on_enter(self):
         self.cargar_recepciones()
+
+
+class RecepcionCard(BoxLayout):
+    recepcion_id = NumericProperty(0)
+    nombre = StringProperty('')
+    fecha = StringProperty('')
+    editar_callback = ObjectProperty(allownone=True)
+    eliminar_callback = ObjectProperty(allownone=True)
