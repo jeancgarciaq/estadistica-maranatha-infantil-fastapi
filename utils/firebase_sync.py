@@ -28,10 +28,39 @@ logger = logging.getLogger(__name__)
 
 
 MODEL_REGISTRY = {
+    'areas': Area,
+    'salones': Salon,
+    'aulas': Aula,
     'donaciones': Donacion,
+    'alimentos_preparados': AlimentoPreparado,
+    'alimento_preparado_componentes': AlimentoPreparadoComponente,
+    'ensenanza': Ensenanza,
+    'logistica': Logistica,
+    'otras_areas': OtrasAreas,
+    'recepciones': Recepcion,
     'distribuciones': Distribucion,
     'usuarios': Usuario,
+    'roles': Rol,
+    'permisos': Permiso,
 }
+
+
+SYNC_COLLECTION_ORDER = [
+    'areas',
+    'salones',
+    'aulas',
+    'donaciones',
+    'alimentos_preparados',
+    'alimento_preparado_componentes',
+    'ensenanza',
+    'logistica',
+    'otras_areas',
+    'recepciones',
+    'distribuciones',
+    'usuarios',
+    'roles',
+    'permisos',
+]
 
 
 class FirebaseClient:
