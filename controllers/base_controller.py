@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, date
 
+from kivy.app import App
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from utils.firebase_sync import SyncManager
@@ -59,6 +60,7 @@ class BaseController:
         try:
             with db.begin():
                 operacion(db)
+            self._sincronizar_si_corresponde(db)
             if mensaje_exito:
                 return True, mensaje_exito
             return True, "Operación exitosa"
@@ -67,6 +69,30 @@ class BaseController:
         finally:
             db.close()
             logger.info("Conexión a la base de datos cerrada.")
+
+    def _sincronizar_si_corresponde(self, db):
+        """Dispara la sincronización Firebase si la app está activa y configurada."""
+        try:
+            app = App.get_running_app()
+        except Exception:
+            app = None
+
+        if not app or not getattr(app, 'current_user', None):
+            return
+
+        sync_manager = getattr(app, 'sync_manager', None)
+        if sync_manager is None or not sync_manager.client.is_configured():
+            return
+
+        if hasattr(app, 'usuarios_controller'):
+            sync_manager.set_auth_token_provider(
+                lambda: app.usuarios_controller.obtener_token_firebase(app.current_user)
+            )
+
+        try:
+            sync_manager.push_pending(db)
+        except Exception as exc:
+            logger.warning("No se pudo sincronizar con Firebase tras guardar el cambio: %s", exc)
 
     def marcar_eliminado(self, registro, db):
         """Marca un registro como eliminado sin borrarlo físicamente."""
