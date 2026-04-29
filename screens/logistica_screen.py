@@ -59,13 +59,13 @@ class LogisticaScreen(Screen):
 
     def _obtener_datos_formulario(self):
         datos = {
-            'almacen': self.logistica_almacen_text.strip(),
-            'capitan': self.logistica_capitan_text.strip(),
-            'distribucion': self.logistica_distribucion_text.strip(),
-            'hidratacion': self.logistica_hidratacion_text.strip(),
-            'pasillo': self.logistica_pasillo_text.strip(),
-            'secretaria': self.logistica_secretaria_text.strip(),
-            'fecha': self.logistica_fecha_text.strip()
+            'almacen': self.ids.logistica_almacen.text.strip() if 'logistica_almacen' in self.ids else self.logistica_almacen_text.strip(),
+            'capitan': self.ids.logistica_capitan.text.strip() if 'logistica_capitan' in self.ids else self.logistica_capitan_text.strip(),
+            'distribucion': self.ids.logistica_distribucion.text.strip() if 'logistica_distribucion' in self.ids else self.logistica_distribucion_text.strip(),
+            'hidratacion': self.ids.logistica_hidratacion.text.strip() if 'logistica_hidratacion' in self.ids else self.logistica_hidratacion_text.strip(),
+            'pasillo': self.ids.logistica_pasillo.text.strip() if 'logistica_pasillo' in self.ids else self.logistica_pasillo_text.strip(),
+            'secretaria': self.ids.logistica_secretaria.text.strip() if 'logistica_secretaria' in self.ids else self.logistica_secretaria_text.strip(),
+            'fecha': self.ids.logistica_fecha.text.strip() if 'logistica_fecha' in self.ids else self.logistica_fecha_text.strip()
         }
         return datos
 
