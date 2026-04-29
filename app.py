@@ -6,7 +6,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from models.database import SessionLocal
-from utils.firebase_sync import SyncManager
+from utils.firebase_sync import SYNC_COLLECTION_ORDER, SyncManager
 from utils.env_loader import load_app_env
 from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
@@ -146,17 +146,21 @@ class EmiApp(App):
             return {'pushed': [], 'pulled': []}
 
         pushed = self.sync_manager.push_pending(self.session)
-        pulled_donaciones = self.sync_manager.pull_collection(self.session, 'donaciones')
-        pulled_distribuciones = self.sync_manager.pull_collection(self.session, 'distribuciones')
-        pulled_usuarios = self.sync_manager.pull_collection(self.session, 'usuarios')
+        pulled = {}
+
+        for entity_name in SYNC_COLLECTION_ORDER:
+            if entity_name == 'usuarios':
+                try:
+                    self.sync_manager.set_auth_token_provider(
+                        lambda: self.usuarios_controller.obtener_token_firebase(self.current_user)
+                    )
+                except Exception:
+                    pass
+            pulled[entity_name] = self.sync_manager.pull_collection(self.session, entity_name)
 
         return {
             'pushed': pushed,
-            'pulled': {
-                'donaciones': pulled_donaciones,
-                'distribuciones': pulled_distribuciones,
-                'usuarios': pulled_usuarios,
-            },
+            'pulled': pulled,
         }
 
     def set_current_user(self, user):
@@ -165,7 +169,7 @@ class EmiApp(App):
 
     def logout(self):
         self.current_user = None
-        if self.root:
+        if isinstance(self.root, ScreenManager):
             self.root.current = 'login'
 
     def has_permission(self, permiso_codigo):
