@@ -7,6 +7,7 @@ from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from models.database import SessionLocal
 from utils.firebase_sync import SyncManager
+from utils.env_loader import load_app_env
 from controllers import (
     AreasController, SalonesController, AulasController, DonacionesController, EnsenanzaController, 
     LogisticaController, OtrasAreasController, RecepcionController, DistribucionesController,
@@ -28,6 +29,8 @@ class EmiApp(App):
     current_user = None
 
     def build(self):
+        load_app_env()
+
         logging.basicConfig(
             level=logging.DEBUG,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
