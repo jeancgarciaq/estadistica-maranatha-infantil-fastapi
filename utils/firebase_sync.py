@@ -174,6 +174,47 @@ class SyncManager:
         session.commit()
         return pushed
 
+    def bootstrap_collection(self, session, entity_name):
+        """Sube todos los registros locales actuales de una entidad a Firebase collections."""
+        if not self.client.is_configured():
+            return []
+
+        model = MODEL_REGISTRY.get(entity_name)
+        if model is None:
+            raise ValueError(f'Entidad no soportada para sincronización: {entity_name}')
+
+        records = session.query(model).all()
+        if not records:
+            return []
+
+        touched_local = False
+        pushed = []
+        now = datetime.utcnow()
+
+        for record in records:
+            if not getattr(record, 'sync_id', None):
+                setattr(record, 'sync_id', str(uuid.uuid4()))
+                touched_local = True
+
+            if getattr(record, 'created_at', None) is None:
+                setattr(record, 'created_at', now)
+                touched_local = True
+
+            if getattr(record, 'updated_at', None) is None:
+                setattr(record, 'updated_at', now)
+                touched_local = True
+
+            payload = self.serialize_model(record)
+            payload['sync_bootstrap_at'] = now.isoformat()
+            payload['sync_device_id'] = self.device_id
+            self.client.put(self.queue_path(entity_name, payload['sync_id']), payload)
+            pushed.append(payload['sync_id'])
+
+        if touched_local:
+            session.commit()
+
+        return pushed
+
     def pull_collection(self, session, entity_name):
         if not self.client.is_configured():
             return []
