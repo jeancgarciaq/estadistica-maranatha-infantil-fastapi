@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models.database import SessionLocal
 from utils.env_loader import load_app_env
-from utils.firebase_sync import MODEL_REGISTRY, SyncManager
+from utils.firebase_sync import MODEL_REGISTRY, SYNC_COLLECTION_ORDER, SyncManager
 from utils.firebase_auth import FirebaseAuthService
 
 
@@ -23,8 +23,8 @@ def parse_args():
     parser.add_argument(
         '--collections',
         nargs='+',
-        default=['donaciones', 'distribuciones', 'usuarios'],
-        help='Colecciones a sincronizar. Ejemplo: --collections donaciones distribuciones usuarios',
+        default=SYNC_COLLECTION_ORDER,
+        help='Colecciones a sincronizar. Ejemplo: --collections areas salones aulas ...',
     )
     return parser.parse_args()
 
