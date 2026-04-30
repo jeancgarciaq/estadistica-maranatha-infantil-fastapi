@@ -1,6 +1,9 @@
 import kivy
 kivy.require('2.3.1')
 
+import os
+import logging
+
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.core.text import LabelBase
@@ -20,7 +23,6 @@ from screens import (
     ListPreparadosScreen, ListDistribucionesScreen, ListOtrasAreasScreen, ListLogisticaScreen,
     UsuariosScreen)
 from models.security import ROLE_ROOT, seed_security_data
-import logging
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -31,11 +33,14 @@ class EmiApp(App):
     def build(self):
         load_app_env()
 
+        os.makedirs(self.user_data_dir, exist_ok=True)
+        log_path = os.path.join(self.user_data_dir, 'app.log')
+
         logging.basicConfig(
             level=logging.DEBUG,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler("app.log"),
+                logging.FileHandler(log_path),
                 logging.StreamHandler()
             ]
         )
