@@ -4,16 +4,15 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import cm
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+    from reportlab.graphics.shapes import Drawing
+    from reportlab.graphics.charts.barcharts import BarChart
+    from reportlab.graphics import renderPM
     REPORTLAB_DISPONIBLE = True
 except ModuleNotFoundError:
     colors: Any = None
@@ -27,6 +26,9 @@ except ModuleNotFoundError:
     Table: Any = None
     TableStyle: Any = None
     Image: Any = None
+    Drawing: Any = None
+    BarChart: Any = None
+    renderPM: Any = None
     REPORTLAB_DISPONIBLE = False
 
 from sqlalchemy.orm import joinedload
@@ -452,19 +454,39 @@ class ReporteEstadisticoService:
         return '\n'.join(lineas)
 
     def generar_graficos(self, resumen):
+        if not REPORTLAB_DISPONIBLE:
+            return {'asistencia': None}
+
         fecha_texto = resumen.fecha_corte.strftime('%Y%m%d')
         ruta_asistencia = os.path.join(self.output_dir, f'asistencia_{fecha_texto}.png')
 
-        plt.figure(figsize=(7, 4))
-        categorias = ['Niños', 'Niñas', 'Servidores']
-        valores = [resumen.asistencia_ninos, resumen.asistencia_ninas, resumen.asistencia_servidores]
-        colores = ['#2F80ED', '#EB5757', '#27AE60']
-        plt.bar(categorias, valores, color=colores)
-        plt.title(f'Asistencia - {resumen.fecha_corte}')
-        plt.ylabel('Cantidad')
-        plt.tight_layout()
-        plt.savefig(ruta_asistencia, dpi=180)
-        plt.close()
+        # Crear gráfico de barras con reportlab
+        drawing = Drawing(700, 400)
+        chart = BarChart()
+        chart.title = f'Asistencia - {resumen.fecha_corte}'
+        chart.x = 50
+        chart.y = 50
+        chart.width = 600
+        chart.height = 300
+        
+        # Datos: categorías y valores
+        chart.data = [[resumen.asistencia_ninos, resumen.asistencia_ninas, resumen.asistencia_servidores]]
+        chart.categoryAxis.categoryNames = ['Niños', 'Niñas', 'Servidores']
+        
+        # Colores de las barras
+        chart.bars[0].fillColor = colors.HexColor('#2F80ED')  # Azul para Niños
+        chart.bars[1].fillColor = colors.HexColor('#EB5757')  # Rojo para Niñas
+        chart.bars[2].fillColor = colors.HexColor('#27AE60')  # Verde para Servidores
+        
+        # Etiquetas
+        chart.valueAxis.labelTextFormat = '%d'
+        chart.categoryAxis.style = 'normal'
+        chart.categoryAxis.labelTextFormat = '%s'
+        
+        drawing.add(chart)
+        
+        # Guardar como PNG
+        renderPM.drawToFile(drawing, ruta_asistencia, fmt='PNG', dpi=180)
 
         return {
             'asistencia': ruta_asistencia,
