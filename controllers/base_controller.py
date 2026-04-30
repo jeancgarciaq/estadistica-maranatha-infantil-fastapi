@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime, date
 
 from kivy.app import App
@@ -23,8 +24,20 @@ class BaseController:
         self.session = session or SessionLocal()
         self.sync_manager = SyncManager()
 
+    def _initialize_session(self):
+        """
+        DEPRECATED: La inicialización del engine debe ocurrir en models/database.py.
+        Mantenido por compatibilidad, pero ahora usa la sesión global.
+        """
+        return SessionLocal()
+
     def get_db_session(self):
-        """Obtiene una nueva sesión de base de datos."""
+        """
+        Obtiene una nueva sesión de base de datos.
+        En Android, asegúrate de que el engine en models/database.py
+        haya sido inicializado con la ruta App.get_running_app().user_data_dir
+        antes de llamar a este método.
+        """
         return SessionLocal()
 
     def manejar_excepcion(self, e, mensaje_error):
