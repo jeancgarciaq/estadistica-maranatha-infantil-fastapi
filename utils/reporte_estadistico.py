@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
+from kivy.app import App
+
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
@@ -75,8 +77,12 @@ class ResumenEstadistico:
 class ReporteEstadisticoService:
     def __init__(self, session):
         self.session = session
-        self.base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        self.output_dir = os.path.join(self.base_dir, 'tmp', 'reportes')
+        app = App.get_running_app()
+        if app and getattr(app, 'user_data_dir', None):
+            self.base_dir = app.user_data_dir
+        else:
+            self.base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        self.output_dir = os.path.join(self.base_dir, 'reportes')
         os.makedirs(self.output_dir, exist_ok=True)
 
     def _parse_fecha(self, fecha_corte):
