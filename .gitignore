@@ -1,6 +1,9 @@
 # Archivo del entorno virtual
 venv
 
+# Archivos de buildozer
+.buildozer/*
+
 # Archivos de Python
 __pycache__
 *.pyc
