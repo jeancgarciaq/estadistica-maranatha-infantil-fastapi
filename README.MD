@@ -53,6 +53,21 @@ Para ejecutar la aplicación, usa el siguiente comando:
 python app.py
 ```
 
+## Build Android
+Para compilar el APK con Buildozer y forzar Java 17, usa:
+```sh
+bash scripts/build_android.sh
+```
+
+Si quieres pasar argumentos extra a Buildozer, el script los reenvia tal cual.
+
+Si tu sistema tiene varias versiones de Java instaladas, la documentación de Buildozer recomienda fijar primero la versión activa con:
+```sh
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+```
+Selecciona Java 17 en ambos comandos antes de lanzar la compilación.
+
 ## Contribuciones
 Si deseas contribuir al desarrollo del proyecto, realiza un fork del repositorio, crea una nueva rama con tus cambios y envía un pull request.
 
