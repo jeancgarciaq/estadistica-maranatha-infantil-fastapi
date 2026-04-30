@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,atlas,db,json
 
 # (list) Application requirements
 # Incluimos todas las dependencias detectadas en requirements.txt
-requirements = python3,kivy==2.3.1,sqlalchemy,certifi,urllib3,idna,requests,python-dotenv,reportlab,matplotlib,numpy
+requirements = python3,kivy==2.3.1,sqlalchemy,certifi,urllib3,idna,requests,python-dotenv,matplotlib,numpy
 
 # (str) Supported orientations
 orientation = portrait
