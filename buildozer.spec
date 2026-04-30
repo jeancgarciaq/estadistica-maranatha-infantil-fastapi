@@ -28,7 +28,8 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE
+# El PDF se guarda en el almacenamiento privado de la app, así que no hace falta pedir permisos de almacenamiento.
+android.permissions = INTERNET
 
 # (int) Android API to use
 android.api = 33
