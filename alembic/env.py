@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
+from kivy.app import App
 from alembic import context
 
 import os
@@ -57,7 +58,16 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    # Ajustar URL para Android si es necesario
+    url = None
+    try:
+        from kivy.utils import platform
+        if platform == 'android':
+            db_path = os.path.join(App.get_running_app().user_data_dir, 'app.db')
+            url = f"sqlite:///{db_path}"
+    except Exception:
+        url = config.get_main_option("sqlalchemy.url")
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -76,8 +86,19 @@ def run_migrations_online():
     database, first create a transaction and within that
     transaction run the migrations.
     """
+    section = config.get_section(config.config_ini_section)
+    
+    # Ajustar URL dinámicamente para el entorno Android
+    try:
+        from kivy.utils import platform
+        if platform == 'android':
+            db_path = os.path.join(App.get_running_app().user_data_dir, 'app.db')
+            section['sqlalchemy.url'] = f"sqlite:///{db_path}"
+    except Exception:
+        pass
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
