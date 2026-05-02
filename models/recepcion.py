@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, String, Date
 from sqlalchemy.orm import relationship
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Recepcion(SyncMixin, Base):
+class Recepcion(Base, AuditMixin):
     __tablename__ = 'recepciones'
 
-    id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String)
     fecha = Column(Date)
 
