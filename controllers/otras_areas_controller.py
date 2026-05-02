@@ -2,8 +2,6 @@ import logging
 from models.otras_areas import OtrasAreas
 from controllers.base_controller import BaseController
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
-
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,116 +11,100 @@ class OtrasAreasController(BaseController):
         super().__init__(model=OtrasAreas, session=session)
         logger.info("OtrasAreasController inicializado.")
 
-    def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha):
+    def crear_otrasareas(self, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha, user_context=None):
         """
         Crea un registro de otras áreas.
         :return: (Exito, Mensaje)
         """
-        if not fecha:
-            return False, "La fecha es obligatoria."
+        fecha_dt = self.validar_y_convertir_fecha(fecha)
+        if not fecha_dt:
+            return False, "Formato de fecha incorrecto o fecha faltante. Debe ser YYYY-MM-DD."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                otrasareas = OtrasAreas(
-                    alabanza=alabanza, protocolo=protocolo, semillitas=semillitas,
-                    sonido=sonido, teatro=teatro, tv=tv, ujier=ujier, seguridad=seguridad, fecha=fecha_date
-                )
-                db.add(otrasareas)
-                logger.info(f"Otras áreas creadas.")
-            return True, "Otras áreas creadas exitosamente."
-        except ValueError:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al crear otras áreas: {e}")
-            return False, f"Error al crear otras áreas: {e}"
-        finally:
-            db.close()
+        def operacion(db):
+            otrasareas = OtrasAreas(
+                alabanza=alabanza,
+                protocolo=protocolo,
+                semillitas=semillitas,
+                sonido=sonido,
+                teatro=teatro,
+                tv=tv,
+                ujier=ujier,
+                seguridad=seguridad,
+                fecha=fecha_dt
+            )
+            db.add(otrasareas)
+            db.flush()
+            self.registrar_evento_sync(db, 'otras_areas', otrasareas, 'upsert')
+            logger.info("Otras áreas creadas.")
 
-    def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha):
+        return self.ejecutar_transaccion(operacion, "Otras áreas creadas exitosamente.", user_context=user_context)
+
+    def actualizar_otrasareas(self, id, alabanza, protocolo, semillitas, sonido, teatro, tv, ujier, seguridad, fecha, user_context=None):
         """
         Actualiza un registro de otras áreas.
         :return: (Exito, Mensaje)
         """
-        if not fecha:
-            return False, "La fecha es obligatoria."
+        fecha_dt = self.validar_y_convertir_fecha(fecha)
+        if not fecha_dt:
+            return False, "Formato de fecha incorrecto o fecha faltante. Debe ser YYYY-MM-DD."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
-                if otrasareas:
-                    fecha_date = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    setattr(otrasareas, 'alabanza', alabanza)
-                    setattr(otrasareas, 'protocolo', protocolo)
-                    setattr(otrasareas, 'semillitas', semillitas)
-                    setattr(otrasareas, 'sonido', sonido)
-                    setattr(otrasareas, 'teatro', teatro)
-                    setattr(otrasareas, 'tv', tv)
-                    setattr(otrasareas, 'ujier', ujier)
-                    setattr(otrasareas, 'seguridad', seguridad)
-                    setattr(otrasareas, 'fecha', fecha_date)
-                    logger.info(f"Otras áreas actualizadas: ID {id}")
-                    return True, "Otras áreas actualizadas exitosamente."
-                else:
-                    return False, "Otras áreas no encontradas."
-        except ValueError:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al actualizar otras áreas: {e}")
-            return False, f"Error al actualizar otras áreas: {e}"
-        finally:
-            db.close()
+        def operacion(db):
+            otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
+            if not otrasareas:
+                raise ValueError("Otras áreas no encontradas.")
+            
+            otrasareas.alabanza = alabanza
+            otrasareas.protocolo = protocolo
+            otrasareas.semillitas = semillitas
+            otrasareas.sonido = sonido
+            otrasareas.teatro = teatro
+            otrasareas.tv = tv
+            otrasareas.ujier = ujier
+            otrasareas.seguridad = seguridad
+            otrasareas.fecha = fecha_dt
+            
+            self.registrar_evento_sync(db, 'otras_areas', otrasareas, 'upsert')
+            logger.info(f"Otras áreas actualizadas: ID {id}")
 
-    def eliminar_otrasareas(self, id):
+        return self.ejecutar_transaccion(operacion, "Otras áreas actualizadas exitosamente.", user_context=user_context)
+
+    def eliminar_otrasareas(self, id, user_context=None):
         """
         Elimina un registro de otras áreas.
         :return: (Exito, Mensaje)
         """
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
-                if otrasareas:
-                    self.marcar_eliminado(otrasareas, db)
-                    logger.info(f"Otras áreas eliminadas: ID {id}")
-                    return True, "Otras áreas eliminadas exitosamente."
-                else:
-                    return False, "Otras áreas no encontradas."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al eliminar otras áreas: {e}")
-            return False, f"Error al eliminar otras áreas: {e}"
-        finally:
-            db.close()
+        def operacion(db):
+            otrasareas = db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
+            if not otrasareas:
+                raise ValueError("Otras áreas no encontradas.")
+            
+            self.marcar_eliminado(otrasareas, db)
+            self.registrar_evento_sync(db, 'otras_areas', otrasareas, 'delete')
+            logger.info(f"Otras áreas eliminadas: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Otras áreas eliminadas exitosamente.", user_context=user_context)
 
     def listar_otrasareas(self, fecha=None):
         """
-        Lista todos los registros de otras áreas.
-        :param fecha: Fecha en formato YYYY-MM-DD o date para filtrar resultados (opcional).
-        :return: Lista de objetos OtrasAreas.
+        Lista los registros de otras áreas, opcionalmente filtrados por fecha.
         """
         db = self.get_db_session()
         try:
-            query = db.query(OtrasAreas).filter(OtrasAreas.is_deleted.is_(False))
-
+            query = self.query_activa(db)
             if fecha:
-                if isinstance(fecha, str):
-                    try:
-                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    except ValueError:
-                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
-                        return []
-                query = query.filter(OtrasAreas.fecha == fecha)
+                fecha_dt = self.validar_y_convertir_fecha(fecha)
+                if fecha_dt:
+                    query = query.filter(OtrasAreas.fecha == fecha_dt)
 
-            otrasareas = query.order_by(OtrasAreas.id.desc()).all()
-            logger.info("Otras áreas listadas.")
+            otrasareas = query.order_by(OtrasAreas.fecha.desc(), OtrasAreas.id.desc()).all()
+            logger.info(f"{len(otrasareas)} registros de otras áreas obtenidos.")
             return otrasareas
         except SQLAlchemyError as e:
             logger.error(f"Error al listar otras áreas: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def obtener_otrasareas(self, id):
         """
@@ -131,9 +113,10 @@ class OtrasAreasController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(OtrasAreas).filter(OtrasAreas.id == id, OtrasAreas.is_deleted.is_(False)).first()
+            return self.query_activa(db).filter(OtrasAreas.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener otras áreas: {e}")
             return None
         finally:
-            db.close()
+            if not self.session:
+                db.close()
