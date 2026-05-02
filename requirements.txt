@@ -1,11 +1,13 @@
-# Dependencias del proyecto
-
-kivy>=2.3.0
+# Dependencias de la versión Web (FastAPI)
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
 SQLAlchemy>=2.0.0
-python-dotenv  # Para manejo de variables de entorno (opcional)
+python-dotenv
 reportlab>=4.0.0
 matplotlib>=3.8.0
-
-# Dependencias adicionales si son necesarias
-kivy-garden
-kivy-examples
+httpx
+pydantic
+pydantic-settings
+sqlalchemy-utils
