@@ -9,13 +9,12 @@ logger = logging.getLogger(__name__)
 
 class AreasController(BaseController):
     def __init__(self, session=None):
-        super().__init__(None, Area, session)
-        self.session = session
+        super().__init__(model=Area, session=session)
         logger.info("Inicializando AreasController")
-        if not session:
-            logger.error("No se ha proporcionado una sesión de base de datos.")
-            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
-        logger.info("AreasController inicializado con éxito.")
+
+    def _get_db(self, db):
+        """Helper para usar la sesión proporcionada o la interna."""
+        return db if db else self.session
 
     def crear_area(self, nombre):
         if not nombre:
@@ -103,12 +102,11 @@ class AreasController(BaseController):
         if nombre and not isinstance(nombre, str):
             return False, None, "El nombre debe ser una cadena de texto."
             
-        #Buscar Área
-        area = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="area")
-        if area:
-            return True, area, "Área encontrada exitosamente."
-        else:
-            if id:
-                return False, None, f"No existe un área con ID {id}."
-            elif nombre:
-                return False, None, f"No existe un área con nombre '{nombre}'."
+        try:
+            area = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="area")
+            if area:
+                return True, area, "Área encontrada exitosamente."
+            return False, None, "No se encontró el área solicitada."
+        except Exception as e:
+            logger.error(f"Error en búsqueda: {e}")
+            return False, None, str(e)
