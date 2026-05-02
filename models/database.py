@@ -1,6 +1,10 @@
 import os
 
-from kivy.app import App
+try:
+    from kivy.app import App
+except ImportError:
+    App = None
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.base import Base
