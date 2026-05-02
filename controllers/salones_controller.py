@@ -10,31 +10,24 @@ logger = logging.getLogger(__name__)
 class SalonesController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Salon, session=session)
-        logger.info("Inicializando SalonesController")
-        if not session:
-            logger.error("No se ha proporcionado una sesión de base de datos.")
-            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
-        logger.info("SalonesController inicializado con éxito.")
+        logger.info("SalonesController inicializado.")
 
-    def crear_salon(self, nombre, edad):
+    def crear_salon(self, nombre, edad, user_context=None):
         if not nombre:
             return False, "El nombre del salón es obligatorio."
         if not edad:
             return False, "La edad del salón es obligatoria."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                salon = Salon(salon=nombre, edad=edad)
-                db.add(salon)
-                logger.info(f"Salón creado: {nombre}")
-            return True, "Salón creado exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al crear salón")
-        finally:
-            db.close()
+        def operacion(db):
+            salon = Salon(salon=nombre, edad=edad)
+            db.add(salon)
+            db.flush()
+            self.registrar_evento_sync(db, 'salones', salon, 'upsert')
+            logger.info(f"Salón creado: {nombre}")
 
-    def actualizar_salon(self, id, nombre, edad):
+        return self.ejecutar_transaccion(operacion, "Salón creado exitosamente.", user_context=user_context)
+
+    def actualizar_salon(self, id, nombre, edad, user_context=None):
         if not id:
             return False, "El ID del salón es obligatorio."
         if not nombre:
@@ -42,67 +35,58 @@ class SalonesController(BaseController):
         if not edad:
             return False, "La edad del salón es obligatoria."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                salon = db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
-                if salon:
-                    salon.salon = nombre  
-                    salon.edad = edad
-                    logger.info(f"Salón actualizado: {nombre}")
-                    return True, "Salón actualizado exitosamente."
-                else:
-                    return False, "Salón no encontrado."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al actualizar salón")
-        finally:
-            db.close()
-                
-    def eliminar_salon(self, id):
+        def operacion(db):
+            salon = self.query_activa(db).filter(Salon.id == id).first()
+            if not salon:
+                raise ValueError("Salón no encontrado.")
+            
+            salon.salon = nombre
+            salon.edad = edad
+            self.registrar_evento_sync(db, 'salones', salon, 'upsert')
+            logger.info(f"Salón actualizado: {nombre}")
+
+        return self.ejecutar_transaccion(operacion, "Salón actualizado exitosamente.", user_context=user_context)
+
+    def eliminar_salon(self, id, user_context=None):
         if not id:
             return False, "El ID del salón es obligatorio."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                salon = db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
-                if salon:
-                    self.marcar_eliminado(salon, db)
-                    logger.info(f"Salón eliminado: ID {id}")
-                    return True, "Salón eliminado exitosamente."
-                else:
-                    return False, "Salón no encontrado."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al eliminar salón")
-        finally:
-            db.close()
-            logger.info("Conexión cerrada")
+        def operacion(db):
+            salon = self.query_activa(db).filter(Salon.id == id).first()
+            if not salon:
+                raise ValueError("Salón no encontrado.")
+            
+            self.marcar_eliminado(salon, db)
+            self.registrar_evento_sync(db, 'salones', salon, 'delete')
+            logger.info(f"Salón eliminado: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Salón eliminado exitosamente.", user_context=user_context)
 
     def listar_salones(self):
         """Método para listar los salones y manejar errores."""
         db = self.get_db_session()
         try:
-            salones = db.query(Salon).filter(Salon.is_deleted.is_(False)).all()
+            salones = self.query_activa(db).all()
             logger.info(f"{len(salones)} salones obtenidos de la base de datos.")
             return salones
         except SQLAlchemyError as e:
-            logger.error(f"Error al obtener salones: {e}")
+            logger.error(f"Error al listar salones: {e}")
             return []
         finally:
-            db.close()
-            logger.info("Conexión cerrada")
+            if not self.session:
+                db.close()
 
     def obtener_salon(self, id):
         """Obtiene un salón por su ID."""
         db = self.get_db_session()
         try:
-            return db.query(Salon).filter(Salon.id == id, Salon.is_deleted.is_(False)).first()
+            return self.query_activa(db).filter(Salon.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener salón: {e}")
             return None
         finally:
-            db.close()
-            logger.info("Conexión cerrada")
+            if not self.session:
+                db.close()
 
     def buscar_salon(self, id=None, nombre=None):
         """
