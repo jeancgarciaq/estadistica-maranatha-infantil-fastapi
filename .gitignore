@@ -1,4 +1,9 @@
 ```
+# Buildozer
+.buildozer/*
+.buildozer/bin/
+.buildozer/venv/
+
 # Build artifacts
 build/
 
