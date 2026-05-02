@@ -18,13 +18,9 @@ logger = logging.getLogger(__name__)
 class DistribucionesController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Distribucion, session=session)
-        logger.info("Inicializando DistribucionesController")
-        if not session:
-            logger.error("No se ha proporcionado una sesión de base de datos.")
-            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
-        logger.info("DistribucionesController inicializado con éxito.")
+        logger.info("DistribucionesController inicializado.")
 
-    def crear_distribucion(self, datos):
+    def crear_distribucion(self, datos, user_context=None):
         """
         Crea una nueva distribución en la base de datos.
         :param datos: Diccionario con los datos de la distribución.
@@ -49,7 +45,7 @@ class DistribucionesController(BaseController):
             db.flush()
             self.registrar_evento_sync(db, 'distribuciones', distribucion, 'upsert')
 
-        return self.ejecutar_transaccion(operacion, "Distribución creada exitosamente.")
+        return self.ejecutar_transaccion(operacion, "Distribución creada exitosamente.", user_context=user_context)
 
     def listar_distribuciones(self):
         """
@@ -71,7 +67,8 @@ class DistribucionesController(BaseController):
             logger.error(f"Error al listar distribuciones: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def listar_distribuciones_concentradas(self, fecha):
         """
@@ -198,9 +195,10 @@ class DistribucionesController(BaseController):
             logger.error(f"Error al listar distribuciones concentradas: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
-    def actualizar_distribucion(self, id, datos):
+    def actualizar_distribucion(self, id, datos, user_context=None):
         """
         Actualiza una distribución existente.
         :param id: ID de la distribución a actualizar.
@@ -210,12 +208,15 @@ class DistribucionesController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID de la distribución es obligatorio y debe ser un número entero."
 
-        db = self.get_db_session()
-        try:
-            datos_normalizados = self._normalizar_datos(datos)
+        datos_normalizados = self._normalizar_datos(datos)
+        fecha = self.validar_y_convertir_fecha(datos_normalizados.get('fecha'))
+        if fecha:
+            datos_normalizados['fecha'] = fecha
+
+        def operacion(db):
             distribucion = db.query(Distribucion).filter(Distribucion.id == id, Distribucion.is_deleted.is_(False)).first()
             if not distribucion:
-                return False, "Distribución no encontrada."
+                raise ValueError("Distribución no encontrada.")
 
             datos_validar = {
                 "donacion_id": datos_normalizados.get("donacion_id", distribucion.donacion_id),
@@ -230,28 +231,17 @@ class DistribucionesController(BaseController):
 
             errores = self.validar_datos(datos_validar, db)
             if errores:
-                return False, "\n".join(errores)
-
-            # Convertir fecha de string a objeto date
-            if 'fecha' in datos_normalizados and isinstance(datos_normalizados['fecha'], str):
-                try:
-                    datos_normalizados['fecha'] = datetime.strptime(datos_normalizados['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+                raise ValueError("\n".join(errores))
 
             for key, value in datos_normalizados.items():
                 setattr(distribucion, key, value)
+            
             self.registrar_evento_sync(db, 'distribuciones', distribucion, 'upsert')
-            db.commit()
             logger.info(f"Distribución actualizada: ID {id}")
-            return True, "Distribución actualizada exitosamente."
-        except SQLAlchemyError as e:
-            db.rollback()
-            return self.manejar_excepcion(e, "Error al actualizar distribución")
-        finally:
-            db.close()
 
-    def eliminar_distribucion(self, id):
+        return self.ejecutar_transaccion(operacion, "Distribución actualizada exitosamente.", user_context=user_context)
+
+    def eliminar_distribucion(self, id, user_context=None):
         """
         Elimina una distribución de la base de datos.
         :param id: ID de la distribución a eliminar.
@@ -260,22 +250,16 @@ class DistribucionesController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID de la distribución es obligatorio y debe ser un número entero."
 
-        db = self.get_db_session()
-        try:
+        def operacion(db):
             distribucion = db.query(Distribucion).filter(Distribucion.id == id, Distribucion.is_deleted.is_(False)).first()
-            if distribucion:
-                self.marcar_eliminado(distribucion, db)
-                self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
-                db.commit()
-                logger.info(f"Distribución eliminada: ID {id}")
-                return True, "Distribución eliminada exitosamente."
-            else:
-                return False, "Distribución no encontrada."
-        except SQLAlchemyError as e:
-            db.rollback()
-            return self.manejar_excepcion(e, "Error al eliminar distribución")
-        finally:
-            db.close()
+            if not distribucion:
+                raise ValueError("Distribución no encontrada.")
+            
+            self.marcar_eliminado(distribucion, db)
+            self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
+            logger.info(f"Distribución eliminada: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Distribución eliminada exitosamente.", user_context=user_context)
 
     def obtener_distribucion(self, id):
         """
@@ -296,7 +280,8 @@ class DistribucionesController(BaseController):
             logger.error(f"Error al obtener distribución: {e}")
             return None
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def buscar_distribucion(self, id=None):
         """
