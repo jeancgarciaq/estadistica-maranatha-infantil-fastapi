@@ -13,13 +13,9 @@ logger = logging.getLogger(__name__)
 class AulasController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Aula, session=session)
-        logger.info("Inicializando AulasController")
-        if not session:
-            logger.error("No se ha proporcionado una sesión de base de datos.")
-            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
-        logger.info("AulasController inicializado con éxito.")
+        logger.info("AulasController inicializado.")
 
-    def crear_aula(self, datos):
+    def crear_aula(self, datos, user_context=None):
         """
         Crea un aula con los datos proporcionados.
         :param datos: Diccionario con los datos del aula.
@@ -29,26 +25,21 @@ class AulasController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            # Convertir fecha de string a objeto date
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha
 
-            with db.begin():
-                aula = Aula(**datos)
-                db.add(aula)
-                logger.info(f"Aula creada.")
-            return True, "Aula creada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al crear aula")
-        finally:
-            db.close()
+        def operacion(db):
+            aula = Aula(**datos)
+            db.add(aula)
+            db.flush()
+            self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
+            logger.info("Aula creada.")
 
-    def actualizar_aula(self, id, datos):
+        return self.ejecutar_transaccion(operacion, "Aula creada exitosamente.", user_context=user_context)
+
+    def actualizar_aula(self, id, datos, user_context=None):
         """
         Actualiza un aula existente con los datos proporcionados.
         :param id: ID del aula a actualizar.
@@ -62,30 +53,25 @@ class AulasController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            # Convertir fecha de string a objeto date
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha
 
-            with db.begin():
-                aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
-                if aula:
-                    for key, value in datos.items():
-                        setattr(aula, key, value)
-                    logger.info(f"Aula actualizada: ID {id}")
-                    return True, "Aula actualizada exitosamente."
-                else:
-                    return False, "Aula no encontrada."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al actualizar aula")
-        finally:
-            db.close()
+        def operacion(db):
+            aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
+            if not aula:
+                raise ValueError("Aula no encontrada.")
+            
+            for key, value in datos.items():
+                setattr(aula, key, value)
+            
+            self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
+            logger.info(f"Aula actualizada: ID {id}")
 
-    def eliminar_aula(self, id):
+        return self.ejecutar_transaccion(operacion, "Aula actualizada exitosamente.", user_context=user_context)
+
+    def eliminar_aula(self, id, user_context=None):
         """
         Elimina un aula por su ID.
         :param id: ID del aula a eliminar.
@@ -94,20 +80,16 @@ class AulasController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID del aula es obligatorio y debe ser un número entero."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
-                if aula:
-                    self.marcar_eliminado(aula, db)
-                    logger.info(f"Aula eliminada: ID {id}")
-                    return True, "Aula eliminada exitosamente."
-                else:
-                    return False, "Aula no encontrada."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al eliminar aula")
-        finally:
-            db.close()
+        def operacion(db):
+            aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
+            if not aula:
+                raise ValueError("Aula no encontrada.")
+            
+            self.marcar_eliminado(aula, db)
+            self.registrar_evento_sync(db, 'aulas', aula, 'delete')
+            logger.info(f"Aula eliminada: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Aula eliminada exitosamente.", user_context=user_context)
 
     def listar_aulas(self):
         """
@@ -124,12 +106,11 @@ class AulasController(BaseController):
         """
         db = self.get_db_session()
         try:
-            query = db.query(Aula).options(selectinload(Aula.salon))
-            query = query.filter(Aula.is_deleted.is_(False))
+            query = self.query_activa(db).options(selectinload(Aula.salon))
             if fecha:
-                if isinstance(fecha, str):
-                    fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-                query = query.filter(Aula.fecha == fecha)
+                fecha_dt = self.validar_y_convertir_fecha(fecha)
+                if fecha_dt:
+                    query = query.filter(Aula.fecha == fecha_dt)
 
             aulas = query.all()
             logger.info(f"{len(aulas)} aulas obtenidas de la base de datos.")
@@ -141,7 +122,8 @@ class AulasController(BaseController):
             logger.error(f"Formato de fecha inválido al listar aulas: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def listar_salones(self):
         """
@@ -157,7 +139,8 @@ class AulasController(BaseController):
             logger.error(f"Error al listar salones en AulasController: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def obtener_aula(self, id):
         """
@@ -167,12 +150,14 @@ class AulasController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
+            return self.query_activa(db).filter(Aula.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener aula: {e}")
             return None
         finally:
-            db.close()
+            if not self.session:
+                db.close()
+
     def buscar_aula(self, id=None, fecha=None):
         """
         Busca un aula por ID o fecha.
