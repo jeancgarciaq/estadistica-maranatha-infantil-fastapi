@@ -1,33 +1,48 @@
-# Archivo del entorno virtual
-venv
+```
+# Build artifacts
+build/
 
-# Archivos de buildozer
-.buildozer/*
-
-# Archivos de Python
-__pycache__
+# Dependencies
+.python-version
+.venv/
+venv/
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Archivos de Kivy
-.kivy
-
-# Archivos de SQLAlchemy
-.db
-
-# Archivos de configuración
-.env
-
-# Archivos de logs
+# Logs
 *.log
 
-# Archivos de pruebas
-*.test
+# Environment
+.env
+.env.local
+.env.*
 
-# Archivos de documentación
-*.md
+# Coverage
+.coverage
+coverage/
+htmlcov/
 
-# Archivos de empaquetado
-*.exe
-*.apk    
+# Distribution
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# MyPy
+.mypy_cache/
+```
