@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, String, Date
 
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Logistica(SyncMixin, Base):
+class Logistica(Base, AuditMixin):
     __tablename__ = 'logisticas'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     almacen = Column(String(100), nullable=False)
     capitan = Column(String(100), nullable=False)
     distribucion = Column(String(255), nullable=True)
