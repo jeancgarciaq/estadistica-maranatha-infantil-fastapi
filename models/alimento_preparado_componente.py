@@ -1,13 +1,11 @@
 from sqlalchemy import Column, Integer, ForeignKey, Float
 from sqlalchemy.orm import relationship
+from models.database import Base
+from models.base_class import AuditMixin
 
-from models.base import Base, SyncMixin
-
-
-class AlimentoPreparadoComponente(SyncMixin, Base):
+class AlimentoPreparadoComponente(Base, AuditMixin):
     __tablename__ = 'alimentos_preparados_componentes'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     alimento_preparado_id = Column(Integer, ForeignKey('alimentos_preparados.id'), nullable=False)
     donacion_materia_id = Column(Integer, ForeignKey('donaciones.id'), nullable=False)
     cantidad_usada = Column(Float, nullable=False)
