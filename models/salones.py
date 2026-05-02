@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Salon(SyncMixin, Base):
+class Salon(Base, AuditMixin):
     __tablename__ = 'salones'
 
-    id = Column(Integer, primary_key=True, index=True)
     salon = Column(String, nullable=False, unique=True)
     edad = Column(String, nullable=False)
     
