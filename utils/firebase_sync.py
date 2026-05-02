@@ -128,7 +128,7 @@ class SyncManager:
 
     def __init__(self, client=None, device_id=None):
         self.client = client or FirebaseClient()
-        self.device_id = device_id or os.getenv('SYNC_DEVICE_ID') or str(uuid.uuid4())
+        self.device_id = device_id or os.getenv('SYNC_DEVICE_ID', 'WEB_APP_SERVER')
 
     def set_auth_token_provider(self, provider):
         self.client.token_provider = provider
@@ -140,6 +140,10 @@ class SyncManager:
         return f"collections/{entity_name}"
 
     def enqueue_model(self, session, entity_name, registry_object, operation='upsert'):
+        """
+        Encola un cambio local. 
+        registry_object ya posee sync_id gracias a AuditMixin.
+        """
         payload = self.serialize_model(registry_object)
         payload['sync_device_id'] = self.device_id
         payload['sync_operation'] = operation
@@ -147,16 +151,22 @@ class SyncManager:
 
         event = SyncQueue()
         setattr(event, 'entity_name', entity_name)
-        setattr(event, 'entity_sync_id', payload['sync_id'])
+        setattr(event, 'entity_sync_id', payload.get('sync_id'))
         setattr(event, 'operation', operation)
         setattr(event, 'payload_json', json.dumps(payload, ensure_ascii=False))
         setattr(event, 'status', 'pending')
         session.add(event)
+        # No hacemos commit aquí, dejamos que el controlador maneje la transacción.
         return event
 
     def serialize_model(self, record):
+        """Convierte un modelo SQLAlchemy a un diccionario JSON-safe."""
+        if record is None:
+            return {}
+            
         mapper = inspect(record.__class__)
         data = {}
+        # Incluye todas las columnas (incluyendo las de AuditMixin)
         for column in mapper.columns:
             value = getattr(record, column.key)
             data[column.key] = self._json_safe_value(value)
@@ -205,42 +215,28 @@ class SyncManager:
 
     def bootstrap_collection(self, session, entity_name):
         """Sube todos los registros locales actuales de una entidad a Firebase collections."""
-        if not self.client.is_configured():
-            return []
-
         model = MODEL_REGISTRY.get(entity_name)
         if model is None:
             raise ValueError(f'Entidad no soportada para sincronización: {entity_name}')
+
+        if not self.client.is_configured():
+            logger.warning("Firebase no configurado. Bootstrap cancelado.")
+            return []
 
         records = session.query(model).all()
         if not records:
             return []
 
-        touched_local = False
         pushed = []
         now = datetime.utcnow()
-
+        
+        # AuditMixin ya garantiza que sync_id, created_at y updated_at existen.
         for record in records:
-            if not getattr(record, 'sync_id', None):
-                setattr(record, 'sync_id', str(uuid.uuid4()))
-                touched_local = True
-
-            if getattr(record, 'created_at', None) is None:
-                setattr(record, 'created_at', now)
-                touched_local = True
-
-            if getattr(record, 'updated_at', None) is None:
-                setattr(record, 'updated_at', now)
-                touched_local = True
-
             payload = self.serialize_model(record)
             payload['sync_bootstrap_at'] = now.isoformat()
             payload['sync_device_id'] = self.device_id
             self.client.put(self.queue_path(entity_name, payload['sync_id']), payload)
             pushed.append(payload['sync_id'])
-
-        if touched_local:
-            session.commit()
 
         return pushed
 
