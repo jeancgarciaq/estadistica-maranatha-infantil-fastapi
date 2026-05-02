@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, Date
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Ensenanza(SyncMixin, Base):
+class Ensenanza(Base, AuditMixin):
     __tablename__ = 'ensenanzas'
 
-    id = Column(Integer, primary_key=True, index=True)
     capitan = Column(String)
     subcapitan = Column(Integer)
     fecha = Column(Date)
