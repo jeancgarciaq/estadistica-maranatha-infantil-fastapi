@@ -42,10 +42,7 @@ class UsuariosController(BaseController):
             user_record = (
                 db.query(Usuario)
                 .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
-                .filter(
-                    Usuario.username == username.strip(),
-                    Usuario.is_deleted.is_(False),
-                )
+                .filter(Usuario.username == username.strip(), Usuario.is_deleted.is_(False))
                 .first()
             )
 
@@ -57,18 +54,13 @@ class UsuariosController(BaseController):
                 logger.warning("Fallo login local para '%s': Contraseña incorrecta o usuario inactivo (activo=%s).", username, user_record.activo)
                 return False, None, 'Credenciales inválidas o usuario inactivo.'
 
-            user = user_record
-            db.expunge(user)
-            if user.rol:
-                db.expunge(user.rol)
-                for permiso in user.rol.permisos:
-                    db.expunge(permiso)
-            return True, user, 'Inicio de sesión exitoso.'
+            return True, user_record, 'Inicio de sesión exitoso.'
         except SQLAlchemyError as e:
             logger.error('Error autenticando usuario: %s', e)
             return False, None, 'Error interno de autenticación.'
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def obtener_token_firebase(self, usuario):
         if not usuario:
@@ -88,9 +80,8 @@ class UsuariosController(BaseController):
         db = self.get_db_session()
         try:
             return (
-                db.query(Usuario)
+                self.query_activa(db)
                 .options(joinedload(Usuario.rol))
-                .filter(Usuario.is_deleted.is_(False))
                 .order_by(Usuario.username.asc())
                 .all()
             )
@@ -98,28 +89,30 @@ class UsuariosController(BaseController):
             logger.error('Error listando usuarios: %s', e)
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def listar_roles(self):
         db = self.get_db_session()
         try:
-            return db.query(Rol).filter(Rol.is_deleted.is_(False)).order_by(Rol.nombre.asc()).all()
+            return self.query_activa(db).order_by(Rol.nombre.asc()).all()
         except SQLAlchemyError as e:
             logger.error('Error listando roles: %s', e)
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
-    def crear_usuario(self, username, password, rol_nombre):
+    def crear_usuario(self, username, password, rol_nombre, user_context=None):
         if not username or not password or not rol_nombre:
             return False, 'Usuario, contraseña y rol son obligatorios.'
 
         def operacion(db):
-            existe = db.query(Usuario).filter(Usuario.username == username.strip(), Usuario.is_deleted.is_(False)).first()
+            existe = self.query_activa(db).filter(Usuario.username == username.strip()).first()
             if existe:
                 raise ValueError('Ya existe un usuario con ese nombre.')
 
-            rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
+            rol = self.query_activa(db).filter(Rol.nombre == rol_nombre).first()
             if not rol:
                 raise ValueError('Rol inválido.')
 
@@ -134,14 +127,14 @@ class UsuariosController(BaseController):
             self.registrar_evento_sync(db, 'usuarios', nuevo_usuario, 'upsert')
             logger.info("Usuario creado localmente y encolado para sync.")
 
-        return self.ejecutar_transaccion(operacion, 'Usuario creado exitosamente.')
+        return self.ejecutar_transaccion(operacion, 'Usuario creado exitosamente.', user_context=user_context)
 
-    def actualizar_usuario(self, user_id, password=None, rol_nombre=None, activo=None):
+    def actualizar_usuario(self, user_id, password=None, rol_nombre=None, activo=None, user_context=None):
         if not user_id:
             return False, 'Debe indicar el usuario a actualizar.'
 
         def operacion(db):
-            usuario = db.query(Usuario).filter(Usuario.id == int(user_id), Usuario.is_deleted.is_(False)).first()
+            usuario = self.query_activa(db).filter(Usuario.id == int(user_id)).first()
             if not usuario:
                 raise ValueError('Usuario no encontrado.')
 
@@ -152,7 +145,7 @@ class UsuariosController(BaseController):
                 setattr(usuario, 'password', password)
 
             if rol_nombre:
-                rol = db.query(Rol).filter(Rol.nombre == rol_nombre, Rol.is_deleted.is_(False)).first()
+                rol = self.query_activa(db).filter(Rol.nombre == rol_nombre).first()
                 if not rol:
                     raise ValueError('Rol inválido.')
                 if getattr(usuario, 'username', None) == 'root' and getattr(rol, 'nombre', None) != ROLE_ROOT:
@@ -165,22 +158,23 @@ class UsuariosController(BaseController):
             self.registrar_evento_sync(db, 'usuarios', usuario, 'upsert')
             logger.info("Usuario actualizado localmente y encolado para sync: ID %s", user_id)
 
-        return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.')
+        return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.', user_context=user_context)
 
     def obtener_usuario(self, user_id):
         db = self.get_db_session()
         try:
             return (
-                db.query(Usuario)
+                self.query_activa(db)
                 .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
-                .filter(Usuario.id == int(user_id), Usuario.is_deleted.is_(False))
+                .filter(Usuario.id == int(user_id))
                 .first()
             )
         except SQLAlchemyError as e:
             logger.error('Error obteniendo usuario: %s', e)
             return None
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     @staticmethod
     def usuario_tiene_permiso(usuario, permiso_codigo):
