@@ -1,18 +1,14 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Area(SyncMixin, Base):
+class Area(Base, AuditMixin):
     """
     Modelo que representa un área en la base de datos.
-
-    Atributos:
-        id (int): Identificador único del área.
-        area (str): Nombre del área.
     """
     __tablename__ = 'areas'
 
-    id = Column(Integer, primary_key=True, index=True)
     area = Column(String(100), nullable=False, unique=True)  # Longitud máxima de 100 caracteres
 
     distribuciones = relationship("Distribucion", back_populates="area")
