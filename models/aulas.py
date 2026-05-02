@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
-class Aula(SyncMixin, Base):
+class Aula(Base, AuditMixin):
     __tablename__ = 'aulas'
 
-    id = Column(Integer, primary_key=True, index=True)
     auxiliar = Column(Integer, nullable=False)
     capitan = Column(Integer, nullable=False)
     colaborador = Column(Integer, nullable=False)
