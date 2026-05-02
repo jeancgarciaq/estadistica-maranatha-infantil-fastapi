@@ -15,4 +15,19 @@ if [[ $# -eq 0 ]]; then
     set -- -v android debug
 fi
 
-exec buildozer "$@"
+LOG_DIR="tmp/build_logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/buildozer_$(date +%Y%m%d_%H%M%S).log"
+
+echo "Buildozer log: $LOG_FILE"
+
+set +e
+buildozer "$@" 2>&1 | tee "$LOG_FILE"
+STATUS=${PIPESTATUS[0]}
+set -e
+
+if [[ $STATUS -ne 0 ]]; then
+    echo "Buildozer fallo con codigo $STATUS. Revisa: $LOG_FILE" >&2
+fi
+
+exit "$STATUS"
