@@ -3,7 +3,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
 
 ROLE_ROOT = 'root'
@@ -52,10 +53,9 @@ role_permissions = Table(
 )
 
 
-class Rol(SyncMixin, Base):
+class Rol(Base, AuditMixin):
     __tablename__ = 'roles'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(50), unique=True, nullable=False, index=True)
     descripcion = Column(String(255), nullable=True)
 
@@ -66,10 +66,9 @@ class Rol(SyncMixin, Base):
         return f"<Rol(id={self.id}, nombre='{self.nombre}')>"
 
 
-class Permiso(SyncMixin, Base):
+class Permiso(Base, AuditMixin):
     __tablename__ = 'permissions'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     codigo = Column(String(100), unique=True, nullable=False, index=True)
     descripcion = Column(String(255), nullable=True)
 
@@ -79,10 +78,9 @@ class Permiso(SyncMixin, Base):
         return f"<Permiso(id={self.id}, codigo='{self.codigo}')>"
 
 
-class Usuario(SyncMixin, Base):
+class Usuario(Base, AuditMixin):
     __tablename__ = 'usuarios'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(60), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
     activo = Column(Boolean, nullable=False, default=True)
