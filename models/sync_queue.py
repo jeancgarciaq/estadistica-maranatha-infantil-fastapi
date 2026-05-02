@@ -1,13 +1,13 @@
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import validates
 
-from models.base import Base, SyncMixin
+from models.database import Base
+from models.base_class import AuditMixin
 
 
-class SyncQueue(SyncMixin, Base):
+class SyncQueue(Base, AuditMixin):
     __tablename__ = 'sync_queue'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     entity_name = Column(String(80), nullable=False, index=True)
     entity_sync_id = Column(String(36), nullable=False, index=True)
     operation = Column(String(20), nullable=False, default='upsert')
