@@ -11,6 +11,19 @@ fi
 export JAVA_HOME="$JAVA_17_HOME"
 export PATH="$JAVA_HOME/bin:$PATH"
 
+# Colocar el wrapper de clang ANTES del NDK en el PATH
+# para que libffi y otros no usen opciones como -print-multi-os-directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$SCRIPT_DIR:$PATH"
+
+# Crear symlinks del wrapper para clang y clang-14
+ln -sf clang-wrapper.sh "$SCRIPT_DIR/clang" 2>/dev/null || true
+ln -sf clang-wrapper.sh "$SCRIPT_DIR/clang-14" 2>/dev/null || true
+
+# Evitar errores de configure con clang-14
+# Configurar LDFLAGS para que libtool sea menos agresivo
+export LDFLAGS="-fPIC"
+
 if [[ $# -eq 0 ]]; then
     set -- -v android debug
 fi
