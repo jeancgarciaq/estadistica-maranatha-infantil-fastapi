@@ -2,7 +2,6 @@ import logging
 import os
 from datetime import datetime, date
 
-from kivy.app import App
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from utils.firebase_sync import SyncManager
@@ -12,37 +11,25 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class BaseController:
-    def __init__(self, vista=None, model=None, session=None):
+    def __init__(self, model=None, session=None):
         """
         Clase base para controladores.
-        :param vista: (DEPRECATED) Vista asociada al controlador. Mantenido por compatibilidad temporal.
         :param model: Modelo SQLAlchemy asociado al controlador.
-        :param session: Sesión de base de datos opcional.
+        :param session: Sesión de base de datos (inyectada por FastAPI).
         """
-        self.vista = vista
         self.model = model
-        self.session = session or SessionLocal()
+        self.session = session
         self.sync_manager = SyncManager()
-
-    def _initialize_session(self):
-        """
-        DEPRECATED: La inicialización del engine debe ocurrir en models/database.py.
-        Mantenido por compatibilidad, pero ahora usa la sesión global.
-        """
-        return SessionLocal()
 
     def get_db_session(self):
         """
-        Obtiene una nueva sesión de base de datos.
-        En Android, asegúrate de que el engine en models/database.py
-        haya sido inicializado con la ruta App.get_running_app().user_data_dir
-        antes de llamar a este método.
+        Obtiene la sesión actual. En entorno Web usamos la sesión inyectada.
         """
-        return SessionLocal()
+        return self.session or SessionLocal()
 
     def manejar_excepcion(self, e, mensaje_error):
         """
-        Maneja excepciones de SQLAlchemy y devuelve un mensaje formateado.
+        Maneja excepciones y devuelve un mensaje formateado.
         :param e: Excepción capturada.
         :param mensaje_error: Mensaje base de error.
         :return: (False, Mensaje de error formateado)
@@ -62,45 +49,45 @@ class BaseController:
             logger.error(f"Formato de fecha inválido: {fecha}")
             return None
 
-    def ejecutar_transaccion(self, operacion, mensaje_exito=None):
+    def ejecutar_transaccion(self, operacion, mensaje_exito=None, user_context=None):
         """
         Ejecuta una operación dentro de una transacción de base de datos.
         :param operacion: Función que contiene la lógica de la operación.
         :param mensaje_exito: Mensaje de éxito a devolver (opcional).
+        :param user_context: Contexto del usuario (necesario en Web para sync).
         :return: Tupla (Booleano Exito, Mensaje)
         """
-        db = self.get_db_session()
+        db = self.session if self.session else self.get_db_session()
         try:
             with db.begin():
                 operacion(db)
-            self._sincronizar_si_corresponde(db)
+            self._sincronizar_si_corresponde(db, user_context)
             if mensaje_exito:
                 return True, mensaje_exito
             return True, "Operación exitosa"
         except (SQLAlchemyError, ValueError) as e:
             return self.manejar_excepcion(e, "Error en la transacción")
         finally:
-            db.close()
-            logger.info("Conexión a la base de datos cerrada.")
+            if not self.session:
+                db.close()
 
-    def _sincronizar_si_corresponde(self, db):
-        """Dispara la sincronización Firebase si la app está activa y configurada."""
-        try:
-            app = App.get_running_app()
-        except Exception:
-            app = None
+    def _sincronizar_si_corresponde(self, db, user_context=None):
+        """
+        Dispara la sincronización con Firebase.
+        """
+        sync_manager = self.sync_manager
+        current_user = None
 
-        if not app or not getattr(app, 'current_user', None):
+        if user_context:
+            sync_manager = user_context.get('sync_manager', sync_manager)
+            current_user = user_context.get('user')
+            # Nota: El token de Firebase debería estar disponible aquí para el sync_manager
+
+        if not sync_manager or not current_user or not sync_manager.client.is_configured():
             return
 
-        sync_manager = getattr(app, 'sync_manager', None)
-        if sync_manager is None or not sync_manager.client.is_configured():
-            return
-
-        if hasattr(app, 'usuarios_controller'):
-            sync_manager.set_auth_token_provider(
-                lambda: app.usuarios_controller.obtener_token_firebase(app.current_user)
-            )
+        # En entorno web, el token ya debería estar en el context o manejarse vía BackgroundTasks
+        # Esta lógica se simplificará al mover el sync a tareas asíncronas de FastAPI
 
         try:
             sync_manager.push_pending(db)
