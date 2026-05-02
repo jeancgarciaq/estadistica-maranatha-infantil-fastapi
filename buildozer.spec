@@ -20,7 +20,9 @@ source.include_exts = py,png,jpg,kv,atlas,db,json
 # (list) Application requirements
 # Solo incluimos reportlab que es lo único necesario para los gráficos en PDF
 # matplotlib, numpy y pillow NO son necesarios ya que reportlab tiene su propia implementación de gráficos
-requirements = python3,kivy==2.3.0,sqlalchemy,certifi,urllib3,idna,requests,python-dotenv,reportlab
+# Importante: reportlab recipe actual de python-for-android no compila con Python 3.11,
+# por eso fijamos Python 3.10 para builds Android estables.
+requirements = python3==3.10.11,kivy==2.3.0,sqlalchemy,certifi,urllib3,idna,requests,python-dotenv,reportlab
 
 # (str) Supported orientations
 orientation = portrait
