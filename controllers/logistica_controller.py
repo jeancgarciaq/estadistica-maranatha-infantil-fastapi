@@ -11,13 +11,9 @@ logger = logging.getLogger(__name__)
 class LogisticaController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Logistica, session=session)
-        logger.info("Inicializando LogisticaController")
-        if not session:
-            logger.error("No se ha proporcionado una sesión de base de datos.")
-            raise ValueError("Se requiere una sesión de base de datos para el controlador.")
-        logger.info("LogisticaController inicializado con éxito.")
+        logger.info("LogisticaController inicializado.")
 
-    def crear_logistica(self, datos):
+    def crear_logistica(self, datos, user_context=None):
         """
         Crea un nuevo registro de logística en la base de datos.
         :param datos: Diccionario con los datos de la logística.
@@ -27,25 +23,21 @@ class LogisticaController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha_dt:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha_dt
 
-            with db.begin():
-                logistica = Logistica(**datos)
-                db.add(logistica)
-                logger.info(f"Logística creada.")
-            return True, "Logística creada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al crear logística")
-        finally:
-            db.close()
+        def operacion(db):
+            logistica = Logistica(**datos)
+            db.add(logistica)
+            db.flush()
+            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
+            logger.info("Logística creada.")
 
-    def actualizar_logistica(self, id, datos):
+        return self.ejecutar_transaccion(operacion, "Logística creada exitosamente.", user_context=user_context)
+
+    def actualizar_logistica(self, id, datos, user_context=None):
         """
         Actualiza un registro de logística existente.
         :param id: ID de la logística a actualizar.
@@ -59,29 +51,25 @@ class LogisticaController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        db = self.get_db_session()
-        try:
-            if 'fecha' in datos and isinstance(datos['fecha'], str):
-                try:
-                    datos['fecha'] = datetime.strptime(datos['fecha'], '%Y-%m-%d').date()
-                except ValueError:
-                    return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha_dt:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha_dt
 
-            with db.begin():
-                logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
-                if logistica:
-                    for key, value in datos.items():
-                        setattr(logistica, key, value)
-                    logger.info(f"Logística actualizada: ID {id}")
-                    return True, "Logística actualizada exitosamente."
-                else:
-                    return False, "Logística no encontrada."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al actualizar logística")
-        finally:
-            db.close()
+        def operacion(db):
+            logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
+            if not logistica:
+                raise ValueError("Logística no encontrada.")
+            
+            for key, value in datos.items():
+                setattr(logistica, key, value)
+            
+            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
+            logger.info(f"Logística actualizada: ID {id}")
 
-    def eliminar_logistica(self, id):
+        return self.ejecutar_transaccion(operacion, "Logística actualizada exitosamente.", user_context=user_context)
+
+    def eliminar_logistica(self, id, user_context=None):
         """
         Elimina un registro de logística por su ID.
         :param id: ID de la logística a eliminar.
@@ -90,19 +78,16 @@ class LogisticaController(BaseController):
         if not id or not isinstance(id, int):
             return False, "El ID de la logística es obligatorio y debe ser un número entero."
 
-        db = self.get_db_session()
-        try:
-            with db.begin():
-                logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
-                if not logistica:
-                    return False, "Logística no encontrada."
-                self.marcar_eliminado(logistica, db)
-                logger.info(f"Logística eliminada: ID {id}")
-            return True, "Logística eliminada exitosamente."
-        except SQLAlchemyError as e:
-            return self.manejar_excepcion(e, "Error al eliminar logística")
-        finally:
-            db.close()
+        def operacion(db):
+            logistica = db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
+            if not logistica:
+                raise ValueError("Logística no encontrada.")
+            
+            self.marcar_eliminado(logistica, db)
+            self.registrar_evento_sync(db, 'logistica', logistica, 'delete')
+            logger.info(f"Logística eliminada: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Logística eliminada exitosamente.", user_context=user_context)
 
     def listar_logisticas(self, fecha=None):
         """
@@ -110,16 +95,12 @@ class LogisticaController(BaseController):
         """
         db = self.get_db_session()
         try:
-            query = db.query(Logistica).filter(Logistica.is_deleted.is_(False))
+            query = self.query_activa(db)
 
             if fecha:
-                if isinstance(fecha, str):
-                    try:
-                        fecha = datetime.strptime(fecha, '%Y-%m-%d').date()
-                    except ValueError:
-                        logger.warning(f"Fecha de filtro inválida recibida: {fecha}")
-                        return []
-                query = query.filter(Logistica.fecha == fecha)
+                fecha_dt = self.validar_y_convertir_fecha(fecha)
+                if fecha_dt:
+                    query = query.filter(Logistica.fecha == fecha_dt)
 
             logisticas = query.order_by(Logistica.fecha.desc(), Logistica.id.desc()).all()
             logger.info(f"{len(logisticas)} registros de logística obtenidos.")
@@ -128,7 +109,8 @@ class LogisticaController(BaseController):
             logger.error(f"Error al listar logísticas: {e}")
             return []
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def obtener_logistica(self, id):
         """
@@ -138,12 +120,13 @@ class LogisticaController(BaseController):
         """
         db = self.get_db_session()
         try:
-            return db.query(Logistica).filter(Logistica.id == id, Logistica.is_deleted.is_(False)).first()
+            return self.query_activa(db).filter(Logistica.id == id).first()
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener logística: {e}")
             return None
         finally:
-            db.close()
+            if not self.session:
+                db.close()
 
     def validar_datos(self, datos):
         """
