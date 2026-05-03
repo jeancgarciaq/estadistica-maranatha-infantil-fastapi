@@ -1,285 +1,231 @@
 import logging
 from datetime import datetime
-
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
-
-from controllers import BaseController
+from controllers.base_controller import BaseController
+from models.donaciones import Donacion
 from models.alimento_preparado import AlimentoPreparado
 from models.alimento_preparado_componente import AlimentoPreparadoComponente
-from models.distribucion import Distribucion
-from models.donaciones import Donacion
+from sqlalchemy.exc import SQLAlchemyError
 
-# Configuracion de logging
+# Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class DonacionesController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Donacion, session=session)
         logger.info("DonacionesController inicializado.")
 
-    def crear_donacion(self, datos, user_context=None):
-        """
-        Crea una nueva donacion en la base de datos.
-        :param datos: Diccionario con los datos de la donacion.
-        :return: (Exito, Mensaje)
-        """
-        errores = self.validar_datos(datos)
-        if errores:
-            return False, "\n".join(errores)
+    def crear_donacion(self, datos: dict, user_context=None):
+        # Validaciones basadas en donaciones_screen.py
+        if not datos.get('descripcion'):
+            return False, "La descripción es obligatoria."
+        if not datos.get('cantidad'):
+            return False, "La cantidad es obligatoria."
+        if not datos.get('unidad'):
+            return False, "La unidad es obligatoria."
+        if not datos.get('equipo'):
+            return False, "El equipo es obligatorio."
+        if not datos.get('fecha'):
+            return False, "La fecha es obligatoria."
 
-        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
-        if not fecha:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        datos['fecha'] = fecha
+        try:
+            float_cantidad = float(datos['cantidad'])
+            if "Unidad" in datos['unidad'] and not float_cantidad.is_integer():
+                return False, "Para la medida 'Unidad(es)', la cantidad debe ser un número entero."
+            fecha_obj = self.validar_y_convertir_fecha(datos['fecha'])
+            if not fecha_obj:
+                return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        except ValueError:
+            return False, "La cantidad debe ser un número válido."
 
         def operacion(db):
-            donacion = Donacion(**datos)
+            donacion = Donacion(
+                descripcion=datos['descripcion'],
+                cantidad=float_cantidad,
+                unidad=datos['unidad'],
+                equipo=datos['equipo'],
+                fecha=fecha_obj
+            )
             db.add(donacion)
             db.flush()
             self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
-            logger.info("Donacion creada localmente y encolada para sync.")
+            logger.info(f"Donación creada: {donacion.descripcion}")
 
-        return self.ejecutar_transaccion(operacion, "Donacion creada exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Donación creada exitosamente.", user_context=user_context)
 
-    def actualizar_donacion(self, id, datos, user_context=None):
-        """
-        Actualiza una donacion existente.
-        :param id: ID de la donacion a actualizar.
-        :param datos: Diccionario con los datos actualizados.
-        :return: (Exito, Mensaje)
-        """
-        if not id or not isinstance(id, int):
-            return False, "El ID de la donacion es obligatorio y debe ser un numero entero."
+    def actualizar_donacion(self, id: int, datos: dict, user_context=None):
+        if not id:
+            return False, "El ID de la donación es obligatorio."
+        if not datos.get('descripcion'):
+            return False, "La descripción es obligatoria."
+        if not datos.get('cantidad'):
+            return False, "La cantidad es obligatoria."
+        if not datos.get('unidad'):
+            return False, "La unidad es obligatoria."
+        if not datos.get('equipo'):
+            return False, "El equipo es obligatorio."
+        if not datos.get('fecha'):
+            return False, "La fecha es obligatoria."
 
-        errores = self.validar_datos(datos)
-        if errores:
-            return False, "\n".join(errores)
-
-        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
-        if not fecha:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        datos['fecha'] = fecha
+        try:
+            float_cantidad = float(datos['cantidad'])
+            if "Unidad" in datos['unidad'] and not float_cantidad.is_integer():
+                return False, "Para la medida 'Unidad(es)', la cantidad debe ser un número entero."
+            fecha_obj = self.validar_y_convertir_fecha(datos['fecha'])
+            if not fecha_obj:
+                return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        except ValueError:
+            return False, "La cantidad debe ser un número válido."
 
         def operacion(db):
-            donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
+            donacion = self.query_activa(db).filter(Donacion.id == id).first()
             if not donacion:
-                raise ValueError("Donacion no encontrada.")
-
-            for key, value in datos.items():
-                setattr(donacion, key, value)
-
+                raise ValueError("Donación no encontrada.")
+            
+            donacion.descripcion = datos['descripcion']
+            donacion.cantidad = float_cantidad
+            donacion.unidad = datos['unidad']
+            donacion.equipo = datos['equipo']
+            donacion.fecha = fecha_obj
             self.registrar_evento_sync(db, 'donaciones', donacion, 'upsert')
-            logger.info("Donacion actualizada: ID %s", id)
+            logger.info(f"Donación actualizada: ID {id}")
 
-        return self.ejecutar_transaccion(operacion, "Donacion actualizada exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Donación actualizada exitosamente.", user_context=user_context)
 
-    def eliminar_donacion(self, id, user_context=None):
-        """
-        Elimina una donacion por su ID (soft delete).
-        :param id: ID de la donacion a eliminar.
-        :return: (Exito, Mensaje)
-        """
-        if not id or not isinstance(id, int):
-            return False, "El ID de la donacion es obligatorio y debe ser un numero entero."
+    def eliminar_donacion(self, id: int, user_context=None):
+        if not id:
+            return False, "El ID de la donación es obligatorio."
 
         def operacion(db):
-            donacion = db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
+            donacion = self.query_activa(db).filter(Donacion.id == id).first()
             if not donacion:
-                raise ValueError("Donacion no encontrada.")
-
-            uso_en_preparados = db.query(AlimentoPreparadoComponente).filter(
-                AlimentoPreparadoComponente.donacion_materia_id == id,
-                AlimentoPreparadoComponente.is_deleted.is_(False),
-            ).count()
+                raise ValueError("Donación no encontrada.")
             
-            if uso_en_preparados > 0:
-                raise ValueError("No se puede eliminar la donacion porque esta asociada a alimentos preparados.")
-
-            distribuciones_vinculadas = db.query(Distribucion).filter(
-                Distribucion.donacion_id == id,
-                Distribucion.is_deleted.is_(False),
-            ).all()
-            
-            for distribucion in distribuciones_vinculadas:
-                self.marcar_eliminado(distribucion, db)
-                self.registrar_evento_sync(db, 'distribuciones', distribucion, 'delete')
-
             self.marcar_eliminado(donacion, db)
             self.registrar_evento_sync(db, 'donaciones', donacion, 'delete')
-            logger.info("Donacion eliminada: ID %s", id)
+            logger.info(f"Donación eliminada: ID {id}")
 
-        return self.ejecutar_transaccion(operacion, "Donacion eliminada exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Donación eliminada exitosamente.", user_context=user_context)
 
-    def combinar_donaciones(self, datos_resultado, lista_componentes, user_context=None):
-        """
-        Registra un alimento preparado y su composicion, sin descontar inventario de donaciones.
-        :param datos_resultado: Diccionario con datos del preparado.
-        :param lista_componentes: Lista de diccionarios [{'id': id_materia, 'cantidad': cantidad_usada}, ...]
-        :return: (Exito, Mensaje)
-        """
-        if not lista_componentes:
-            return False, "Debe seleccionar al menos una materia prima."
-
-        def operacion(db):
-            for item in lista_componentes:
-                materia = db.query(Donacion).filter(Donacion.id == item['id'], Donacion.is_deleted.is_(False)).first()
-                if not materia:
-                    raise ValueError(f"ID de materia prima {item['id']} no encontrado.")
-
-            fecha = self.validar_y_convertir_fecha(datos_resultado.get('fecha'))
-            if not fecha:
-                raise ValueError("Formato de fecha incorrecto. Debe ser YYYY-MM-DD.")
-            datos_resultado['fecha'] = fecha
-
-            preparado = AlimentoPreparado(**datos_resultado)
-            db.add(preparado)
-            db.flush()
-
-            for item in lista_componentes:
-                componente = AlimentoPreparadoComponente(
-                    alimento_preparado_id=preparado.id,
-                    donacion_materia_id=item['id'],
-                    cantidad_usada=item['cantidad'],
-                )
-                db.add(componente)
-            
-            self.registrar_evento_sync(db, 'alimentos_preparados', preparado, 'upsert')
-            logger.info("Alimento preparado ID %s registrado exitosamente.", preparado.id)
-
-        return self.ejecutar_transaccion(operacion, "Preparado registrado exitosamente.", user_context=user_context)
-
-    def listar_preparados(self, fecha=None):
-        """Lista los alimentos preparados con sus componentes, opcionalmente filtrados por fecha."""
+    def listar_donaciones(self, fecha: str = None):
         db = self.get_db_session()
         try:
-            query = db.query(AlimentoPreparado).options(
-                joinedload(AlimentoPreparado.componentes).joinedload(AlimentoPreparadoComponente.materia_prima)
-            ).filter(AlimentoPreparado.is_deleted.is_(False))
-
+            query = self.query_activa(db)
             if fecha:
-                fecha_dt = self.validar_y_convertir_fecha(fecha)
-                if fecha_dt:
-                    query = query.filter(AlimentoPreparado.fecha == fecha_dt)
-
-            preparados = query.order_by(AlimentoPreparado.fecha.desc(), AlimentoPreparado.id.desc()).all()
-            logger.info("%s preparados obtenidos.", len(preparados))
-            return preparados
-        except SQLAlchemyError as e:
-            logger.error("Error al listar preparados: %s", e)
-            return []
-        finally:
-            if not self.session:
-                db.close()
-
-    def eliminar_preparado(self, preparado_id, user_context=None):
-        """Elimina un alimento preparado y sus componentes (soft delete)."""
-        if not preparado_id or not isinstance(preparado_id, int):
-            return False, "El ID del preparado es obligatorio y debe ser un numero entero."
-
-        def operacion(db):
-            preparado = db.query(AlimentoPreparado).filter(
-                AlimentoPreparado.id == preparado_id,
-                AlimentoPreparado.is_deleted.is_(False),
-            ).first()
-            if not preparado:
-                raise ValueError("Preparado no encontrado.")
-            self.marcar_eliminado(preparado, db)
-            self.registrar_evento_sync(db, 'alimentos_preparados', preparado, 'delete')
-
-        return self.ejecutar_transaccion(operacion, "Preparado eliminado exitosamente.", user_context=user_context)
-
-    def listar_donaciones(self, fecha=None):
-        """
-        Obtiene la lista de donaciones desde la base de datos.
-        :param fecha: Fecha en formato YYYY-MM-DD o date para filtrar resultados (opcional).
-        :return: Lista de objetos Donacion.
-        """
-        db = self.get_db_session()
-        try:
-            query = db.query(Donacion).filter(Donacion.is_deleted.is_(False))
-            if fecha:
-                fecha_dt = self.validar_y_convertir_fecha(fecha)
-                if fecha_dt:
-                    query = query.filter(Donacion.fecha == fecha_dt)
-
-            donaciones = query.order_by(Donacion.id.desc()).all()
-            logger.info("%s donaciones obtenidas de la base de datos.", len(donaciones))
+                fecha_obj = self.validar_y_convertir_fecha(fecha)
+                if fecha_obj:
+                    query = query.filter(Donacion.fecha == fecha_obj)
+            donaciones = query.order_by(Donacion.fecha.desc(), Donacion.id.desc()).all()
+            logger.info(f"{len(donaciones)} donaciones obtenidas de la base de datos.")
             return donaciones
         except SQLAlchemyError as e:
-            logger.error("Error al listar donaciones: %s", e)
+            logger.error(f"Error al listar donaciones: {e}")
             return []
         finally:
             if not self.session:
                 db.close()
 
-    def obtener_donacion(self, id):
+    def combinar_donaciones(self, datos_resultado: dict, lista_componentes: list, user_context=None):
         """
-        Obtiene una donacion por su ID.
-        :param id: ID de la donacion.
-        :return: Objeto Donacion o None.
+        Crea un AlimentoPreparado a partir de varias Donaciones (materias primas).
+        :param datos_resultado: Datos del alimento producido.
+        :param lista_componentes: Lista de {'id': donacion_id, 'cantidad': cant_usada}
         """
+        if not datos_resultado.get('descripcion') or not datos_resultado.get('cantidad'):
+            return False, "Los datos del alimento preparado son incompletos."
+        if not lista_componentes:
+            return False, "Debe incluir al menos una materia prima."
+
+        fecha_obj = self.validar_y_convertir_fecha(datos_resultado.get('fecha'))
+        if not fecha_obj:
+            return False, "Fecha inválida."
+
+        def operacion(db):
+            # 1. Crear el Alimento Preparado
+            preparado = AlimentoPreparado(
+                descripcion=datos_resultado['descripcion'],
+                cantidad=float(datos_resultado['cantidad']),
+                unidad=datos_resultado['unidad'],
+                equipo=datos_resultado['equipo'],
+                fecha=fecha_obj
+            )
+            db.add(preparado)
+            db.flush() # Para obtener el ID
+
+            # 2. Registrar los componentes (materias primas usadas)
+            for comp in lista_componentes:
+                # Verificar que la donación exista
+                materia = db.query(Donacion).filter(Donacion.id == comp['id']).first()
+                if not materia:
+                    raise ValueError(f"Materia prima con ID {comp['id']} no encontrada.")
+                
+                componente = AlimentoPreparadoComponente(
+                    alimento_preparado_id=preparado.id,
+                    donacion_materia_id=materia.id,
+                    cantidad_usada=float(comp['cantidad'])
+                )
+                db.add(componente)
+                # Nota: Siguiendo la lógica de tu Kivy, no descontamos del stock original.
+            
+            db.flush()
+            self.registrar_evento_sync(db, 'alimentos_preparados', preparado, 'upsert')
+            logger.info(f"Alimento preparado registrado: {preparado.descripcion}")
+
+        return self.ejecutar_transaccion(operacion, "Alimento preparado registrado exitosamente.", user_context=user_context)
+
+    def listar_preparados(self, fecha: str = None):
         db = self.get_db_session()
         try:
-            return db.query(Donacion).filter(Donacion.id == id, Donacion.is_deleted.is_(False)).first()
+            query = db.query(AlimentoPreparado).filter(AlimentoPreparado.is_deleted.is_(False))
+            if fecha:
+                fecha_obj = self.validar_y_convertir_fecha(fecha)
+                if fecha_obj:
+                    query = query.filter(AlimentoPreparado.fecha == fecha_obj)
+            return query.order_by(AlimentoPreparado.fecha.desc()).all()
+        finally:
+            if not self.session:
+                db.close()
+
+    def eliminar_preparado(self, id: int, user_context=None):
+        def operacion(db):
+            preparado = db.query(AlimentoPreparado).filter(AlimentoPreparado.id == id).first()
+            if not preparado:
+                raise ValueError("Registro no encontrado.")
+            self.marcar_eliminado(preparado, db)
+            self.registrar_evento_sync(db, 'alimentos_preparados', preparado, 'delete')
+        return self.ejecutar_transaccion(operacion, "Registro eliminado.", user_context=user_context)
+
+    def obtener_donacion(self, id: int):
+        db = self.get_db_session()
+        try:
+            return self.query_activa(db).filter(Donacion.id == id).first()
         except SQLAlchemyError as e:
-            logger.error("Error al obtener donacion: %s", e)
+            logger.error(f"Error al obtener donación: {e}")
             return None
         finally:
             if not self.session:
                 db.close()
 
     def buscar_donacion(self, id=None, descripcion=None):
-        """
-        Busca una donacion por ID o descripcion.
-        :param id: ID de la donacion a buscar.
-        :param descripcion: Descripcion de la donacion a buscar.
-        :return: (Exito, Objeto, Mensaje)
-        """
         if not id and not descripcion:
-            return False, None, "Debe proporcionar un ID o una descripcion para buscar la donacion."
-        if id and not isinstance(id, int):
-            return False, None, "El ID debe ser un numero entero."
+            return False, None, "Debe proporcionar un ID o una descripción para buscar la donación."
+        
+        db = self.get_db_session()
+        try:
+            query = self.query_activa(db)
+            donacion = None
+            if id:
+                donacion = query.filter(Donacion.id == id).first()
+            elif descripcion:
+                donacion = query.filter(Donacion.descripcion.ilike(f"%{descripcion}%")).first()
 
-        donacion = self.buscar_por_id_o_nombre(id=id, nombre=descripcion, nombre_campo="descripcion")
-        if donacion:
-            return True, donacion, "Donacion encontrada exitosamente."
-        if id:
-            return False, None, f"No existe una donacion con ID {id}."
-        return False, None, "No existe una donacion con esa descripcion."
-
-    def validar_datos(self, datos):
-        """
-        Valida los datos proporcionados para crear o actualizar una donacion.
-        :param datos: Diccionario con los datos de la donacion.
-        :return: Lista de errores encontrados.
-        """
-        errores = []
-        cantidad = datos.get("cantidad")
-        if cantidad is None or not isinstance(cantidad, (int, float)):
-            errores.append("El campo 'cantidad' debe ser un numero.")
-        if not isinstance(datos.get("descripcion"), str):
-            errores.append("El campo 'descripcion' debe ser una cadena de texto.")
-        if not isinstance(datos.get("unidad"), str):
-            errores.append("El campo 'unidad' debe ser una cadena de texto.")
-        if not isinstance(datos.get("fecha"), str):
-            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
-        else:
-            try:
-                datetime.strptime(datos["fecha"], '%Y-%m-%d')
-            except ValueError:
-                errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
-        if not isinstance(datos.get("equipo"), str):
-            errores.append("El campo 'equipo' debe ser una cadena de texto.")
-
-        unidad = datos.get("unidad", "")
-        if "Unidad" in unidad and cantidad is not None:
-            try:
-                if not float(cantidad).is_integer():
-                    errores.append("Para la medida 'Unidad(es)', la cantidad debe ser un numero entero.")
-            except (ValueError, TypeError):
-                pass
-
-        return errores
+            if donacion:
+                return True, donacion, "Donación encontrada exitosamente."
+            else:
+                return False, None, "No se encontró la donación solicitada."
+        except SQLAlchemyError as e:
+            logger.error(f"Error al buscar donación: {e}")
+            return False, None, f"Error al buscar donación: {e}"
+        finally:
+            if not self.session:
+                db.close()
