@@ -41,6 +41,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "pyformat"},
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
@@ -62,7 +63,8 @@ def run_migrations_online() -> None:
             connection=connection, 
             target_metadata=target_metadata,
             # Esto permite detectar cambios en tipos de columnas y campos nuevos
-            compare_type=True 
+            compare_type=True,
+            render_as_batch=True,
         )
 
         with context.begin_transaction():
