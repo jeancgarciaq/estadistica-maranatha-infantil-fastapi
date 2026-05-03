@@ -19,7 +19,7 @@ def configure_database():
     Crea las tablas si no existen. 
     Nota: En producción es mejor usar Alembic, pero esto asegura que la app corra.
     """
-    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion
+    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente
     Base.metadata.create_all(bind=engine)
 
 def get_db():
