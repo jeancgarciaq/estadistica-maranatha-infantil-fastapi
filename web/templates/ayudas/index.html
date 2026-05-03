@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Ayuda - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Ayuda de Maranatha Infantil</h2>
+            <p class="text-slate-400 text-sm">Guía rápida para entender cada parte de la aplicación y entrar al módulo
+                que necesitas.</p>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Sección: Inicio rápido -->
+        <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
+            <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">Inicio rápido</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                1. Entra al menú principal.<br>
+                2. Abre el módulo que corresponda a tu trabajo.<br>
+                3. Registra la información y vuelve al menú cuando termines.<br>
+                4. Si no ves una pantalla, puede depender de tus permisos.
+            </p>
+        </div>
+
+        <!-- Sección: Qué hace cada sección -->
+        <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
+            <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">Qué hace cada sección</h3>
+            <p class="text-sm text-slate-300 leading-relaxed mb-4">
+                Áreas, salones y aulas organizan la estructura del servicio. Donaciones y preparaciones registran la
+                merienda recibida y preparada. Distribuciones, logística, recepción y otras áreas ayudan a controlar la
+                entrega y el movimiento interno. Estadística y reporte concentran los totales para revisión y salida de
+                información. Usuarios administra permisos y accesos.
+            </p>
+
+            <div class="grid grid-cols-2 gap-3">
+                <a href="/areas" class="btn-help-nav">Áreas</a>
+                <a href="/salones" class="btn-help-nav">Salones</a>
+                <a href="/aulas" class="btn-help-nav">Aulas</a>
+                <a href="/donaciones" class="btn-help-nav">Donaciones</a>
+                <a href="/preparados" class="btn-help-nav">Preparados</a>
+                <a href="/distribuciones" class="btn-help-nav">Distribuciones</a>
+                <a href="/logistica" class="btn-help-nav">Logística</a>
+                <a href="/otrasareas" class="btn-help-nav">Otras áreas</a>
+                <a href="/ensenanza" class="btn-help-nav">Enseñanza</a>
+                <a href="/recepciones" class="btn-help-nav">Recepción</a>
+                <a href="/reportes" class="btn-help-nav">Estadística y Reporte</a>
+                <!-- Asumiendo que la ruta /usuarios se creará más adelante -->
+                <a href="/usuarios" class="btn-help-nav">Usuarios</a>
+            </div>
+        </div>
+
+        <!-- Sección: Tutoriales en YouTube -->
+        <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
+            <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">Tutoriales en YouTube</h3>
+            <p class="text-sm text-slate-300 leading-relaxed mb-4">
+                En una próxima etapa esta pantalla incluirá tutoriales en video para cada módulo. La idea es que esta
+                ayuda quede como una guía escrita rápida, y que los videos expliquen el uso paso a paso con ejemplos
+                reales.
+            </p>
+            <button type="button" onclick="mostrarAvisoTutoriales()"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 uppercase text-sm">
+                Ver aviso de tutoriales
+            </button>
+        </div>
+
+        <!-- Botón Volver al menú -->
+        <div class="pt-4">
+            <a href="/dashboard"
+                class="w-full block text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 uppercase text-sm">
+                Volver al menú
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-help-nav {
+        @apply bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95 uppercase text-xs text-center;
+    }
+</style>
+
+<script>
+    function mostrarAvisoTutoriales() {
+        alert(
+            'Tutoriales en camino\n\n' +
+            'Más adelante se agregarán tutoriales en YouTube para cada módulo de la aplicación.\n\n' +
+            'Por ahora esta ayuda sirve como guía rápida dentro del sistema.'
+        );
+    }
+</script>
+{% endblock %}
