@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Lista Otras Áreas - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Lista Otras Áreas</h2>
+            <p class="text-slate-400 text-sm">Servidores por fecha</p>
+        </div>
+        <a href="/otrasareas" class="text-rose-400 hover:text-rose-300 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Gestión</span>
+        </a>
+    </div>
+
+    <!-- Filtro de Fecha -->
+    <form action="/otrasareas/lista" method="get" class="mb-6 flex gap-2">
+        <input type="date" name="fecha" value="{{ fecha_filtro or '' }}"
+            class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-rose-500 text-sm">
+        <button type="submit" class="bg-rose-600 px-4 rounded-xl text-white">
+            <i class="la la-search"></i>
+        </button>
+        <a href="/otrasareas/lista" class="bg-slate-700 px-4 rounded-xl text-white flex items-center">
+            <i class="la la-sync"></i>
+        </a>
+    </form>
+
+    <div class="space-y-4">
+        {% for reg in registros %}
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400 font-bold border border-rose-500/20 text-sm">
+                        #{{ reg.id }}
+                    </div>
+                    <p class="font-bold text-slate-100">{{ reg.fecha.strftime('%d/%m/%Y') }}</p>
+                </div>
+                <span class="text-[10px] text-slate-500 uppercase">Global ID: {{ reg.sync_id[:8] }}...</span>
+            </div>
+
+            <div class="text-[11px] text-slate-400 grid grid-cols-2 gap-y-2 border-t border-slate-700 pt-3 mb-4">
+                <p><span class="font-bold text-slate-300">Alabanza:</span> {{ reg.alabanza }}</p>
+                <p><span class="font-bold text-slate-300">Protocolo:</span> {{ reg.protocolo }}</p>
+                <p><span class="font-bold text-slate-300">Semillitas:</span> {{ reg.semillitas }}</p>
+                <p><span class="font-bold text-slate-300">Sonido:</span> {{ reg.sonido }}</p>
+                <p><span class="font-bold text-slate-300">Teatro:</span> {{ reg.teatro }}</p>
+                <p><span class="font-bold text-slate-300">TV:</span> {{ reg.tv }}</p>
+                <p><span class="font-bold text-slate-300">Ujier:</span> {{ reg.ujier }}</p>
+                <p><span class="font-bold text-slate-300">Seguridad:</span> {{ reg.seguridad }}</p>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
+                <a href="/otrasareas?edit_id={{ reg.id }}&alabanza={{ reg.alabanza }}&protocolo={{ reg.protocolo }}&semillitas={{ reg.semillitas }}&sonido={{ reg.sonido }}&teatro={{ reg.teatro }}&tv={{ reg.tv }}&ujier={{ reg.ujier }}&seguridad={{ reg.seguridad }}&fecha={{ reg.fecha }}"
+                    class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-xs flex items-center gap-2">
+                    <i class="la la-edit"></i> Editar
+                </a>
+                <form action="/otrasareas/eliminar" method="post" onsubmit="return confirm('¿Confirmar eliminación?');">
+                    <input type="hidden" name="id" value="{{ reg.id }}">
+                    <button type="submit"
+                        class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-colors text-xs flex items-center gap-2">
+                        <i class="la la-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <i class="la la-shapes text-6xl text-slate-700 mb-4"></i>
+            <p class="text-slate-500 font-medium">No hay registros para esta fecha.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
