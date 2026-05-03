@@ -1,101 +1,151 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Estadística Maranatha Infantil</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            background-color: #142850;
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-        .card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            color: #333;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .card i {
-            font-size: 3rem;
-            color: #142850;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        .card span {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        .logout-btn {
-            color: white;
-            text-decoration: none;
-            background-color: #ff6b6b;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            font-size: 0.9rem;
-        }
-    </style>
-    <!-- LineAwesome for icons if available, otherwise fallback -->
-    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
-</head>
-<body>
-    <header>
-        <h2>Panel de Control</h2>
-        <a href="/logout" class="logout-btn">Cerrar Sesión</a>
-    </header>
-    
-    <div class="container">
-        <a href="/areas" class="card">
-            <i class="la la-map-marker"></i>
-            <span>Áreas</span>
-        </a>
-        <a href="/donaciones" class="card">
-            <i class="la la-hand-holding-heart"></i>
-            <span>Donaciones</span>
-        </a>
-        <a href="/distribuciones" class="card">
-            <i class="la la-exchange-alt"></i>
-            <span>Distribución</span>
-        </a>
-        <a href="/estadistica" class="card">
-            <i class="la la-chart-bar"></i>
-            <span>Estadística</span>
-        </a>
-        <a href="/ensenanza" class="card">
-            <i class="la la-book-open"></i>
-            <span>Enseñanza</span>
-        </a>
-        <a href="/logistica" class="card">
-            <i class="la la-truck"></i>
-            <span>Logística</span>
-        </a>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EMI{% endblock %}
+
+{% block content %}
+<!-- Extraemos los códigos de permiso del usuario para facilitar la comprobación -->
+{% set user_perms = user.rol.permisos | map(attribute='codigo') | list %}
+{% set is_root = user.rol.nombre == 'root' %}
+
+<div class="mb-6">
+    <h2 class="text-xl font-bold text-white">Panel de Gestión</h2>
+    <p class="text-slate-400 text-sm">Bienvenido, {{ user.username }}</p>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+
+    <!-- 1. Áreas -->
+    {% if is_root or 'areas.view' in user_perms %}
+    <a href="/areas"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-map-marker text-2xl text-blue-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Áreas</span>
+    </a>
+    {% endif %}
+
+    <!-- 2. Salones -->
+    {% if is_root or 'salones.view' in user_perms %}
+    <a href="/salones"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-sky-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-door-open text-2xl text-sky-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Salones</span>
+    </a>
+    {% endif %}
+
+    <!-- 3. Aulas -->
+    {% if is_root or 'aulas.view' in user_perms %}
+    <a href="/aulas"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-users text-2xl text-orange-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Aulas</span>
+    </a>
+    {% endif %}
+
+    <!-- 4. Donaciones -->
+    {% if is_root or 'donaciones.view' in user_perms %}
+    <a href="/donaciones"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-hand-holding-heart text-2xl text-emerald-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Donaciones</span>
+    </a>
+    {% endif %}
+
+    <!-- 5. Alimentos Preparados -->
+    {% if is_root or 'preparados.view' in user_perms %}
+    <a href="/preparados"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-utensils text-2xl text-amber-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Alimentos
+            Preparados</span>
+    </a>
+    {% endif %}
+
+    <!-- 6. Distribución -->
+    {% if is_root or 'distribuciones.view' in user_perms %}
+    <a href="/distribuciones"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-exchange-alt text-2xl text-purple-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Distribución</span>
+    </a>
+    {% endif %}
+
+    <!-- 7. Recepción -->
+    {% if is_root or 'recepcion.view' in user_perms %}
+    <a href="/recepciones"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-teal-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-concierge-bell text-2xl text-teal-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Recepción</span>
+    </a>
+    {% endif %}
+
+    <!-- 8. Enseñanza -->
+    {% if is_root or 'ensenanza.view' in user_perms %}
+    <a href="/ensenanza"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-lime-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-book-open text-2xl text-lime-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Enseñanza</span>
+    </a>
+    {% endif %}
+
+    <!-- 9. Logística -->
+    {% if is_root or 'logistica.view' in user_perms %}
+    <a href="/logistica"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-truck text-2xl text-yellow-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Logística</span>
+    </a>
+    {% endif %}
+
+    <!-- 10. Otras Áreas -->
+    {% if is_root or 'otras_areas.view' in user_perms %}
+    <a href="/otras_areas"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-rose-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-shapes text-2xl text-rose-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Otras Áreas</span>
+    </a>
+    {% endif %}
+
+    <!-- 11. Reporte Estadístico -->
+    {% if is_root or 'reporte.view' in user_perms %}
+    <a href="/reportes"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-file-pdf text-2xl text-indigo-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Reporte Estadístico</span>
+    </a>
+    {% endif %}
+
+    <!-- 12. Ayuda -->
+    {% if is_root or 'ayuda.view' in user_perms %}
+    <a href="/ayuda"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-slate-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-question-circle text-2xl text-slate-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Ayuda</span>
+    </a>
+    {% endif %}
+
+</div>
+{% endblock %}
