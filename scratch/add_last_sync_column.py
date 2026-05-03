@@ -14,9 +14,9 @@ def migrate():
     # Listado de tablas que utilizan AuditMixin y requieren el campo last_sync para sincronización
     # Se incluyen variaciones de nombres comunes según los modelos definidos
     tables = [
-        "areas", "salones", "aulas", "donaciones", "distribuciones", 
-        "logistica", "ensenanza", "otras_areas", "otrasareas", "recepciones",
-        "usuarios", "roles", "permisos", "alimentos_preparados"
+        "areas", "salones", "aulas", "donaciones", "distribuciones",
+        "logisticas", "ensenanzas", "otrasareas", "recepciones",
+        "usuarios", "roles", "permissions", "alimentos_preparados", "alimentos_preparados_componentes"
     ]
 
     try:
