@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Salones - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Lista de Salones</h2>
+            <p class="text-slate-400 text-sm">{{ salones|length }} salones registrados</p>
+        </div>
+        <a href="/salones" class="text-sky-400 hover:text-sky-300 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Gestión</span>
+        </a>
+    </div>
+
+    <div class="space-y-4">
+        {% for salon in salones %}
+        <div
+            class="bg-slate-800 p-5 rounded-2xl border border-slate-700 flex justify-between items-center group active:bg-slate-700 transition-colors shadow-lg">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center text-sky-400 font-bold border border-sky-500/20">
+                    {{ salon.id }}
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100 text-lg">{{ salon.salon }}</h3>
+                    <p class="text-sm text-sky-400/80 font-medium">Edad: {{ salon.edad }}</p>
+                    <p class="text-[10px] text-slate-500 uppercase mt-1">Global ID: {{ salon.sync_id[:8] }}...</p>
+                </div>
+            </div>
+            <i class="la la-angle-right text-slate-600 group-active:text-sky-400 transition-colors text-xl"></i>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <i class="la la-door-closed text-6xl text-slate-700 mb-4"></i>
+            <p class="text-slate-500 font-medium">No se han registrado salones.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
