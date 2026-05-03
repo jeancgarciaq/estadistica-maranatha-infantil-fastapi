@@ -35,6 +35,21 @@ class FirebaseAuthService:
         self.email_domain = (email_domain or os.getenv('FIREBASE_AUTH_EMAIL_DOMAIN', '')).strip().lower()
         self.timeout = timeout
 
+    def reconstruct_session(self, id_token, local_id=None, email=None):
+        """
+        Reconstruye un objeto de sesión a partir de datos persistidos (ej. cookies).
+        Útil para el middleware de FastAPI.
+        """
+        if not id_token:
+            return None
+        return FirebaseAuthSession(
+            local_id=local_id or "",
+            email=email or "",
+            id_token=id_token,
+            refresh_token="",  # No disponible en reconstrucción simple
+            expires_at=time.time() + 3600
+        )
+
     def is_configured(self):
         return bool(self.api_key and self.database_url)
 
