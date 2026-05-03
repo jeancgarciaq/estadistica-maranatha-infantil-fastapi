@@ -1,8 +1,7 @@
-import logging
-from models.ensenanza import Ensenanza
 from controllers.base_controller import BaseController
+from models.ensenanza import Ensenanza
+import logging
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -14,96 +13,67 @@ class EnsenanzaController(BaseController):
         logger.info("EnsenanzaController inicializado.")
 
     def crear_ensenanza(self, capitan, fecha, subcapitan, user_context=None):
-        """
-        Crea un registro de enseñanza.
-        :return: (Exito, Mensaje)
-        """
-        if not capitan or not fecha or not subcapitan:
+        if not capitan or not fecha or subcapitan is None:
             return False, "Todos los campos son obligatorios."
 
-        fecha_dt = self.validar_y_convertir_fecha(fecha)
-        if not fecha_dt:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha_obj = self.validar_y_convertir_fecha(fecha)
+        if not fecha_obj:
+            return False, "Formato de fecha incorrecto."
 
         def operacion(db):
-            ensenanza = Ensenanza(capitan=capitan, subcapitan=subcapitan, fecha=fecha_dt)
-            db.add(ensenanza)
+            reg = Ensenanza(capitan=capitan, fecha=fecha_obj, subcapitan=int(subcapitan))
+            db.add(reg)
             db.flush()
-            self.registrar_evento_sync(db, 'ensenanza', ensenanza, 'upsert')
-            logger.info("Enseñanza creada.")
+            self.registrar_evento_sync(db, 'ensenanza', reg, 'upsert')
+            logger.info(f"Registro de enseñanza creado: {capitan}")
 
-        return self.ejecutar_transaccion(operacion, "Enseñanza creada exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Enseñanza registrada exitosamente.", user_context=user_context)
 
     def actualizar_ensenanza(self, id, capitan, subcapitan, fecha, user_context=None):
-        """
-        Actualiza un registro de enseñanza.
-        :return: (Exito, Mensaje)
-        """
-        if not capitan or not fecha or not subcapitan:
+        if not id or not capitan or not fecha or subcapitan is None:
             return False, "Todos los campos son obligatorios."
 
-        fecha_dt = self.validar_y_convertir_fecha(fecha)
-        if not fecha_dt:
-            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        fecha_obj = self.validar_y_convertir_fecha(fecha)
+        if not fecha_obj:
+            return False, "Formato de fecha incorrecto."
 
         def operacion(db):
-            ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id, Ensenanza.is_deleted.is_(False)).first()
-            if not ensenanza:
-                raise ValueError("Enseñanza no encontrada.")
+            reg = self.query_activa(db).filter(Ensenanza.id == id).first()
+            if not reg:
+                raise ValueError("Registro de enseñanza no encontrado.")
             
-            ensenanza.capitan = capitan
-            ensenanza.subcapitan = subcapitan
-            ensenanza.fecha = fecha_dt
-            
-            self.registrar_evento_sync(db, 'ensenanza', ensenanza, 'upsert')
+            reg.capitan = capitan
+            reg.subcapitan = int(subcapitan)
+            reg.fecha = fecha_obj
+            self.registrar_evento_sync(db, 'ensenanza', reg, 'upsert')
             logger.info(f"Enseñanza actualizada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Enseñanza actualizada exitosamente.", user_context=user_context)
-
+                
     def eliminar_ensenanza(self, id, user_context=None):
-        """
-        Elimina un registro de enseñanza.
-        :return: (Exito, Mensaje)
-        """
+        if not id:
+            return False, "El ID es obligatorio."
+
         def operacion(db):
-            ensenanza = db.query(Ensenanza).filter(Ensenanza.id == id, Ensenanza.is_deleted.is_(False)).first()
-            if not ensenanza:
-                raise ValueError("Enseñanza no encontrada.")
+            reg = self.query_activa(db).filter(Ensenanza.id == id).first()
+            if not reg:
+                raise ValueError("Registro no encontrado.")
             
-            self.marcar_eliminado(ensenanza, db)
-            self.registrar_evento_sync(db, 'ensenanza', ensenanza, 'delete')
+            self.marcar_eliminado(reg, db)
+            self.registrar_evento_sync(db, 'ensenanza', reg, 'delete')
             logger.info(f"Enseñanza eliminada: ID {id}")
 
-        return self.ejecutar_transaccion(operacion, "Enseñanza eliminada exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Registro eliminado exitosamente.", user_context=user_context)
 
-    def listar_ensenanzas(self, fecha=None):
-        """
-        Lista todos los registros de enseñanza.
-        :return: Lista de objetos Ensenanza.
-        """
+    def listar_ensenanzas(self):
         db = self.get_db_session()
         try:
-            query = self.query_activa(db)
-            if fecha:
-                fecha_dt = self.validar_y_convertir_fecha(fecha)
-                if fecha_dt:
-                    query = query.filter(Ensenanza.fecha == fecha_dt)
-            
-            ensenanzas = query.order_by(Ensenanza.fecha.desc()).all()
-            logger.info("Enseñanzas listadas.")
-            return ensenanzas
-        except SQLAlchemyError as e:
-            logger.error(f"Error al listar enseñanzas: {e}")
-            return []
+            return self.query_activa(db).order_by(Ensenanza.fecha.desc(), Ensenanza.id.desc()).all()
         finally:
             if not self.session:
                 db.close()
 
     def obtener_ensenanza(self, id):
-        """
-        Obtiene un registro de enseñanza por ID.
-        :return: Objeto Ensenanza o None.
-        """
         db = self.get_db_session()
         try:
             return self.query_activa(db).filter(Ensenanza.id == id).first()
