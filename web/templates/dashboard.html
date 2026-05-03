@@ -137,7 +137,7 @@
     {% endif %}
 
     <!-- 12. Ayuda -->
-    {% if is_root or 'ayuda.view' in user_perms %}
+    {% if is_root or 'ayuda.view' in user_perms %} {# Enlace a la vista de ayuda #}
     <a href="/ayuda"
         class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
         <div class="w-12 h-12 bg-slate-500/20 rounded-full flex items-center justify-center">
