@@ -6,7 +6,7 @@ import sys
 # Permite ejecutar el script desde /scratch sin errores de import.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from models.database import SessionLocal
+from models.database import SessionLocal, configure_database
 from utils.env_loader import load_app_env
 from utils.firebase_sync import MODEL_REGISTRY, SYNC_COLLECTION_ORDER, SyncManager
 from utils.firebase_auth import FirebaseAuthService
@@ -78,6 +78,10 @@ def _resolve_auth_token(requested_collections):
 def main():
     args = parse_args()
     load_app_env()
+
+    # Inicializar la base de datos y cargar todos los modelos para que 
+    # SQLAlchemy configure correctamente los mappers y relaciones.
+    configure_database()
 
     invalid = [name for name in args.collections if name not in MODEL_REGISTRY]
     if invalid:
