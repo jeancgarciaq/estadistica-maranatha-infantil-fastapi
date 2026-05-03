@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Recepciones - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Lista de Recepciones</h2>
+            <p class="text-slate-400 text-sm">{{ recepciones|length }} registros encontrados</p>
+        </div>
+        <a href="/recepciones" class="text-teal-400 hover:text-teal-300 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Gestión</span>
+        </a>
+    </div>
+
+    <div class="space-y-4">
+        {% for r in recepciones %}
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 bg-teal-500/10 rounded-xl flex items-center justify-center text-teal-400 font-bold border border-teal-500/20">
+                        {{ r.id }}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-100 text-lg">{{ r.nombre }}</h3>
+                        <p class="text-xs text-teal-400 font-medium">{{ r.fecha.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-500 uppercase block">Global ID: {{ r.sync_id[:8] }}...</span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
+                <a href="/recepciones?edit_id={{ r.id }}"
+                    class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-sm flex items-center gap-2">
+                    <i class="la la-edit"></i> Editar
+                </a>
+                <form action="/recepciones/eliminar" method="post"
+                    onsubmit="return confirm('¿Confirmar eliminación de {{ r.nombre }}?');">
+                    <input type="hidden" name="id" value="{{ r.id }}">
+                    <button type="submit"
+                        class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <i class="la la-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <i class="la la-concierge-bell text-6xl text-slate-700 mb-4"></i>
+            <p class="text-slate-500 font-medium">No hay registros de recepción.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

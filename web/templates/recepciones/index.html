@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Recepción - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Gestión de Recepción</h2>
+            <p class="text-slate-400 text-sm">Registro de asistencia en entrada</p>
+        </div>
+        <a href="/recepciones/lista" class="text-teal-400 hover:text-teal-300 flex flex-col items-center">
+            <i class="la la-list text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Ver Lista</span>
+        </a>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        const type = urlParams.get('type');
+        if (msg) {
+            document.write(`
+                <div class="mb-6 p-4 rounded-xl border ${type === 'success' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-red-500/10 border-red-500/50 text-red-400'} flex items-center gap-3">
+                    <i class="la ${type === 'success' ? 'la-check-circle' : 'la-exclamation-circle'} text-xl"></i>
+                    <p class="text-sm font-medium">${msg}</p>
+                </div>
+            `);
+        }
+    </script>
+
+    <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
+        <form id="recepcionForm" action="/recepciones/crear" method="post" class="space-y-4">
+            <div id="id_field" class="hidden">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Recepción</label>
+                <input type="number" name="id" id="recepcion_id"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Nombre Completo</label>
+                <input type="text" name="nombre" id="recepcion_nombre" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500"
+                    placeholder="Ej. Juan Pérez">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha</label>
+                <input type="date" name="fecha" id="recepcion_fecha" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-4">
+                <button type="submit" id="btn_submit"
+                    class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-600/30 uppercase text-sm">
+                    Registrar
+                </button>
+                <button type="button" onclick="cambiarAModoEdicion()" id="btn_mode"
+                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl transition-all uppercase text-xs">
+                    Modo Edición
+                </button>
+            </div>
+        </form>
+
+        <form id="deleteForm" action="/recepciones/eliminar" method="post" class="hidden">
+            <input type="hidden" name="id" id="delete_id">
+            <button type="submit" onclick="return confirm('¿Eliminar registro de recepción?')"
+                class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
+                Eliminar Registro
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function cambiarAModoEdicion() {
+        const form = document.getElementById('recepcionForm');
+        const idField = document.getElementById('id_field');
+        const delForm = document.getElementById('deleteForm');
+        const btnSubmit = document.getElementById('btn_submit');
+
+        idField.classList.toggle('hidden');
+        delForm.classList.toggle('hidden');
+
+        if (!idField.classList.contains('hidden')) {
+            form.action = "/recepciones/actualizar";
+            btnSubmit.innerText = "ACTUALIZAR";
+            document.getElementById('btn_mode').innerText = "MODO CREAR";
+            document.getElementById('recepcion_id').required = true;
+            document.getElementById('recepcion_id').addEventListener('input', (e) => {
+                document.getElementById('delete_id').value = e.target.value;
+            });
+        } else {
+            form.action = "/recepciones/crear";
+            btnSubmit.innerText = "REGISTRAR";
+            document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
+            document.getElementById('recepcion_id').required = false;
+        }
+    }
+    document.getElementById('recepcion_fecha').valueAsDate = new Date();
+
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit_id');
+        if (editId) {
+            cambiarAModoEdicion();
+            document.getElementById('recepcion_id').value = editId;
+        }
+    };
+</script>
+{% endblock %}
