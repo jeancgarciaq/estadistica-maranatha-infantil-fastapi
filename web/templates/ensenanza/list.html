@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Enseñanza - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Lista de Enseñanza</h2>
+            <p class="text-slate-400 text-sm">{{ registros|length }} registros encontrados</p>
+        </div>
+        <a href="/ensenanza" class="text-lime-400 hover:text-lime-300 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Gestión</span>
+        </a>
+    </div>
+
+    <div class="space-y-4">
+        {% for reg in registros %}
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 font-bold border border-lime-500/20">
+                        {{ reg.id }}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-100 text-lg">{{ reg.capitan }}</h3>
+                        <p class="text-xs text-lime-400 font-medium">{{ reg.fecha.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span
+                        class="bg-slate-900 px-2 py-1 rounded-md text-[10px] font-bold text-slate-400 border border-slate-700 italic">
+                        Subs: {{ reg.subcapitan }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
+                <a href="/ensenanza?edit_id={{ reg.id }}&capitan={{ reg.capitan }}&sub={{ reg.subcapitan }}&fecha={{ reg.fecha }}"
+                    class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-sm flex items-center gap-2">
+                    <i class="la la-edit"></i> Editar
+                </a>
+                <form action="/ensenanza/eliminar" method="post"
+                    onsubmit="return confirm('¿Confirmar eliminación de este registro?');">
+                    <input type="hidden" name="id" value="{{ reg.id }}">
+                    <button type="submit"
+                        class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-colors text-sm flex items-center gap-2">
+                        <i class="la la-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <i class="la la-book-open text-6xl text-slate-700 mb-4"></i>
+            <p class="text-slate-500 font-medium">No hay registros de enseñanza.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
