@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Áreas - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Lista de Áreas</h2>
+            <p class="text-slate-400 text-sm">{{ areas|length }} registros encontrados</p>
+        </div>
+        <a href="/areas" class="text-blue-400 hover:text-blue-300 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Gestión</span>
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        {% for area in areas %}
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center group">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 font-bold">
+                    {{ area.id }}
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100">{{ area.area }}</h3>
+                    <p class="text-[10px] text-slate-500 uppercase">Sincronizado: {{ area.sync_id[:8] }}...</p>
+                </div>
+            </div>
+            <i class="la la-angle-right text-slate-600 group-active:text-blue-400 transition-colors"></i>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="la la-folder-open text-5xl text-slate-700 mb-2"></i>
+            <p class="text-slate-500">No hay áreas registradas todavía.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
