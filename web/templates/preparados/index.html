@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Preparación - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-white">Preparación de Alimentos</h2>
+            <p class="text-slate-400 text-sm">Combine materias primas</p>
+        </div>
+        <a href="/preparados/lista" class="text-amber-400 hover:text-amber-300 flex flex-col items-center">
+            <i class="la la-list text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Ver Lista</span>
+        </a>
+    </div>
+
+    <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl space-y-6">
+        <form id="preparadoForm" action="/preparados/crear" method="post" class="space-y-4">
+            <div class="border-b border-white/5 pb-4">
+                <h3 class="text-amber-400 font-bold text-xs uppercase tracking-widest mb-4">Resultado Final</h3>
+                <div class="space-y-4">
+                    <input type="text" name="descripcion" required placeholder="Descripción (ej. Jugo de papelón)"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" step="0.01" name="cantidad" required placeholder="Cantidad"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
+                        <select name="unidad"
+                            class="bg-slate-900 border border-slate-700 rounded-xl px-2 text-white outline-none">
+                            {% for m in medidas %}<option value="{{m}}">{{m}}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="date" name="fecha" id="fecha_input" required
+                            class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+                        <input type="text" name="equipo" required placeholder="Equipo"
+                            class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Materias Primas -->
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-emerald-400 font-bold text-xs uppercase tracking-widest">Materias Primas</h3>
+                    <button type="button" onclick="abrirModalMaterias()"
+                        class="text-[10px] bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold hover:bg-emerald-600 hover:text-white transition-all">
+                        + AGREGAR
+                    </button>
+                </div>
+
+                <div id="lista_ingredientes" class="space-y-2 mb-4">
+                    <!-- Se llena vía JS -->
+                    <p class="text-slate-500 text-xs italic text-center py-4" id="vacio_msg">No hay ingredientes
+                        seleccionados</p>
+                </div>
+                <input type="hidden" name="componentes_json" id="componentes_input" value="[]">
+            </div>
+
+            <button type="submit"
+                class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-amber-600/30 transition-all active:scale-95 uppercase text-sm">
+                Registrar Preparado
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Simulado para seleccionar materias (Popup Kivy) -->
+<div id="modal_materias"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 w-full max-w-sm rounded-3xl border border-white/10 p-6 shadow-2xl">
+        <h3 class="text-white font-bold mb-4">Seleccionar Materia Prima</h3>
+        <div id="materias_container" class="max-h-60 overflow-y-auto space-y-2 mb-6">
+            <!-- Se llena vía API -->
+        </div>
+        <button onclick="cerrarModal()" class="w-full py-3 text-slate-400 font-bold text-sm">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    let ingredientes = [];
+    document.getElementById('fecha_input').valueAsDate = new Date();
+
+    async function abrirModalMaterias() {
+        const res = await fetch('/api/materias-primas');
+        const materias = await res.json();
+        const container = document.getElementById('materias_container');
+        container.innerHTML = '';
+
+        materias.forEach(m => {
+            if (ingredientes.find(i => i.id == m.id)) return;
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left bg-slate-900/50 p-3 rounded-xl border border-white/5 hover:border-emerald-500/50 text-xs";
+            btn.innerHTML = `<div class="font-bold text-white">${m.descripcion}</div><div class="text-slate-500">Stock: ${m.cantidad} ${m.unidad}</div>`;
+            btn.onclick = () => pedirCantidad(m);
+            container.appendChild(btn);
+        });
+        document.getElementById('modal_materias').classList.remove('hidden');
+    }
+
+    function pedirCantidad(materia) {
+        const cant = prompt(`Cantidad a usar de ${materia.descripcion} (${materia.unidad}):`);
+        if (cant && !isNaN(cant)) {
+            ingredientes.push({ id: materia.id, descripcion: materia.descripcion, cantidad: cant, unidad: materia.unidad });
+            renderIngredientes();
+            cerrarModal();
+        }
+    }
+
+    function renderIngredientes() {
+        const container = document.getElementById('lista_ingredientes');
+        const msg = document.getElementById('vacio_msg');
+        container.innerHTML = '';
+        if (ingredientes.length > 0) msg.classList.add('hidden');
+        else msg.classList.remove('hidden');
+
+        ingredientes.forEach((ing, index) => {
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5";
+            div.innerHTML = `
+                <div class="text-xs">
+                    <span class="font-bold text-white">${ing.descripcion}</span>
+                    <span class="text-emerald-400 ml-2">${ing.cantidad} ${ing.unidad}</span>
+                </div>
+                <button type="button" onclick="quitarIngrediente(${index})" class="text-red-400 p-1"><i class="la la-times-circle text-lg"></i></button>
+            `;
+            container.appendChild(div);
+        });
+        document.getElementById('componentes_input').value = JSON.stringify(ingredientes);
+    }
+
+    function quitarIngrediente(index) {
+        ingredientes.splice(index, 1);
+        renderIngredientes();
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal_materias').classList.add('hidden');
+    }
+</script>
+{% endblock %}

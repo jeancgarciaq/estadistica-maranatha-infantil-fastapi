@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Lista Preparados - EMI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Alimentos Preparados</h2>
+        <a href="/preparados" class="text-amber-400 flex flex-col items-center">
+            <i class="la la-plus-circle text-2xl"></i>
+            <span class="text-[10px] font-bold uppercase">Nuevo</span>
+        </a>
+    </div>
+
+    <form action="/preparados/lista" method="get" class="mb-6 flex gap-2">
+        <input type="date" name="fecha" value="{{ fecha_filtro or '' }}"
+            class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm outline-none">
+        <button type="submit" class="bg-amber-600 px-4 rounded-xl text-white"><i class="la la-search"></i></button>
+    </form>
+
+    <div class="space-y-4">
+        {% for p in preparados %}
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="font-bold text-white text-lg">{{ p.descripcion }}</h3>
+                    <p class="text-xs text-amber-400">{{ p.fecha.strftime('%d/%m/%Y') }}</p>
+                </div>
+                <span
+                    class="bg-slate-900 px-2 py-1 rounded text-[10px] font-bold text-slate-500 border border-slate-700 italic">
+                    {{ p.equipo }}
+                </span>
+            </div>
+
+            <div class="flex justify-between items-center border-t border-white/5 pt-3">
+                <p class="text-lg font-bold text-white">{{ p.cantidad }} {{ p.unidad }}</p>
+                <div class="flex gap-2">
+                    <button onclick="alert('Ver componentes - ID: {{p.id}}')"
+                        class="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-all">
+                        <i class="la la-info-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <p class="text-[9px] text-slate-500 uppercase font-bold mb-1">Ingredientes utilizados:</p>
+                <div class="flex flex-wrap gap-1">
+                    {% for comp in p.componentes %}
+                    <span
+                        class="text-[9px] bg-slate-900 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        {{ comp.materia_prima.descripcion }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <i class="la la-utensils text-6xl text-slate-700 mb-4"></i>
+            <p class="text-slate-500 font-medium">No hay registros para mostrar.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
