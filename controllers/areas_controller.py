@@ -16,78 +16,64 @@ class AreasController(BaseController):
         """Helper para usar la sesión proporcionada o la interna."""
         return db if db else self.session
 
-    def crear_area(self, nombre):
+    def crear_area(self, nombre, user_context=None):
         if not nombre:
             return False, "El nombre del área es obligatorio."
 
-        db = self.get_db_session()  # Usar el método de la clase madre
-        try:
-            with db.begin():
-                area = Area()
-                area.area = nombre
-                db.add(area)
-                logger.info(f"Área creada: {nombre}")
-                return True, "Área creada exitosamente."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al crear área: {e}")
-            return False, f"Error al crear área: {e}. Inténtalo de nuevo."
-        finally:
-            db.close()
+        def operacion(db):
+            area = Area(area=nombre)
+            db.add(area)
+            db.flush()
+            self.registrar_evento_sync(db, 'areas', area, 'upsert')
+            logger.info(f"Área creada: {nombre}")
 
-    def actualizar_area(self, id, nombre):
-        #Validar los datos
+        return self.ejecutar_transaccion(operacion, "Área creada exitosamente.", user_context=user_context)
+
+    def actualizar_area(self, id, nombre, user_context=None):
         if not id:
             return False, "El id del área es obligatorio."
         if not nombre:
             return False, "El nombre del área es obligatorio."
 
-        db = self.get_db_session()  # Usar el método de la clase madre
-        try:
-            with db.begin():
-                area = db.query(Area).filter(Area.id == id, Area.is_deleted.is_(False)).first()
-                if area:
-                    area.area = nombre  
-                    logger.info(f"Área actualizada: {nombre}")
-                    return True, "Área actualizada exitosamente."
-                else:
-                    return False, "Área no encontrada."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al actualizar área: {e}")
-            return False, f"Error al actualizar área: {e}. Inténtalo de nuevo."
-        finally:
-            db.close()
+        def operacion(db):
+            area = self.query_activa(db).filter(Area.id == id).first()
+            if not area:
+                raise ValueError("Área no encontrada.")
+            
+            area.area = nombre
+            self.registrar_evento_sync(db, 'areas', area, 'upsert')
+            logger.info(f"Área actualizada: {nombre}")
+
+        return self.ejecutar_transaccion(operacion, "Área actualizada exitosamente.", user_context=user_context)
                 
-    def eliminar_area(self, id):
-        db = self.get_db_session()  # Usar el método de la clase madre
-        try:
-            with db.begin():
-                area = db.query(Area).filter(Area.id == id, Area.is_deleted.is_(False)).first()
-                if area:
-                    self.marcar_eliminado(area, db)
-                    logger.info(f"Área eliminada: {area.area}")
-                    return True, "Área eliminada exitosamente."
-                else:
-                    return False, "Área no encontrada."
-        except SQLAlchemyError as e:
-            logger.error(f"Error al eliminar área: {e}")
-            return False, f"Error al eliminar área: {e}. Inténtalo de nuevo."
-        finally:
-            db.close()
-            logger.info("Conexión cerrada")
+    def eliminar_area(self, id, user_context=None):
+        if not id:
+            return False, "El ID del área es obligatorio."
+
+        def operacion(db):
+            area = self.query_activa(db).filter(Area.id == id).first()
+            if not area:
+                raise ValueError("Área no encontrada.")
+            
+            self.marcar_eliminado(area, db)
+            self.registrar_evento_sync(db, 'areas', area, 'delete')
+            logger.info(f"Área eliminada: ID {id}")
+
+        return self.ejecutar_transaccion(operacion, "Área eliminada exitosamente.", user_context=user_context)
 
     def listar_areas(self):
         """Método para listar las áreas y manejar errores."""
-        db = self.get_db_session()  # Usar el método de la clase madre
+        db = self.get_db_session()
         try:
-            areas = db.query(Area).filter(Area.is_deleted.is_(False)).all()
+            areas = self.query_activa(db).all()
             logger.info(f"{len(areas)} áreas obtenidas de la base de datos.")
             return areas
         except SQLAlchemyError as e:
             logger.error(f"Error al obtener áreas: {e}")
             return []
         finally:
-            db.close()
-            logger.info("Conexión cerrada")
+            if not self.session:
+                db.close()
 
     def buscar_area(self, id=None, nombre=None):
         """
