@@ -179,6 +179,8 @@ class SyncManager:
             return value.isoformat()
         if isinstance(value, Decimal):
             return float(value)
+        if isinstance(value, uuid.UUID):
+            return str(value)
         return value
 
     def push_pending(self, session):
@@ -198,6 +200,9 @@ class SyncManager:
             try:
                 remote_payload = dict(payload)
                 remote_payload['sync_pushed_at'] = datetime.utcnow().isoformat()
+                # Asegurar que el sync_id del AuditMixin sea la clave en Firebase
+                if not event.entity_sync_id:
+                    raise ValueError(f"Evento {event.id} no tiene entity_sync_id")
                 path = self.queue_path(event.entity_name, event.entity_sync_id)
                 self.client.put(path, remote_payload)
                 event.status = 'synced'
