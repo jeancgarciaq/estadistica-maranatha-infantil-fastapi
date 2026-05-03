@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Float, Date
+from sqlalchemy.orm import relationship
 from models.database import Base
 from models.base_class import AuditMixin
 
@@ -10,6 +11,9 @@ class Donacion(Base, AuditMixin):
     unidad = Column(String(50), nullable=False)
     equipo = Column(String(100), nullable=True)
     fecha = Column(Date, nullable=False)
+
+    # Relaciones
+    distribuciones = relationship("Distribucion", back_populates="donacion")
 
     def __repr__(self):
         return f"<Donacion(id={self.id}, descripcion='{self.descripcion}')>"
