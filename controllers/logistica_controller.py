@@ -135,15 +135,32 @@ class LogisticaController(BaseController):
         :return: Lista de errores encontrados.
         """
         errores = []
-        if not isinstance(datos.get("almacen"), str) or not datos.get("almacen").strip():
-            errores.append("El campo 'almacen' es obligatorio.")
-        if not isinstance(datos.get("capitan"), str) or not datos.get("capitan").strip():
-            errores.append("El campo 'capitan' es obligatorio.")
-        if not isinstance(datos.get("fecha"), str):
-            errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
-        else:
+        campos_numericos = ['almacen', 'capitan', 'distribucion', 'hidratacion', 'pasillo', 'secretaria']
+
+        for campo in campos_numericos:
+            valor = datos.get(campo)
+            
+            # Tratar None o cadenas vacías como 0 para normalizar el registro
+            if valor is None or (isinstance(valor, str) and not valor.strip()):
+                datos[campo] = 0
+                continue
+
             try:
-                datetime.strptime(datos["fecha"], '%Y-%m-%d')
+                int_valor = int(valor)
+                if int_valor < 0:
+                    errores.append(f"El campo '{campo}' debe ser un número entero no negativo.")
+                else:
+                    datos[campo] = int_valor  # Aseguramos que el valor en el dict sea int para el modelo
+            except (ValueError, TypeError):
+                errores.append(f"El campo '{campo}' debe ser un número entero válido.")
+
+        fecha = datos.get("fecha")
+        if not fecha:
+            errores.append("El campo 'fecha' es obligatorio.")
+        elif isinstance(fecha, str):
+            try:
+                datetime.strptime(fecha, '%Y-%m-%d')
             except ValueError:
                 errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
+
         return errores
