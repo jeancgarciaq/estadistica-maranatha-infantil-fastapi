@@ -11,7 +11,7 @@ try:
     from reportlab.lib.units import cm
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
     from reportlab.graphics.shapes import Drawing
-    from reportlab.graphics.charts.barcharts import BarChart
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
     from reportlab.graphics import renderPM
     REPORTLAB_DISPONIBLE = True
 except ModuleNotFoundError:
@@ -27,7 +27,7 @@ except ModuleNotFoundError:
     TableStyle: Any = None
     Image: Any = None
     Drawing: Any = None
-    BarChart: Any = None
+    VerticalBarChart: Any = None
     renderPM: Any = None
     REPORTLAB_DISPONIBLE = False
 
@@ -458,39 +458,30 @@ class ReporteEstadisticoService:
         if not REPORTLAB_DISPONIBLE:
             return {'asistencia': None}
 
-        fecha_texto = resumen.fecha_corte.strftime('%Y%m%d')
-        ruta_asistencia = os.path.join(self.output_dir, f'asistencia_{fecha_texto}.png')
-
-        # Crear gráfico de barras con reportlab
-        drawing = Drawing(700, 400)
-        chart = BarChart()
-        chart.title = f'Asistencia - {resumen.fecha_corte}'
-        chart.x = 50
+        # Creamos el objeto Drawing. No necesitamos renderPM (PNG) si insertamos 
+        # el vector directamente en el PDF, evitando errores de backends (rlPyCairo/Pillow).
+        drawing = Drawing(450, 250)
+        chart = VerticalBarChart()
+        chart.x = 40
         chart.y = 50
-        chart.width = 600
-        chart.height = 300
+        chart.width = 380
+        chart.height = 160
         
-        # Datos: categorías y valores
+        # Datos: una serie con tres valores
         chart.data = [[resumen.asistencia_ninos, resumen.asistencia_ninas, resumen.asistencia_servidores]]
         chart.categoryAxis.categoryNames = ['Niños', 'Niñas', 'Servidores']
         
-        # Colores de las barras
-        chart.bars[0].fillColor = colors.HexColor('#2F80ED')  # Azul para Niños
-        chart.bars[1].fillColor = colors.HexColor('#EB5757')  # Rojo para Niñas
-        chart.bars[2].fillColor = colors.HexColor('#27AE60')  # Verde para Servidores
+        # Colores individuales para cada barra de la misma serie (serie 0)
+        chart.bars[(0, 0)].fillColor = colors.HexColor('#2F80ED')  # Azul para Niños
+        chart.bars[(0, 1)].fillColor = colors.HexColor('#EB5757')  # Rojo para Niñas
+        chart.bars[(0, 2)].fillColor = colors.HexColor('#27AE60')  # Verde para Servidores
         
         # Etiquetas
         chart.valueAxis.labelTextFormat = '%d'
-        chart.categoryAxis.style = 'normal'
-        chart.categoryAxis.labelTextFormat = '%s'
         
         drawing.add(chart)
-        
-        # Guardar como PNG
-        renderPM.drawToFile(drawing, ruta_asistencia, fmt='PNG', dpi=180)
-
         return {
-            'asistencia': ruta_asistencia,
+            'asistencia': drawing,
         }
 
     def generar_pdf(self, resumen, graficos=None, archivo_salida=None):
@@ -528,12 +519,16 @@ class ReporteEstadisticoService:
         story.append(Spacer(1, 0.25 * cm))
 
         if graficos:
-            graficos_existentes = [ruta for ruta in graficos.values() if ruta and os.path.exists(ruta)]
-            if graficos_existentes:
+            # Verificamos si hay gráficos (objetos Drawing o rutas de archivos)
+            graficos_validos = [v for v in graficos.values() if v]
+            if graficos_validos:
                 self._agregar_seccion(story, '2. Gráficos de referencia', styles)
-                for ruta in graficos_existentes:
-                    story.append(Image(ruta, width=16 * cm, height=7.5 * cm))
-                    story.append(Spacer(1, 0.2 * cm))
+                for item in graficos_validos:
+                    if isinstance(item, str) and os.path.exists(item):
+                        story.append(Image(item, width=16 * cm, height=7.5 * cm))
+                    else:
+                        story.append(item) # Insertar Drawing directamente
+                    story.append(Spacer(1, 0.5 * cm))
 
         self._agregar_seccion(story, '3. Asistencia por aula', styles)
         aulas_data = [[
