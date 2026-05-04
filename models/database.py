@@ -4,7 +4,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # En la web, usamos una ruta relativa o absoluta definida en el entorno
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./models/app.db")
+# Si estamos en local usa SQLite, si estamos en la nube usará el string de PostgreSQL
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./models/app.db"
 
 engine = create_engine(
     DATABASE_URL, 
