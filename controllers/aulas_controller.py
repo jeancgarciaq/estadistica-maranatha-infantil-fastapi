@@ -219,4 +219,22 @@ class AulasController(BaseController):
                 errores.append("El campo 'fecha' debe tener el formato 'YYYY-MM-DD'.")
         if not isinstance(datos.get("id_salon"), int):
             errores.append("El campo 'id_salon' debe ser un número entero.")
+
+        # Validación de lógica de Condición vs Asistencia
+        maestra = datos.get("maestra", 0)
+        auxiliar = datos.get("auxiliar", 0)
+        capitan = datos.get("capitan", 0)
+        subcapitan = datos.get("subcapitan", 0)
+        colaborador = datos.get("colaborador", 0)
+        ninos = datos.get("ninos", 0)
+        ninas = datos.get("ninas", 0)
+        condicion = datos.get("condicion")
+
+        total_asistencia = sum([maestra, auxiliar, capitan, subcapitan, colaborador, ninos, ninas])
+
+        if total_asistencia > 0 and condicion == "Cerrado":
+            errores.append("No se puede registrar como 'Cerrado' si hay asistencia reportada.")
+        elif total_asistencia == 0 and condicion == "Abierto":
+            errores.append("Si no hay asistencia (todos los campos en 0), la condición debe ser 'Cerrado'.")
+
         return errores
