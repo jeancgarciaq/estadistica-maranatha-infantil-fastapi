@@ -45,11 +45,10 @@
 
             <div class="text-[11px] text-slate-400 grid grid-cols-2 gap-y-1 border-t border-slate-700 pt-3 mb-4">
                 <p><span class="font-bold text-slate-300">Almacén:</span> {{ log.almacen }}</p>
-                <p><span class="font-bold text-slate-300">Distribución:</span> {{ log.distribucion or 'N/A' }}</p>
-                <p><span class="font-bold text-slate-300">Hidratación:</span> {{ log.hidratacion or 'N/A' }}</p>
-                <p><span class="font-bold text-slate-300">Pasillo:</span> {{ log.pasillo or 'N/A' }}</p>
-                <p class="col-span-2"><span class="font-bold text-slate-300">Secretaría:</span> {{ log.secretaria or
-                    'N/A' }}</p>
+                <p><span class="font-bold text-slate-300">Distribución:</span> {{ log.distribucion }}</p>
+                <p><span class="font-bold text-slate-300">Hidratación:</span> {{ log.hidratacion }}</p>
+                <p><span class="font-bold text-slate-300">Pasillo:</span> {{ log.pasillo }}</p>
+                <p class="col-span-2"><span class="font-bold text-slate-300">Secretaría:</span> {{ log.secretaria }}</p>
             </div>
 
             <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
