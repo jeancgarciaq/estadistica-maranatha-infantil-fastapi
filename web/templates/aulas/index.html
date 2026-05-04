@@ -106,11 +106,12 @@
 
             <!-- Condición -->
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Condición /
-                    Observaciones</label>
-                <input type="text" name="condicion" id="aula_condicion" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500"
-                    placeholder="Ej. Normal, Clima Lluvioso...">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Condición</label>
+                <select name="condicion" id="aula_condicion" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 appearance-none">
+                    <option value="Abierto" selected>Abierto</option>
+                    <option value="Cerrado">Cerrado</option>
+                </select>
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-4">
@@ -136,6 +137,24 @@
 </div>
 
 <script>
+    function actualizarCondicion() {
+        const fields = [
+            'aula_maestra', 'aula_auxiliar', 'aula_capitan',
+            'aula_subcapitan', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
+        ];
+        let total = 0;
+        fields.forEach(id => {
+            total += parseInt(document.getElementById(id).value) || 0;
+        });
+
+        const condSelect = document.getElementById('aula_condicion');
+        if (total > 0) {
+            condSelect.value = "Abierto";
+        } else {
+            condSelect.value = "Cerrado";
+        }
+    }
+
     function cambiarAModoEdicion() {
         const form = document.getElementById('aulaForm');
         const idField = document.getElementById('id_field');
@@ -160,7 +179,17 @@
             document.getElementById('aula_id').required = false;
         }
     }
+
     // Set default date to today
     document.getElementById('aula_fecha').valueAsDate = new Date();
+
+    // Vincular detectores de eventos para actualizar la condición automáticamente
+    [
+        'aula_maestra', 'aula_auxiliar', 'aula_capitan',
+        'aula_subcapitan', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
+    ].forEach(id => {
+        document.getElementById(id).addEventListener('input', actualizarCondicion);
+    });
+    actualizarCondicion(); // Ejecutar al cargar para validar estado inicial
 </script>
 {% endblock %}
