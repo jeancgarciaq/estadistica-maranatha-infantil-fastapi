@@ -9,20 +9,20 @@
             <h2 class="text-xl font-bold text-white">Lista Otras Áreas</h2>
             <p class="text-slate-400 text-sm">Servidores por fecha</p>
         </div>
-        <a href="/otrasareas" class="text-rose-400 hover:text-rose-300 flex flex-col items-center">
+        <a href="/otras_areas" class="text-rose-400 hover:text-rose-300 flex flex-col items-center">
             <i class="la la-plus-circle text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Gestión</span>
         </a>
     </div>
 
     <!-- Filtro de Fecha -->
-    <form action="/otrasareas/lista" method="get" class="mb-6 flex gap-2">
+    <form action="/otras_areas/lista" method="get" class="mb-6 flex gap-2">
         <input type="date" name="fecha" value="{{ fecha_filtro or '' }}"
             class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-rose-500 text-sm">
         <button type="submit" class="bg-rose-600 px-4 rounded-xl text-white">
             <i class="la la-search"></i>
         </button>
-        <a href="/otrasareas/lista" class="bg-slate-700 px-4 rounded-xl text-white flex items-center">
+        <a href="/otras_areas/lista" class="bg-slate-700 px-4 rounded-xl text-white flex items-center">
             <i class="la la-sync"></i>
         </a>
     </form>
@@ -53,11 +53,12 @@
             </div>
 
             <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
-                <a href="/otrasareas?edit_id={{ reg.id }}&alabanza={{ reg.alabanza }}&protocolo={{ reg.protocolo }}&semillitas={{ reg.semillitas }}&sonido={{ reg.sonido }}&teatro={{ reg.teatro }}&tv={{ reg.tv }}&ujier={{ reg.ujier }}&seguridad={{ reg.seguridad }}&fecha={{ reg.fecha }}"
+                <a href="/otras_areas?edit_id={{ reg.id }}&alabanza={{ reg.alabanza }}&protocolo={{ reg.protocolo }}&semillitas={{ reg.semillitas }}&sonido={{ reg.sonido }}&teatro={{ reg.teatro }}&tv={{ reg.tv }}&ujier={{ reg.ujier }}&seguridad={{ reg.seguridad }}&fecha={{ reg.fecha }}"
                     class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-xs flex items-center gap-2">
                     <i class="la la-edit"></i> Editar
                 </a>
-                <form action="/otrasareas/eliminar" method="post" onsubmit="return confirm('¿Confirmar eliminación?');">
+                <form action="/otras_areas/eliminar" method="post"
+                    onsubmit="return confirm('¿Confirmar eliminación?');">
                     <input type="hidden" name="id" value="{{ reg.id }}">
                     <button type="submit"
                         class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-colors text-xs flex items-center gap-2">
