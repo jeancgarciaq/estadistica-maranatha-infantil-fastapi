@@ -47,8 +47,10 @@ auth_service = FirebaseAuthService()
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
     # Rutas que no requieren autenticación
-    public_paths = ["/", "/login", "/logout", "/static", "/api/config/medidas"]
-    if any(request.url.path.startswith(path) for path in public_paths) or request.url.path == "/":
+    # Quitamos "/" de la lista para evitar que coincida con todo vía startswith
+    public_paths = ["/login", "/logout", "/static", "/api/config/medidas"]
+    
+    if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
 
     # Obtener tokens y datos de sesión de las cookies
@@ -74,7 +76,7 @@ async def auth_middleware(request: Request, call_next):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 @app.post("/login")
 async def login(request: Request, username: str = Form(...), password: str = Form(...)):
@@ -92,26 +94,21 @@ async def login(request: Request, username: str = Form(...), password: str = For
         return response
     except Exception as e:
         logger.error("Error de login: %s", e)
-        return templates.TemplateResponse("login.html", {
-            "request": request, 
-            "error": str(e)
-        })
+        return templates.TemplateResponse(request, "login.html", {"error": str(e)})
 
-@app.get("/donaciones", response_class=HTMLResponse) # Ruta para el formulario de gestión
+@app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
     medidas = obtener_medidas()
-    return templates.TemplateResponse("donaciones/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "donaciones/index.html", {
         "user": request.state.user,
         "medidas": medidas
     })
 
-@app.get("/donaciones/lista", response_class=HTMLResponse) # Ruta para el listado
+@app.get("/donaciones/lista", response_class=HTMLResponse)
 async def list_donaciones(request: Request, fecha: str = None, db: Session = Depends(get_db)):
     controller = DonacionesController(session=db)
     donaciones = controller.listar_donaciones(fecha=fecha)
-    return templates.TemplateResponse("donaciones/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "donaciones/list.html", {
         "donaciones": donaciones,
         "user": request.state.user,
         "fecha_filtro": fecha
@@ -156,8 +153,7 @@ async def delete_donacion(request: Request, id: int = Form(...), db: Session = D
 
 @app.get("/preparados", response_class=HTMLResponse)
 async def view_preparados(request: Request):
-    return templates.TemplateResponse("preparados/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "preparados/index.html", {
         "user": request.state.user,
         "medidas": obtener_medidas()
     })
@@ -166,8 +162,7 @@ async def view_preparados(request: Request):
 async def list_preparados(request: Request, fecha: str = None, db: Session = Depends(get_db)):
     controller = DonacionesController(session=db)
     preparados = controller.listar_preparados(fecha=fecha)
-    return templates.TemplateResponse("preparados/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "preparados/list.html", {
         "user": request.state.user,
         "preparados": preparados,
         "fecha_filtro": fecha
@@ -207,15 +202,13 @@ async def get_medidas():
 
 @app.get("/dashboard")
 async def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "dashboard.html", {
         "user": request.state.user
     })
 
 @app.get("/areas", response_class=HTMLResponse)
 async def view_areas(request: Request):
-    return templates.TemplateResponse("areas/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "areas/index.html", {
         "user": request.state.user
     })
 
@@ -223,8 +216,7 @@ async def view_areas(request: Request):
 async def list_areas(request: Request, db: Session = Depends(get_db)):
     controller = AreasController(session=db)
     areas = controller.listar_areas()
-    return templates.TemplateResponse("areas/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "areas/list.html", {
         "user": request.state.user,
         "areas": areas
     })
@@ -249,8 +241,7 @@ async def delete_area(request: Request, id: int = Form(...), db: Session = Depen
 
 @app.get("/salones", response_class=HTMLResponse)
 async def view_salones(request: Request):
-    return templates.TemplateResponse("salones/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "salones/index.html", {
         "user": request.state.user
     })
 
@@ -258,8 +249,7 @@ async def view_salones(request: Request):
 async def list_salones(request: Request, db: Session = Depends(get_db)):
     controller = SalonesController(session=db)
     salones = controller.listar_salones()
-    return templates.TemplateResponse("salones/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "salones/list.html", {
         "user": request.state.user,
         "salones": salones
     })
@@ -287,8 +277,7 @@ async def view_aulas(request: Request, db: Session = Depends(get_db)):
     # Necesitamos los salones para el selector del formulario
     controller = AulasController(session=db)
     salones = controller.listar_salones()
-    return templates.TemplateResponse("aulas/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "aulas/index.html", {
         "user": request.state.user,
         "salones": salones
     })
@@ -297,8 +286,7 @@ async def view_aulas(request: Request, db: Session = Depends(get_db)):
 async def list_aulas(request: Request, fecha: str = None, db: Session = Depends(get_db)):
     controller = AulasController(session=db)
     aulas = controller.listar_aulas_por_fecha(fecha)
-    return templates.TemplateResponse("aulas/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "aulas/list.html", {
         "user": request.state.user,
         "aulas": aulas,
         "fecha_filtro": fecha
@@ -361,8 +349,7 @@ async def delete_aula(request: Request, id: int = Form(...), db: Session = Depen
 
 @app.get("/recepciones", response_class=HTMLResponse)
 async def view_recepciones(request: Request):
-    return templates.TemplateResponse("recepciones/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "recepciones/index.html", {
         "user": request.state.user
     })
 
@@ -370,8 +357,7 @@ async def view_recepciones(request: Request):
 async def list_recepciones(request: Request, db: Session = Depends(get_db)):
     controller = RecepcionController(session=db)
     recepciones = controller.listar_recepciones()
-    return templates.TemplateResponse("recepciones/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "recepciones/list.html", {
         "user": request.state.user,
         "recepciones": recepciones
     })
@@ -396,8 +382,7 @@ async def delete_recepcion(request: Request, id: int = Form(...), db: Session = 
 
 @app.get("/ensenanza", response_class=HTMLResponse)
 async def view_ensenanza(request: Request):
-    return templates.TemplateResponse("ensenanza/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "ensenanza/index.html", {
         "user": request.state.user
     })
 
@@ -405,8 +390,7 @@ async def view_ensenanza(request: Request):
 async def list_ensenanza(request: Request, db: Session = Depends(get_db)):
     controller = EnsenanzaController(session=db)
     registros = controller.listar_ensenanzas()
-    return templates.TemplateResponse("ensenanza/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "ensenanza/list.html", {
         "user": request.state.user,
         "registros": registros
     })
@@ -431,8 +415,7 @@ async def delete_ensenanza(request: Request, id: int = Form(...), db: Session = 
 
 @app.get("/logistica", response_class=HTMLResponse)
 async def view_logistica(request: Request):
-    return templates.TemplateResponse("logistica/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "logistica/index.html", {
         "user": request.state.user
     })
 
@@ -440,8 +423,7 @@ async def view_logistica(request: Request):
 async def list_logistica(request: Request, fecha: str = None, db: Session = Depends(get_db)):
     controller = LogisticaController(session=db)
     logisticas = controller.listar_logisticas(fecha=fecha)
-    return templates.TemplateResponse("logistica/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "logistica/list.html", {
         "user": request.state.user,
         "logisticas": logisticas,
         "fecha_filtro": fecha
@@ -498,8 +480,7 @@ async def delete_logistica(request: Request, id: int = Form(...), db: Session = 
 
 @app.get("/otrasareas", response_class=HTMLResponse)
 async def view_otrasareas(request: Request):
-    return templates.TemplateResponse("otrasareas/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "otrasareas/index.html", {
         "user": request.state.user
     })
 
@@ -507,8 +488,7 @@ async def view_otrasareas(request: Request):
 async def list_otrasareas(request: Request, fecha: str = None, db: Session = Depends(get_db)):
     controller = OtrasAreasController(session=db)
     registros = controller.listar_otrasareas(fecha=fecha)
-    return templates.TemplateResponse("otrasareas/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "otrasareas/list.html", {
         "user": request.state.user,
         "registros": registros,
         "fecha_filtro": fecha
@@ -568,11 +548,10 @@ async def view_reportes(request: Request, fecha: str = None, db: Session = Depen
             logger.error(f"Error al generar resumen para la web: {e}")
             resumen_texto = f"Error al generar resumen: {e}"
 
-    return templates.TemplateResponse("reportes/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "reportes/index.html", {
         "user": request.state.user,
         "fecha_filtro": fecha,
-        "resumen_texto": resumen_texto,
+        "resumen_texto": resumen_texto
     })
 
 @app.post("/reportes/generar-pdf")
@@ -600,8 +579,7 @@ async def generar_reporte_pdf(request: Request, fecha: str = Form(...), db: Sess
 
 @app.get("/ayuda", response_class=HTMLResponse)
 async def view_ayuda(request: Request):
-    return templates.TemplateResponse("ayudas/index.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "ayudas/index.html", {
         "user": request.state.user
     })
 
