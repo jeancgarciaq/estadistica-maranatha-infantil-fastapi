@@ -6,7 +6,6 @@ python-multipart
 SQLAlchemy>=2.0.0
 python-dotenv
 reportlab>=4.0.0
-matplotlib>=3.8.0
 httpx
 pydantic
 pydantic-settings
