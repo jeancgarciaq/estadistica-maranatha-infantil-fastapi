@@ -47,20 +47,27 @@ class DistribucionesController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Distribución creada exitosamente.", user_context=user_context)
 
-    def listar_distribuciones(self):
+    def listar_distribuciones(self, fecha: str = None):
         """
-        Lista todas las distribuciones desde la base de datos.
+        Lista las distribuciones desde la base de datos, opcionalmente filtradas por fecha.
         :return: Lista de objetos Distribucion.
         """
         db = self.get_db_session()
         try:
-            distribuciones = db.query(Distribucion).options(
+            query = self.query_activa(db).options(
                 joinedload(Distribucion.donacion),
                 joinedload(Distribucion.alimento_preparado),
                 joinedload(Distribucion.salon),
                 joinedload(Distribucion.area),
                 joinedload(Distribucion.recepcion)
-            ).filter(Distribucion.is_deleted.is_(False)).all()
+            )
+
+            if fecha:
+                fecha_dt = self.validar_y_convertir_fecha(fecha)
+                if fecha_dt:
+                    query = query.filter(Distribucion.fecha == fecha_dt)
+
+            distribuciones = query.order_by(Distribucion.fecha.desc(), Distribucion.id.desc()).all()
             logger.info(f"{len(distribuciones)} distribuciones obtenidas.")
             return distribuciones
         except SQLAlchemyError as e:
