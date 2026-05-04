@@ -40,52 +40,52 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Almacén</label>
-                    <input type="text" name="almacen" id="logistica_almacen" required
+                    <input type="number" name="almacen" id="logistica_almacen" value="0" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Capitán</label>
-                    <input type="text" name="capitan" id="logistica_capitan" required
+                    <input type="number" name="capitan" id="logistica_capitan" value="0" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Distribución</label>
-                    <input type="text" name="distribucion" id="logistica_distribucion"
+                    <input type="number" name="distribucion" id="logistica_distribucion" value="0"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Hidratación</label>
-                    <input type="text" name="hidratacion" id="logistica_hidratacion"
+                    <input type="number" name="hidratacion" id="logistica_hidratacion" value="0"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Pasillo</label>
-                    <input type="text" name="pasillo" id="logistica_pasillo"
+                    <input type="number" name="pasillo" id="logistica_pasillo" value="0"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Secretaría</label>
-                    <input type="text" name="secretaria" id="logistica_secretaria"
+                    <input type="number" name="secretaria" id="logistica_secretaria" value="0"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Nombre">
+                        placeholder="Cantidad">
                 </div>
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha</label>
                 <input type="date" name="fecha" id="logistica_fecha" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500">
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 text-center">
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-4">
@@ -143,12 +143,12 @@
         if (editId) {
             cambiarAModoEdicion();
             document.getElementById('logistica_id').value = editId;
-            document.getElementById('logistica_almacen').value = urlParams.get('almacen') || "";
-            document.getElementById('logistica_capitan').value = urlParams.get('capitan') || "";
-            document.getElementById('logistica_distribucion').value = urlParams.get('distribucion') || "";
-            document.getElementById('logistica_hidratacion').value = urlParams.get('hidratacion') || "";
-            document.getElementById('logistica_pasillo').value = urlParams.get('pasillo') || "";
-            document.getElementById('logistica_secretaria').value = urlParams.get('secretaria') || "";
+            document.getElementById('logistica_almacen').value = urlParams.get('almacen') || "0";
+            document.getElementById('logistica_capitan').value = urlParams.get('capitan') || "0";
+            document.getElementById('logistica_distribucion').value = urlParams.get('distribucion') || "0";
+            document.getElementById('logistica_hidratacion').value = urlParams.get('hidratacion') || "0";
+            document.getElementById('logistica_pasillo').value = urlParams.get('pasillo') || "0";
+            document.getElementById('logistica_secretaria').value = urlParams.get('secretaria') || "0";
             if (urlParams.get('fecha')) document.getElementById('logistica_fecha').value = urlParams.get('fecha');
         }
     };
