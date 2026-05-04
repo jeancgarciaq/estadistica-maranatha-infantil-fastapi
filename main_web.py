@@ -496,11 +496,11 @@ async def list_logistica(request: Request, fecha: str = None, db: Session = Depe
 async def create_logistica(
     request: Request,
     almacen: str = Form(...),
-    capitan: str = Form(...),
-    distribucion: str = Form(None),
-    hidratacion: str = Form(None),
-    pasillo: str = Form(None),
-    secretaria: str = Form(None),
+    capitan: int = Form(...),
+    distribucion: int = Form(0),
+    hidratacion: int = Form(0),
+    pasillo: int = Form(0),
+    secretaria: int = Form(0),
     fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
@@ -517,12 +517,12 @@ async def create_logistica(
 async def update_logistica(
     request: Request,
     id: int = Form(...),
-    almacen: str = Form(...),
-    capitan: str = Form(...),
-    distribucion: str = Form(None),
-    hidratacion: str = Form(None),
-    pasillo: str = Form(None),
-    secretaria: str = Form(None),
+    almacen: int = Form(...),
+    capitan: int = Form(...),
+    distribucion: int = Form(0),
+    hidratacion: int = Form(0),
+    pasillo: int = Form(0),
+    secretaria: int = Form(0),
     fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
