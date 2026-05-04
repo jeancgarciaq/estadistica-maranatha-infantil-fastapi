@@ -467,17 +467,22 @@ class ReporteEstadisticoService:
         chart.width = 380
         chart.height = 160
         
-        # Datos: una serie con tres valores
-        chart.data = [[resumen.asistencia_ninos, resumen.asistencia_ninas, resumen.asistencia_servidores]]
+        # Aseguramos que los datos sean numéricos y forzamos una serie explícita
+        ninos = int(resumen.asistencia_ninos or 0)
+        ninas = int(resumen.asistencia_ninas or 0)
+        servidores = int(resumen.asistencia_servidores or 0)
+        chart.data = [[ninos, ninas, servidores]]
         chart.categoryAxis.categoryNames = ['Niños', 'Niñas', 'Servidores']
         
-        # Colores individuales para cada barra de la misma serie (serie 0)
+        # Colores individuales para cada barra
         chart.bars[(0, 0)].fillColor = colors.HexColor('#2F80ED')  # Azul para Niños
         chart.bars[(0, 1)].fillColor = colors.HexColor('#EB5757')  # Rojo para Niñas
         chart.bars[(0, 2)].fillColor = colors.HexColor('#27AE60')  # Verde para Servidores
         
-        # Etiquetas
+        # Configuración del eje de valores (Y) para mejor visibilidad
         chart.valueAxis.labelTextFormat = '%d'
+        chart.valueAxis.forceZero = 1
+        chart.valueAxis.valueMin = 0
         
         drawing.add(chart)
         return {
@@ -495,8 +500,8 @@ class ReporteEstadisticoService:
             archivo_salida = os.path.join(self.output_dir, f'reporte_estadistico_{fecha_texto}.pdf')
 
         styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='TituloInforme', parent=styles['Title'], fontSize=18, leading=22, spaceAfter=12))
-        styles.add(ParagraphStyle(name='SubTituloInforme', parent=styles['Heading2'], fontSize=12, leading=14, spaceAfter=8))
+        styles.add(ParagraphStyle(name='TituloInforme', parent=styles['Title'], fontSize=18, leading=22, spaceAfter=12, keepWithNext=True))
+        styles.add(ParagraphStyle(name='SubTituloInforme', parent=styles['Heading2'], fontSize=12, leading=14, spaceAfter=8, keepWithNext=True))
         styles.add(ParagraphStyle(name='CuerpoInforme', parent=styles['BodyText'], fontSize=9, leading=12))
 
         story = []
@@ -516,12 +521,12 @@ class ReporteEstadisticoService:
             ['Total asistencia', self._fmt(resumen.total_asistencia)],
         ]
         story.append(self._tabla(resumen_data, [9 * cm, 5 * cm]))
-        story.append(Spacer(1, 0.25 * cm))
 
         if graficos:
             # Verificamos si hay gráficos (objetos Drawing o rutas de archivos)
             graficos_validos = [v for v in graficos.values() if v]
             if graficos_validos:
+                story.append(Spacer(1, 0.5 * cm))
                 self._agregar_seccion(story, '2. Gráficos de referencia', styles)
                 for item in graficos_validos:
                     if isinstance(item, str) and os.path.exists(item):
@@ -550,7 +555,6 @@ class ReporteEstadisticoService:
             story.append(Paragraph('Sin registros de aulas.', styles['CuerpoInforme']))
         else:
             story.append(self._tabla(aulas_data))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '4. Donaciones registradas', styles)
         donaciones_data = [['Descripción', 'Cantidad', 'Unidad', 'Equipo']]
@@ -565,7 +569,6 @@ class ReporteEstadisticoService:
             story.append(Paragraph('Sin donaciones registradas.', styles['CuerpoInforme']))
         else:
             story.append(self._tabla(donaciones_data))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '5. Alimentos preparados', styles)
         preparados_data = [['Descripción', 'Cantidad', 'Unidad', 'Equipo']]
@@ -580,7 +583,6 @@ class ReporteEstadisticoService:
             story.append(Paragraph('Sin alimentos preparados registrados.', styles['CuerpoInforme']))
         else:
             story.append(self._tabla(preparados_data))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '6. Conversión de donaciones en alimentos preparados', styles)
         if resumen.componentes:
@@ -595,7 +597,6 @@ class ReporteEstadisticoService:
             story.append(self._tabla(conversion_data))
         else:
             story.append(Paragraph('Sin conversión registrada.', styles['CuerpoInforme']))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '7. Distribución detallada', styles)
         distribuciones_data = [['Origen', 'Destino', 'Cantidad', 'Unidad']]
@@ -610,7 +611,6 @@ class ReporteEstadisticoService:
             story.append(Paragraph('Sin distribuciones registradas.', styles['CuerpoInforme']))
         else:
             story.append(self._tabla(distribuciones_data))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '8. Alimentos o donaciones no distribuidos', styles)
         if not resumen.donaciones_sin_distribuir and not resumen.preparados_sin_distribuir:
@@ -642,7 +642,6 @@ class ReporteEstadisticoService:
                         pendiente['unidad'],
                     ])
                 story.append(self._tabla(pendientes_preparados))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '9. Servidores de otras áreas', styles)
         if resumen.otras_areas:
@@ -663,7 +662,6 @@ class ReporteEstadisticoService:
             story.append(self._tabla(otras_areas_data))
         else:
             story.append(Paragraph('Sin registros de otras áreas.', styles['CuerpoInforme']))
-        story.append(Spacer(1, 0.25 * cm))
 
         self._agregar_seccion(story, '10. Recepción', styles)
         if resumen.recepciones:
