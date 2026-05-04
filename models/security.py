@@ -84,13 +84,23 @@ class Usuario(Base, AuditMixin):
     username = Column(String(60), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
     activo = Column(Boolean, nullable=False, default=True)
-    creado_en = Column(DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Campos para recuperación de contraseña
+    reset_token = Column(String(100), nullable=True, index=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
 
     rol_id = Column(Integer, ForeignKey('roles.id'), nullable=False, index=True)
     rol = relationship('Rol', back_populates='usuarios')
 
     def __repr__(self):
         return f"<Usuario(id={self.id}, username='{self.username}', rol_id={self.rol_id})>"
+
+    def verify_password(self, plain_password):
+        return pwd_context.verify(plain_password, self.password)
+
+    @staticmethod
+    def hash_password(password):
+        return pwd_context.hash(password)
 
 
 def seed_security_data(session):
@@ -119,12 +129,11 @@ def seed_security_data(session):
                 role.permisos.append(permiso)
 
     root_role = role_objects[ROLE_ROOT]
-    admin_role = role_objects[ROLE_ADMIN]
 
     root_user = session.query(Usuario).filter(Usuario.username == 'root').first()
     if root_user is None:
-        session.add(Usuario(username='root', password='root123', rol_id=root_role.id, activo=True))
-
-    admin_user = session.query(Usuario).filter(Usuario.username == 'admin').first()
-    if admin_user is None:
-        session.add(Usuario(username='admin', password='admin123', rol_id=admin_role.id, activo=True))
+        # Contraseña por defecto: root123 (Se recomienda cambiar al primer inicio)
+        hashed_pw = Usuario.hash_password('root123')
+        session.add(Usuario(username='root', password=hashed_pw, rol_id=root_role.id, activo=True))
+    
+    session.commit()
