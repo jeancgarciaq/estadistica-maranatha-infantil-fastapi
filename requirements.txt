@@ -10,5 +10,6 @@ httpx
 pydantic
 pydantic-settings
 sqlalchemy-utils
-passlib[bcrypt]
+passlib
+bcrypt==4.0.1
 python-jose[cryptography]
