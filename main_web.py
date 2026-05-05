@@ -10,13 +10,13 @@ from sqlalchemy.orm import Session
 
 from models.database import get_db, configure_database
 from utils.env_loader import load_app_env
-from utils.firebase_auth import FirebaseAuthService, FirebaseAuthSession
 from utils.config_loader import obtener_medidas
 
 from controllers.areas_controller import AreasController
 from controllers.aulas_controller import AulasController
 from controllers.salones_controller import SalonesController
 from controllers.donaciones_controller import DonacionesController
+from controllers.usuarios_controller import UsuariosController
 from controllers.ensenanza_controller import EnsenanzaController
 from utils.reporte_estadistico import ReporteEstadisticoService
 from controllers.otras_areas_controller import OtrasAreasController
@@ -41,36 +41,31 @@ security = HTTPBearer()
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 templates = Jinja2Templates(directory="web/templates")
 
-# Servicio de Autenticación Firebase
-auth_service = FirebaseAuthService()
-
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    # Rutas que no requieren autenticación
-    # Quitamos "/" de la lista para evitar que coincida con todo vía startswith
     public_paths = ["/login", "/logout", "/static", "/api/config/medidas"]
     
     if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
 
-    # Obtener tokens y datos de sesión de las cookies
-    id_token = request.cookies.get("id_token")
-    local_id = request.cookies.get("local_id")
-    email = request.cookies.get("email")
+    # Obtener usuario de la cookie de sesión local
+    username = request.cookies.get("session_user")
 
-    if not id_token:
+    if not username:
         return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
+    db = next(get_db())
     try:
-        # Reconstruir la sesión y validar el rol en Firebase
-        session = auth_service.reconstruct_session(id_token, local_id=local_id, email=email)
-        role_assignment = auth_service.fetch_role_assignment(session)
-        request.state.user = auth_service.build_runtime_user(session, role_assignment)
+        controller = UsuariosController(session=db)
+        from models.security import Usuario
+        user = db.query(Usuario).filter(Usuario.username == username, Usuario.activo == True).first()
+        if not user:
+            raise Exception("Usuario no encontrado o inactivo")
+        request.state.user = user
     except Exception as e:
-        logger.error("Error de autenticación en middleware: %s", e)
         response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-        response.delete_cookie("id_token")
+        response.delete_cookie("session_user")
         return response
 
     return await call_next(request)
@@ -80,22 +75,17 @@ async def index(request: Request):
     return templates.TemplateResponse(request, "login.html")
 
 @app.post("/login")
-async def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    try:
-        # Intentar iniciar sesión en Firebase
-        session_data = auth_service.sign_in(username, password)
-        
+async def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    controller = UsuariosController(session=db)
+    exito, usuario, mensaje = controller.autenticar(username, password)
+    
+    if exito:
         response = RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
-        
-        # Persistir sesión en cookies seguras
-        response.set_cookie(key="id_token", value=session_data.id_token)
-        response.set_cookie(key="local_id", value=session_data.local_id, httponly=True)
-        response.set_cookie(key="email", value=session_data.email, httponly=True)
-        
+        # Establecer cookie de sesión (en producción usar JWT o cookies firmadas)
+        response.set_cookie(key="session_user", value=usuario.username, httponly=True)
         return response
-    except Exception as e:
-        logger.error("Error de login: %s", e)
-        return templates.TemplateResponse(request, "login.html", {"error": str(e)})
+    else:
+        return templates.TemplateResponse(request, "login.html", {"error": mensaje})
 
 @app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
@@ -649,9 +639,7 @@ async def view_ayuda(request: Request):
 @app.get("/logout")
 async def logout():
     response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-    response.delete_cookie("id_token")
-    response.delete_cookie("local_id")
-    response.delete_cookie("email")
+    response.delete_cookie("session_user")
     return response
 
 if __name__ == "__main__":
