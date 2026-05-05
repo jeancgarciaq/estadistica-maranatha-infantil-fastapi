@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 from models.database import get_db, configure_database
 from utils.env_loader import load_app_env
 from utils.config_loader import obtener_medidas
-from models.security import ROLE_ROOT, Usuario, Rol
+from models.security import ROLE_ROOT, ROLE_LIMITS, Usuario, Rol
 
 from controllers.areas_controller import AreasController
 from controllers.aulas_controller import AulasController
@@ -116,7 +116,7 @@ async def register_post(
     website: str = Form(None), # Campo Honeypot
     db: Session = Depends(get_db)
 ):
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     # Validación de campos obligatorios para evitar el JSON de error
     if not all([username, password, rol_nombre, math_answer is not None]):
         return templates.TemplateResponse(request, "register.html", {
@@ -157,7 +157,7 @@ async def forgot_password_view(request: Request):
 
 @app.post("/forgot-password")
 async def forgot_password_post(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     exito, mensaje = controller.solicitar_restablecimiento_contrasena(email)
     if exito:
         return templates.TemplateResponse(request, "forgot_password.html", {
@@ -168,7 +168,7 @@ async def forgot_password_post(request: Request, email: str = Form(...), db: Ses
 
 @app.get("/reset-password/{token}", response_class=HTMLResponse)
 async def reset_password_view(request: Request, token: str, db: Session = Depends(get_db)):
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     usuario = controller.validar_token_restablecimiento(token)
     if not usuario:
         return templates.TemplateResponse(request, "reset_password.html", {
@@ -192,7 +192,7 @@ async def reset_password_post(
             "token": token,
             "error": "Las contraseñas no coinciden."
         })
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     exito, mensaje = controller.restablecer_contrasena(token, password)
     if exito:
         return RedirectResponse(url="/?msg=Contraseña restablecida exitosamente. Ya puede iniciar sesión.&type=success", status_code=status.HTTP_303_SEE_OTHER)
@@ -203,7 +203,7 @@ async def view_usuarios(request: Request, db: Session = Depends(get_db)):
     if request.state.user.rol.nombre != ROLE_ROOT:
         return RedirectResponse(url="/dashboard?msg=Acceso restringido al superusuario&type=error", status_code=status.HTTP_303_SEE_OTHER)
     
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     roles = controller.listar_roles()
     return templates.TemplateResponse(request, "usuarios/index.html", {
         "user": request.state.user,
@@ -215,7 +215,7 @@ async def list_usuarios(request: Request, db: Session = Depends(get_db)):
     if request.state.user.rol.nombre != ROLE_ROOT:
         return HTMLResponse("Acceso denegado", status_code=status.HTTP_403_FORBIDDEN)
     
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     usuarios = controller.listar_usuarios()
     return templates.TemplateResponse(request, "usuarios/list.html", {
         "usuarios": usuarios,
@@ -232,7 +232,7 @@ async def create_usuario(
 ):
     if request.state.user.rol.nombre != ROLE_ROOT:
         return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     exito, mensaje = controller.registrar_usuario({"username": username, "password": password, "rol_nombre": rol_nombre}, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/usuarios?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -248,7 +248,7 @@ async def update_usuario(
     if request.state.user.rol.nombre != ROLE_ROOT:
         return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
 
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     is_active = True if activo == "on" else False
     
     exito, mensaje = controller.actualizar_usuario(
