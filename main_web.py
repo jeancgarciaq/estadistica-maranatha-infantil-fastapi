@@ -45,7 +45,7 @@ templates = Jinja2Templates(directory="web/templates")
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/login", "/logout", "/static", "/api/config/medidas", "/register", "/reset-password"]
+    public_paths = ["/login", "/logout", "/static", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
     
     if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
@@ -128,6 +128,53 @@ async def register_post(
     if exito:
         return RedirectResponse(url="/?msg=Registro exitoso. Ya puede iniciar sesión.", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(request, "register.html", {"error": mensaje, "roles": controller.listar_roles()})
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+async def forgot_password_view(request: Request):
+    return templates.TemplateResponse(request, "forgot_password.html")
+
+@app.post("/forgot-password")
+async def forgot_password_post(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    controller = UsuariosController(session=db)
+    exito, mensaje = controller.solicitar_restablecimiento_contrasena(email)
+    if exito:
+        return templates.TemplateResponse(request, "forgot_password.html", {
+            "message": mensaje,
+            "email_sent": True
+        })
+    return templates.TemplateResponse(request, "forgot_password.html", {"error": mensaje})
+
+@app.get("/reset-password/{token}", response_class=HTMLResponse)
+async def reset_password_view(request: Request, token: str, db: Session = Depends(get_db)):
+    controller = UsuariosController(session=db)
+    usuario = controller.validar_token_restablecimiento(token)
+    if not usuario:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "error": "El enlace de restablecimiento es inválido o ha expirado."
+        })
+    return templates.TemplateResponse(request, "reset_password.html", {
+        "token": token,
+        "username": usuario.username
+    })
+
+@app.post("/reset-password/{token}")
+async def reset_password_post(
+    request: Request,
+    token: str,
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    if password != confirm_password:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "token": token,
+            "error": "Las contraseñas no coinciden."
+        })
+    controller = UsuariosController(session=db)
+    exito, mensaje = controller.restablecer_contrasena(token, password)
+    if exito:
+        return RedirectResponse(url="/?msg=Contraseña restablecida exitosamente. Ya puede iniciar sesión.&type=success", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse(request, "reset_password.html", {"token": token, "error": mensaje})
 
 @app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
