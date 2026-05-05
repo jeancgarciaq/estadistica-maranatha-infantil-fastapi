@@ -2,8 +2,8 @@
 FROM python:3.11-slim
 
 # Evita que Python genere archivos .pyc y permite que los logs se vean en tiempo real
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -16,8 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copiamos el archivo de requerimientos primero para aprovechar el cache de Docker
 COPY requirements.txt .
 
+# Actualizamos pip para evitar errores de parseo de JSON y mejorar la estabilidad
+RUN pip install --no-cache-dir --upgrade pip
+
 # Instalamos las librerías de Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
 
 # Copiamos todo el contenido del proyecto al contenedor
 COPY . .
