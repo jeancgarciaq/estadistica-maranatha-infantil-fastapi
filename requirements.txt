@@ -13,3 +13,4 @@ sqlalchemy-utils
 passlib
 bcrypt==4.0.1
 python-jose[cryptography]
+psycopg2-binary
