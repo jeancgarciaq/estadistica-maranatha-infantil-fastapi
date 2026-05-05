@@ -1,0 +1,13 @@
+# Ignorar archivos y carpetas locales para que la imagen sea ligera
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+.env
+.git
+.gitignore
+venv/
+.buildozer/
+bin/
+models/*.db
