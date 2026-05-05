@@ -178,3 +178,94 @@ class UsuariosController(BaseController):
 
         permisos = {perm.codigo for perm in (usuario.rol.permisos or [])}
         return permiso_codigo in permisos or '*' in permisos
+
+    def solicitar_restablecimiento_contrasena(self, email_o_username):
+        """
+        Genera un token de restablecimiento de contraseña y lo guarda en la base de datos.
+        Luego, envía un correo electrónico con el enlace.
+        """
+        db = self.get_db_session()
+        try:
+            usuario = db.query(Usuario).filter(
+                (Usuario.username == email_o_username) | (Usuario.username == email_o_username.split('@')[0])
+            ).first()
+
+            if not usuario:
+                logger.warning(f"Intento de restablecimiento de contraseña para usuario no encontrado: {email_o_username}")
+                # Por seguridad devolvemos True para no revelar si el correo existe
+                return True, "Si tu cuenta existe, recibirás un correo electrónico con instrucciones."
+
+            token = str(uuid.uuid4())
+            expiracion = datetime.now() + timedelta(hours=1)
+
+            usuario.reset_token = token
+            usuario.reset_token_expiry = expiracion
+            db.commit()
+
+            smtp_server = os.getenv("SMTP_SERVER")
+            smtp_port = int(os.getenv("SMTP_PORT", 465))
+            smtp_email = os.getenv("SMTP_EMAIL")
+            smtp_password = os.getenv("SMTP_PASSWORD")
+
+            if not all([smtp_server, smtp_port, smtp_email, smtp_password]):
+                logger.error("Configuración SMTP incompleta en variables de entorno.")
+                return False, "Error interno: Configuración de correo incompleta."
+
+            # En producción, cambia http://localhost:8000 por tu dominio real
+            reset_link = f"http://localhost:8000/reset-password/{token}"
+            
+            mensaje_texto = (
+                f"Hola {usuario.username},\n\n"
+                f"Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:\n"
+                f"{reset_link}\n\n"
+                f"Este enlace expirará en 1 hora.\n\n"
+                f"Si no solicitaste este cambio, puedes ignorar este correo.\n\n"
+                f"Atentamente,\nEquipo de Soporte EMI"
+            )
+            
+            msg = MIMEText(mensaje_texto)
+            msg['Subject'] = "Restablecimiento de Contraseña - EMI"
+            msg['From'] = smtp_email
+            msg['To'] = usuario.username # Se asume que el username es el correo
+
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+                server.login(smtp_email, smtp_password)
+                server.send_message(msg)
+            
+            return True, "Si tu cuenta existe, recibirás un correo electrónico con instrucciones."
+        except Exception as e:
+            db.rollback()
+            return self.manejar_excepcion(e, "Error al procesar el restablecimiento de contraseña")
+        finally:
+            if not self.session:
+                db.close()
+
+    def validar_token_restablecimiento(self, token):
+        db = self.get_db_session()
+        try:
+            usuario = db.query(Usuario).filter(Usuario.reset_token == token).first()
+            if usuario and usuario.reset_token_expiry and usuario.reset_token_expiry > datetime.now():
+                return usuario
+            return None
+        finally:
+            if not self.session:
+                db.close()
+
+    def restablecer_contrasena(self, token, nueva_contrasena):
+        db = self.get_db_session()
+        try:
+            usuario = self.validar_token_restablecimiento(token)
+            if not usuario:
+                return False, "El enlace es inválido o ha expirado."
+            
+            usuario.password = Usuario.hash_password(nueva_contrasena)
+            usuario.reset_token = None
+            usuario.reset_token_expiry = None
+            db.commit()
+            return True, "Contraseña actualizada correctamente."
+        except SQLAlchemyError as e:
+            db.rollback()
+            return self.manejar_excepcion(e, "Error al actualizar la contraseña")
+        finally:
+            if not self.session:
+                db.close()
