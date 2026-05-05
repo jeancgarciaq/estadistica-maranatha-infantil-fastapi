@@ -58,7 +58,13 @@
             <i class="la la-home text-2xl"></i>
             <span class="text-[10px] uppercase font-bold">Inicio</span>
         </a>
-        <!-- Aquí se pueden añadir accesos directos rápidos -->
+        {% if user.rol.nombre == 'root' %}
+        <a href="/usuarios"
+            class="flex flex-col items-center p-2 text-slate-400 hover:text-purple-400 transition-colors">
+            <i class="la la-users-cog text-2xl"></i>
+            <span class="text-[10px] uppercase font-bold">Usuarios</span>
+        </a>
+        {% endif %}
     </nav>
     {% endif %}
 
