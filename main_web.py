@@ -44,7 +44,7 @@ templates = Jinja2Templates(directory="web/templates")
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/login", "/logout", "/static", "/api/config/medidas"]
+    public_paths = ["/login", "/logout", "/static", "/api/config/medidas", "/register", "/reset-password"]
     
     if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
@@ -86,6 +86,48 @@ async def login(request: Request, username: str = Form(...), password: str = For
         return response
     else:
         return templates.TemplateResponse(request, "login.html", {"error": mensaje})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_view(request: Request, db: Session = Depends(get_db)):
+    controller = UsuariosController(session=db)
+    roles = controller.listar_roles()
+    # Generamos un desafío matemático simple para el anti-spam
+    num1, num2 = 7, 5 # En producción esto debería ser aleatorio
+    return templates.TemplateResponse(request, "register.html", {
+        "roles": roles,
+        "math_challenge": f"¿Cuánto es {num1} + {num2}?",
+        "math_result": num1 + num2
+    })
+
+@app.post("/register")
+async def register_post(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    rol_nombre: str = Form(...),
+    math_answer: int = Form(...),
+    math_expected: int = Form(...),
+    website: str = Form(None), # Campo Honeypot
+    db: Session = Depends(get_db)
+):
+    if math_answer != math_expected:
+        return templates.TemplateResponse(request, "register.html", {
+            "error": "Respuesta matemática incorrecta.",
+            "roles": UsuariosController(session=db).listar_roles()
+        })
+
+    controller = UsuariosController(session=db)
+    datos = {
+        "username": username,
+        "password": password,
+        "rol_nombre": rol_nombre,
+        "website": website
+    }
+    
+    exito, mensaje = controller.registrar_usuario(datos)
+    if exito:
+        return RedirectResponse(url="/?msg=Registro exitoso. Ya puede iniciar sesión.", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse(request, "register.html", {"error": mensaje, "roles": controller.listar_roles()})
 
 @app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
