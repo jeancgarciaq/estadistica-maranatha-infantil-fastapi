@@ -470,7 +470,7 @@ class ReporteEstadisticoService:
             
         lineas.extend([
             '',
-            '11. Salones Cerrados (sin registro de asistencia)',
+            '2. Salones Cerrados (sin registro de asistencia)',
         ])
         if resumen.salones_cerrados:
             for salon in resumen.salones_cerrados:
@@ -478,6 +478,116 @@ class ReporteEstadisticoService:
         else:
             lineas.append('- Todos los salones tuvieron registro de asistencia.')
 
+
+        lineas.extend([
+            '',
+            '11. Salones Cerrados (sin registro de asistencia)',
+        ])
+        if resumen.salones_cerrados:
+            for salon in resumen.salones_cerrados:
+                lineas.append(f"- {salon['nombre']} (Edad: {salon['edad']})")
+        # La sección 11 original se ha movido, este bloque se elimina o se comenta si no es necesario.
+        # else:
+        #     lineas.append('- Todos los salones tuvieron registro de asistencia.')
+
+        lineas.extend([
+            '',
+            '3. Asistencia por aula', # Era la sección 2
+        ])
+        if resumen.aulas:
+            for aula in resumen.aulas:
+                lineas.append(
+                    f"- {aula['nombre']}: Niños {aula['ninos']}, Niñas {aula['ninas']}, "
+                    f"Servidores {aula['servidores']}, Total {aula['total']}"
+                )
+        else:
+            lineas.append('- Sin registros de aulas.')
+
+        lineas.extend([
+            '',
+            '4. Donaciones registradas', # Era la sección 3
+        ])
+        if resumen.donaciones:
+            for donacion in resumen.donaciones:
+                lineas.append(f"- {donacion['descripcion']}: {self._fmt(donacion['cantidad'])} {donacion['unidad']}")
+        else:
+            lineas.append('- Sin donaciones registradas.')
+
+        lineas.extend([
+            '',
+            '5. Alimentos preparados', # Era la sección 4
+        ])
+        if resumen.preparados:
+            for preparado in resumen.preparados:
+                lineas.append(f"- {preparado['descripcion']}: {self._fmt(preparado['cantidad'])} {preparado['unidad']} ({preparado['equipo']})")
+        else:
+            lineas.append('- Sin alimentos preparados registrados.')
+
+        lineas.extend([
+            '',
+            '6. Conversión de donaciones en alimentos preparados', # Era la sección 5
+        ])
+        if resumen.componentes:
+            agrupados = defaultdict(list)
+            for componente in resumen.componentes:
+                agrupados[componente['preparado_id']].append(componente)
+            for items in agrupados.values():
+                lineas.append(f"- {items[0]['preparado_descripcion']}:")
+                for item in items:
+                    lineas.append(
+                        f"  * {item['materia_descripcion']}: {self._fmt(item['cantidad_usada'])} {item['unidad']}"
+                    )
+        else:
+            lineas.append('- Sin conversión registrada.')
+
+        lineas.extend([
+            '',
+            '7. Distribución detallada', # Era la sección 6
+        ])
+        if resumen.distribuciones:
+            for distribucion in resumen.distribuciones:
+                lineas.append(
+                    f"- {distribucion['origen']} -> {distribucion['destino']}: {self._fmt(distribucion['cantidad'])} {distribucion['unidad']}"
+                )
+        else:
+            lineas.append('- Sin distribuciones registradas.')
+
+        lineas.extend([
+            '',
+            '8. Pendientes sin distribuir', # Era la sección 7
+            f"Donaciones pendientes: {len(resumen.donaciones_sin_distribuir)}",
+        ])
+        for pendiente in resumen.donaciones_sin_distribuir:
+            lineas.append(
+                f"- {pendiente['descripcion']}: usada en preparados {self._fmt(pendiente['cantidad_usada_en_preparados'])} {pendiente['unidad']}, pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
+            )
+        lineas.append(f"Alimentos preparados pendientes: {len(resumen.preparados_sin_distribuir)}")
+        for pendiente in resumen.preparados_sin_distribuir:
+            lineas.append(
+                f"- {pendiente['descripcion']}: pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
+            )
+
+        lineas.extend([
+            '',
+            '9. Servidores de otras áreas', # Era la sección 8
+        ])
+        if resumen.otras_areas:
+            for registro in resumen.otras_areas:
+                lineas.append(
+                    f"- ID {registro['id']}: total {registro['servidores']} (Alabanza {registro['alabanza']}, Protocolo {registro['protocolo']}, Semillitas {registro['semillitas']}, Sonido {registro['sonido']}, Teatro {registro['teatro']}, TV {registro['tv']}, Ujier {registro['ujier']}, Seguridad {registro['seguridad']})"
+                )
+        else:
+            lineas.append('- Sin registros de otras áreas.')
+
+        lineas.extend([
+            '',
+            '10. Recepción', # Era la sección 9
+        ])
+        if resumen.recepciones:
+            for recepcion in resumen.recepciones:
+                lineas.append(f"- ID {recepcion['id']}: {recepcion['nombre']}")
+        else:
+            lineas.append('- Sin registros de recepción.')
 
         lineas.extend([
             '',
@@ -553,6 +663,20 @@ class ReporteEstadisticoService:
         ]
         story.append(self._tabla(resumen_data, [9 * cm, 5 * cm]))
 
+        story.append(Spacer(1, 0.3 * cm))
+        self._agregar_seccion(story, '2. Salones Cerrados (sin registro de asistencia)', styles)
+        if resumen.salones_cerrados:
+            salones_cerrados_data = [['ID', 'Nombre del Salón', 'Edad']]
+            for salon in resumen.salones_cerrados:
+                salones_cerrados_data.append([
+                    str(salon['id']),
+                    salon['nombre'],
+                    salon['edad'],
+                ])
+            story.append(self._tabla(salones_cerrados_data))
+        else:
+            story.append(Paragraph('Todos los salones tuvieron registro de asistencia.', styles['CuerpoInforme']))
+
         if graficos:
             # Verificamos si hay gráficos (objetos Drawing o rutas de archivos)
             graficos_validos = [v for v in graficos.values() if v]
@@ -564,7 +688,7 @@ class ReporteEstadisticoService:
                         story.append(Image(item, width=16 * cm, height=7.5 * cm))
                     else:
                         story.append(item) # Insertar Drawing directamente
-                    story.append(Spacer(1, 0.5 * cm))
+                    story.append(Spacer(1, 0.3 * cm))
 
         self._agregar_seccion(story, '3. Asistencia por aula', styles)
         aulas_data = [[
@@ -703,19 +827,8 @@ class ReporteEstadisticoService:
         else:
             story.append(Paragraph('Sin registros de recepción.', styles['CuerpoInforme']))
             
-        story.append(Spacer(1, 0.3 * cm))
-        self._agregar_seccion(story, '11. Salones Cerrados (sin registro de asistencia)', styles)
-        if resumen.salones_cerrados:
-            salones_cerrados_data = [['ID', 'Nombre del Salón', 'Edad']]
-            for salon in resumen.salones_cerrados:
-                salones_cerrados_data.append([
-                    str(salon['id']),
-                    salon['nombre'],
-                    salon['edad'],
-                ])
-            story.append(self._tabla(salones_cerrados_data))
-        else:
-            story.append(Paragraph('Todos los salones tuvieron registro de asistencia.', styles['CuerpoInforme']))
+        # La sección 11 original se ha movido, este bloque se elimina o se comenta si no es necesario.
+        # story.append(Spacer(1, 0.3 * cm))
         story.append(Spacer(1, 0.3 * cm))
 
         conclusion = (
