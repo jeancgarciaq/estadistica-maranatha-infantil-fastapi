@@ -1,7 +1,8 @@
 import logging
 import secrets
 from datetime import datetime, timedelta
-
+import smtplib
+from email.mime.text import MIMEText
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
