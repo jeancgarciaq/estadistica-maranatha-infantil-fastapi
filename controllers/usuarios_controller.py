@@ -1,10 +1,10 @@
 import logging
-import secrets
 import os
 import uuid
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
@@ -17,7 +17,7 @@ from models.security import (
     pwd_context # Import pwd_context for password hashing
 )
  
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # Moved this line to avoid re-declaration
 
 class UsuariosController(BaseController):
     def __init__(self, session=None):
