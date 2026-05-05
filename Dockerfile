@@ -16,11 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copiamos el archivo de requerimientos primero para aprovechar el cache de Docker
 COPY requirements.txt .
 
-# Actualizamos pip para evitar errores de parseo de JSON y mejorar la estabilidad
-RUN pip install --no-cache-dir --upgrade pip
-
-# Instalamos las librerías de Python
-RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
+# Actualizamos pip e instalamos las librerías en un solo paso
+# Aumentamos el timeout a 1000 segundos por la conexión lenta
+RUN python -m pip install --no-cache-dir --upgrade pip && \
+    python -m pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Copiamos todo el contenido del proyecto al contenedor
 COPY . .
