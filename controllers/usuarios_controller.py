@@ -202,13 +202,21 @@ class UsuariosController(BaseController):
             usuario.reset_token_expiry = expiracion
             db.commit()
 
-            smtp_server = os.getenv("SMTP_SERVER")
-            smtp_port = int(os.getenv("SMTP_PORT", 465))
-            smtp_email = os.getenv("SMTP_EMAIL")
-            smtp_password = os.getenv("SMTP_PASSWORD")
+            # Cargamos variables y limpiamos espacios en la contraseña
+            smtp_server = os.getenv("SMTP_SERVER", "").strip()
+            smtp_port_raw = os.getenv("SMTP_PORT", "465")
+            smtp_email = os.getenv("SMTP_EMAIL", "").strip()
+            smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 
-            if not all([smtp_server, smtp_port, smtp_email, smtp_password]):
-                logger.error("Configuración SMTP incompleta en variables de entorno.")
+            smtp_port = int(smtp_port_raw) if smtp_port_raw.isdigit() else 465
+
+            if not all([smtp_server, smtp_email, smtp_password]):
+                missing = [k for k, v in {
+                    "SMTP_SERVER": smtp_server, 
+                    "SMTP_EMAIL": smtp_email, 
+                    "SMTP_PASSWORD": smtp_password
+                }.items() if not v]
+                logger.error(f"Configuración SMTP incompleta. Faltan: {', '.join(missing)}")
                 return False, "Error interno: Configuración de correo incompleta."
 
             # En producción, cambia http://localhost:8000 por tu dominio real
