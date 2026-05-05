@@ -205,7 +205,8 @@ class UsuariosController(BaseController):
             # Cargamos variables y limpiamos espacios en la contraseña
             smtp_server = os.getenv("SMTP_SERVER", "").strip()
             smtp_port_raw = os.getenv("SMTP_PORT", "465")
-            smtp_email = os.getenv("SMTP_EMAIL", "").strip()
+            # Intentamos obtener el correo desde SMTP_EMAIL o SMTP_USER para mayor compatibilidad
+            smtp_email = (os.getenv("SMTP_EMAIL") or os.getenv("SMTP_USER") or "").strip()
             smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 
             smtp_port = int(smtp_port_raw) if smtp_port_raw.isdigit() else 465
@@ -213,7 +214,7 @@ class UsuariosController(BaseController):
             if not all([smtp_server, smtp_email, smtp_password]):
                 missing = [k for k, v in {
                     "SMTP_SERVER": smtp_server, 
-                    "SMTP_EMAIL": smtp_email, 
+                    "SMTP_EMAIL/SMTP_USER": smtp_email, 
                     "SMTP_PASSWORD": smtp_password
                 }.items() if not v]
                 logger.error(f"Configuración SMTP incompleta. Faltan: {', '.join(missing)}")
