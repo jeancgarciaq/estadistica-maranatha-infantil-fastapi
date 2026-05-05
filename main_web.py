@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from models.database import get_db, configure_database
 from utils.env_loader import load_app_env
 from utils.config_loader import obtener_medidas
+from models.security import ROLE_ROOT, Usuario, Rol
 
 from controllers.areas_controller import AreasController
 from controllers.aulas_controller import AulasController
@@ -58,7 +59,6 @@ async def auth_middleware(request: Request, call_next):
     db = next(get_db())
     try:
         controller = UsuariosController(session=db)
-        from models.security import Usuario
         user = db.query(Usuario).filter(Usuario.username == username, Usuario.activo == True).first()
         if not user:
             raise Exception("Usuario no encontrado o inactivo")
@@ -571,7 +571,7 @@ async def update_logistica(
 async def delete_logistica(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
     controller = LogisticaController(session=db)
     exito, mensaje = controller.eliminar_logistica(id, user_context={"user": request.state.user})
-    return RedirectResponse(url=f"/logistica?msg={mensaje}&type={'success' if xito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/logistica?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/otras_areas", response_class=HTMLResponse)
 async def view_otrasareas(request: Request):
