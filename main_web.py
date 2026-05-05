@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+from typing import Optional
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -102,21 +103,32 @@ async def register_view(request: Request, db: Session = Depends(get_db)):
 @app.post("/register")
 async def register_post(
     request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
-    rol_nombre: str = Form(...),
-    math_answer: int = Form(...),
-    math_expected: int = Form(...),
+    username: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
+    rol_nombre: Optional[str] = Form(None),
+    math_answer: Optional[int] = Form(None),
+    math_expected: Optional[int] = Form(None),
     website: str = Form(None), # Campo Honeypot
     db: Session = Depends(get_db)
 ):
+    controller = UsuariosController(session=db)
+    # Validación de campos obligatorios para evitar el JSON de error
+    if not all([username, password, rol_nombre, math_answer is not None]):
+        return templates.TemplateResponse(request, "register.html", {
+            "error": "Todos los campos son obligatorios.",
+            "roles": controller.listar_roles(),
+            "math_challenge": "¿Cuánto es 7 + 5?",
+            "math_result": 12
+        })
+
     if math_answer != math_expected:
         return templates.TemplateResponse(request, "register.html", {
             "error": "Respuesta matemática incorrecta.",
-            "roles": UsuariosController(session=db).listar_roles()
+            "roles": controller.listar_roles(),
+            "math_challenge": "¿Cuánto es 7 + 5?",
+            "math_result": 12
         })
 
-    controller = UsuariosController(session=db)
     datos = {
         "username": username,
         "password": password,
@@ -127,7 +139,12 @@ async def register_post(
     exito, mensaje = controller.registrar_usuario(datos)
     if exito:
         return RedirectResponse(url="/?msg=Registro exitoso. Ya puede iniciar sesión.", status_code=status.HTTP_303_SEE_OTHER)
-    return templates.TemplateResponse(request, "register.html", {"error": mensaje, "roles": controller.listar_roles()})
+    return templates.TemplateResponse(request, "register.html", {
+        "error": mensaje, 
+        "roles": controller.listar_roles(),
+        "math_challenge": "¿Cuánto es 7 + 5?",
+        "math_result": 12
+    })
 
 @app.get("/forgot-password", response_class=HTMLResponse)
 async def forgot_password_view(request: Request):
