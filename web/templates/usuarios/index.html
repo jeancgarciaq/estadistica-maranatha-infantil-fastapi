@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Usuarios - EMI{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 max-w-6xl">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-blue-400">Panel de Usuarios</h2>
+            <p class="text-xs text-slate-500">Configuración global de accesos y roles</p>
+        </div>
+        <button onclick="openCreateModal()"
+            class="bg-green-600 hover:bg-green-700 p-2 px-4 rounded-lg font-bold flex items-center gap-2 transition-all">
+            <i class="la la-user-plus text-xl"></i> Nuevo Usuario
+        </button>
+    </div>
+
+    <div class="glass p-4 rounded-xl mb-6 border border-slate-700 flex flex-wrap gap-4 items-center">
+        <div class="flex-grow">
+            <input type="text" id="searchInput" placeholder="Buscar por usuario o rol..."
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <button onclick="cargarUsuarios()" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg px-4">
+            <i class="la la-sync"></i>
+        </button>
+    </div>
+
+    <div id="usuariosContainer" class="glass rounded-xl overflow-hidden border border-slate-700">
+        <div class="p-10 text-center text-slate-500">Iniciando vista de administración...</div>
+    </div>
+</div>
+
+<!-- Modal Crear/Editar -->
+<div id="userModal"
+    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl">
+        <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+            <h3 id="modalTitle" class="text-xl font-bold text-blue-400">Editar Usuario</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i
+                    class="la la-times text-2xl"></i></button>
+        </div>
+        <form id="userForm" action="/usuarios/actualizar" method="post" class="p-6 space-y-4">
+            <input type="hidden" name="id" id="form_id">
+
+            <div>
+                <label class="block text-sm font-medium mb-1 text-slate-400">Nombre de Usuario</label>
+                <input type="text" name="username" id="form_username" required
+                    class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+                <label id="passLabel" class="block text-sm font-medium mb-1">Nueva Contraseña</label>
+                <input type="password" name="password" id="form_password"
+                    class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Rol en el Sistema</label>
+                <select name="rol_nombre" id="form_rol"
+                    class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg">
+                    {% for rol in roles %}
+                    <option value="{{ rol.nombre }}">{{ rol.nombre|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div id="activeRow" class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
+                <input type="checkbox" name="activo" id="form_activo"
+                    class="w-5 h-5 rounded border-slate-700 text-blue-500 bg-slate-800">
+                <label for="form_activo" class="text-sm font-medium">Cuenta Habilitada</label>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeModal()"
+                    class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                <button type="submit"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded-lg font-bold">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    async function cargarUsuarios() {
+        const container = document.getElementById('usuariosContainer');
+        const resp = await fetch('/usuarios/lista');
+        container.innerHTML = await resp.text();
+        aplicarFiltro();
+    }
+
+    function openCreateModal() {
+        const form = document.getElementById('userForm');
+        form.action = "/usuarios/crear";
+        document.getElementById('modalTitle').innerText = "Crear Nuevo Usuario";
+        document.getElementById('form_id').value = "";
+        document.getElementById('form_username').value = "";
+        document.getElementById('form_username').disabled = false;
+        document.getElementById('form_password').required = true;
+        document.getElementById('passLabel').innerText = "Contraseña";
+        document.getElementById('activeRow').classList.add('hidden');
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    function openEditModal(user) {
+        const form = document.getElementById('userForm');
+        form.action = "/usuarios/actualizar";
+        document.getElementById('modalTitle').innerText = "Editar Usuario: " + user.username;
+        document.getElementById('form_id').value = user.id;
+        document.getElementById('form_username').value = user.username;
+        document.getElementById('form_username').disabled = true;
+        document.getElementById('form_password').required = false;
+        document.getElementById('passLabel').innerText = "Cambiar Contraseña (opcional)";
+        document.getElementById('form_rol').value = user.rol;
+        document.getElementById('form_activo').checked = user.activo;
+        document.getElementById('activeRow').classList.remove('hidden');
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('userModal').classList.add('hidden');
+    }
+
+    function aplicarFiltro() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#usuariosTable tbody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(search) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', aplicarFiltro);
+    window.onload = cargarUsuarios;
+</script>
+{% endblock %}
