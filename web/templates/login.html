@@ -13,6 +13,20 @@
             <p class="text-slate-400 text-sm">Estadística Maranatha Infantil</p>
         </div>
 
+        <!-- Bloque para mostrar mensajes de éxito desde la URL (Redirects) -->
+        <div id="feedback-container"></div>
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const msg = urlParams.get('msg');
+            if (msg) {
+                document.getElementById('feedback-container').innerHTML = `
+                    <div class="mb-6 p-3 bg-emerald-500/20 border border-emerald-500/50 rounded-lg flex items-center gap-3">
+                        <i class="la la-check-circle text-emerald-400 text-xl"></i>
+                        <p class="text-emerald-200 text-xs">${msg}</p>
+                    </div>`;
+            }
+        </script>
+
         {% if error %}
         <div class="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-3">
             <i class="la la-exclamation-circle text-red-400 text-xl"></i>
@@ -38,6 +52,17 @@
                 INGRESAR
             </button>
         </form>
+
+        <!-- Enlaces a Registro y Recuperación -->
+        <div class="mt-8 pt-6 border-t border-white/10 text-center space-y-4">
+            <p class="text-sm text-slate-400">
+                ¿No tienes cuenta? <a href="/register" class="text-blue-400 hover:underline font-medium">Regístrate
+                    aquí</a>
+            </p>
+            <p class="text-sm text-slate-400">
+                <a href="/forgot-password" class="text-blue-400 hover:underline">¿Olvidaste tu contraseña?</a>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
