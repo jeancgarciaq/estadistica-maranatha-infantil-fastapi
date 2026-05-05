@@ -35,6 +35,7 @@ from sqlalchemy.orm import joinedload
 
 from models.aulas import Aula
 from models.donaciones import Donacion
+from models.salones import Salon
 from models.alimento_preparado import AlimentoPreparado
 from models.alimento_preparado_componente import AlimentoPreparadoComponente
 from models.distribucion import Distribucion
@@ -70,6 +71,7 @@ class ResumenEstadistico:
     distribuciones: list
     donaciones_sin_distribuir: list
     preparados_sin_distribuir: list
+    salones_cerrados: list # Nuevo campo para salones cerrados
 
 
 class ReporteEstadisticoService:
@@ -163,6 +165,13 @@ class ReporteEstadisticoService:
             'id': recepcion.id,
             'nombre': str(recepcion.nombre or ''),
             'fecha': recepcion.fecha,
+        }
+
+    def _serializar_salon(self, salon):
+        return {
+            'id': salon.id,
+            'nombre': salon.salon,
+            'edad': salon.edad,
         }
 
     def _serializar_donacion(self, donacion):
@@ -277,6 +286,12 @@ class ReporteEstadisticoService:
             .all()
         )
 
+        # Obtener todos los salones activos
+        todos_salones = self.session.query(Salon).filter(Salon.is_deleted == False).all()
+        
+        # IDs de los salones que sí tuvieron actividad (aulas registradas)
+        salones_con_actividad_ids = {aula.id_salon for aula in aulas}
+
         aulas_data = [self._serializar_aula(aula) for aula in aulas]
         otras_areas_data = [self._serializar_otra_area(registro) for registro in otras_areas]
         recepciones_data = [self._serializar_recepcion(recepcion) for recepcion in recepciones]
@@ -284,6 +299,10 @@ class ReporteEstadisticoService:
         preparados_data = [self._serializar_preparado(preparado) for preparado in preparados]
         componentes_data = [self._serializar_componente(componente) for componente in componentes]
         distribuciones_data = [self._serializar_distribucion(distribucion) for distribucion in distribuciones]
+
+        # Determinar salones cerrados
+        salones_cerrados_data = [self._serializar_salon(s) for s in todos_salones 
+                                 if s.id not in salones_con_actividad_ids]
 
         asistencia_ninos = sum(item['ninos'] for item in aulas_data)
         asistencia_ninas = sum(item['ninas'] for item in aulas_data)
@@ -336,6 +355,7 @@ class ReporteEstadisticoService:
             distribuciones=distribuciones_data,
             donaciones_sin_distribuir=donaciones_sin_distribuir,
             preparados_sin_distribuir=preparados_sin_distribuir,
+            salones_cerrados=salones_cerrados_data,
         )
 
     def formatear_vista_previa(self, resumen):
@@ -447,6 +467,17 @@ class ReporteEstadisticoService:
                 lineas.append(f"- ID {recepcion['id']}: {recepcion['nombre']}")
         else:
             lineas.append('- Sin registros de recepción.')
+            
+        lineas.extend([
+            '',
+            '11. Salones Cerrados (sin registro de asistencia)',
+        ])
+        if resumen.salones_cerrados:
+            for salon in resumen.salones_cerrados:
+                lineas.append(f"- {salon['nombre']} (Edad: {salon['edad']})")
+        else:
+            lineas.append('- Todos los salones tuvieron registro de asistencia.')
+
 
         lineas.extend([
             '',
@@ -671,6 +702,20 @@ class ReporteEstadisticoService:
             story.append(self._tabla(recepciones_data, [3 * cm, 12 * cm]))
         else:
             story.append(Paragraph('Sin registros de recepción.', styles['CuerpoInforme']))
+            
+        story.append(Spacer(1, 0.3 * cm))
+        self._agregar_seccion(story, '11. Salones Cerrados (sin registro de asistencia)', styles)
+        if resumen.salones_cerrados:
+            salones_cerrados_data = [['ID', 'Nombre del Salón', 'Edad']]
+            for salon in resumen.salones_cerrados:
+                salones_cerrados_data.append([
+                    str(salon['id']),
+                    salon['nombre'],
+                    salon['edad'],
+                ])
+            story.append(self._tabla(salones_cerrados_data))
+        else:
+            story.append(Paragraph('Todos los salones tuvieron registro de asistencia.', styles['CuerpoInforme']))
         story.append(Spacer(1, 0.3 * cm))
 
         conclusion = (
