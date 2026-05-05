@@ -4,7 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .python-version
-.env
+# .env  <-- Comentado para permitir que Docker lo vea durante el build local
 .git
 .gitignore
 venv/
