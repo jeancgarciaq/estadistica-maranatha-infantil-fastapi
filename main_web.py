@@ -36,7 +36,7 @@ load_app_env()
 configure_database()
 
 # Inicializar FastAPI
-app = FastAPI(title="Estadística Maranatha Infantil - Web")
+app = FastAPI(title="Estadística Maranatha Kids - Web")
 security = HTTPBearer()
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
