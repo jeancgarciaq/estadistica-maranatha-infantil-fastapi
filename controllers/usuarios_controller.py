@@ -67,7 +67,7 @@ class UsuariosController(BaseController):
     def listar_roles(self):
         db = self.get_db_session()
         try:
-            return self.query_activa(db).order_by(Rol.nombre.asc()).all()
+            return db.query(Rol).order_by(Rol.nombre.asc()).all()
         except SQLAlchemyError as e:
             logger.error('Error listando roles: %s', e)
             return []
@@ -97,7 +97,7 @@ class UsuariosController(BaseController):
                 raise ValueError('Ya existe un usuario con ese nombre.')
 
             # 2. Validar Rol y Límites
-            rol = self.query_activa(db).filter(Rol.nombre == rol_nombre).first()
+            rol = db.query(Rol).filter(Rol.nombre == rol_nombre).first()
             if not rol:
                 raise ValueError('Rol inválido.')
             
@@ -135,7 +135,7 @@ class UsuariosController(BaseController):
                 setattr(usuario, 'password', Usuario.hash_password(password))
 
             if rol_nombre:
-                rol = self.query_activa(db).filter(Rol.nombre == rol_nombre).first()
+                rol = db.query(Rol).filter(Rol.nombre == rol_nombre).first()
                 if not rol:
                     raise ValueError('Rol inválido.')
                 if getattr(usuario, 'username', None) == 'root' and getattr(rol, 'nombre', None) != ROLE_ROOT:
