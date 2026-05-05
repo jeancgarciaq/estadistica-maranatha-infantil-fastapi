@@ -1,76 +1,77 @@
-# Sistema Administrativo para el Área de Atención a Niños en la Iglesia
+# Sistema de Gestión de Estadísticas Maranatha Kids - Web v0.1
 
-Este proyecto es una aplicación desarrollada en Python utilizando Kivy y SQLAlchemy para gestionar la asistencia y distribución de meriendas en el área de atención a niños dentro de una iglesia.
+Este proyecto es una aplicación web robusta diseñada para gestionar la asistencia, logística y distribución de donaciones del área infantil de la iglesia. Evolucionado de una versión de escritorio a una arquitectura web escalable.
 
 ## Autor
 **Jean Carlo Garcia**  
 GitHub: [jeancgarciaq](https://github.com/jeancgarciaq)
 
 ## Tecnologías Utilizadas
-- **Python** 3.13
-- **Kivy** 2.3.1
-- **SQLAlchemy** 2.0.38
-- **SQLite** (Base de datos local)
+- **Backend:** Python 3.11 + FastAPI
+- **Base de Datos:** SQLAlchemy 2.0 (Compatible con SQLite y PostgreSQL)
+- **Frontend:** Jinja2 Templates + Tailwind CSS (Diseño Mobile-First)
+- **Contenerización:** Docker
+- **Seguridad:** Passlib (Bcrypt) + Sistema de Roles Dinámicos
+- **Reportes:** ReportLab (Generación de PDF con gráficos vectoriales)
 
 ## Características
-- Control de asistencia de maestros y auxiliares por salón.
-- Registro de la cantidad de niños atendidos por salón.
-- Gestión de donaciones de meriendas.
-- Registro de meriendas repartidas (a niños, maestros y auxiliares).
-- Navegación intuitiva mediante Kivy con `ScreenManager`.
-- Autenticación de usuarios con roles y permisos.
-- Gestión de usuarios exclusiva para el rol `root`.
+- **Dashboard Informativo:** Resumen visual de la asistencia y estados.
+- **Control de Asistencia:** Registro detallado por aula (niños, niñas y servidores).
+- **Gestión de Inventario:** Control de donaciones, alimentos preparados y su distribución.
+- **Reporte Estadístico:** Generación de informes en PDF con detección automática de salones cerrados y gráficos de asistencia.
+- **Seguridad Avanzada:** 
+    - Registro con validación anti-bot (Honeypot + Desafío matemático).
+    - Recuperación de contraseña mediante tokens temporales.
+    - Gestión de usuarios exclusiva para el superusuario (`root`).
 
 ## Usuarios Iniciales
 - Usuario root: `root`
 - Contraseña root: `root123`
-- Usuario administrador: `admin`
-- Contraseña administrador: `admin123`
 
-El usuario `root` es el único que puede acceder a la pantalla de gestión de usuarios para crear cuentas, cambiar contraseñas y asignar roles.
+*Nota: El usuario root es el único con permisos para acceder al Panel de Gestión de Usuarios (`/usuarios`).*
 
-## Instalación
-1. Clona este repositorio:
-   ```sh
-   git clone https://github.com/jeancgarciaq/New-Estadistica-Maranatha-Infantil-Kivy.git
-   cd tu-repositorio
-   ```
-2. Crea un entorno virtual (opcional pero recomendado):
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # En macOS/Linux
-   venv\Scripts\activate     # En Windows
-   ```
-3. Instala las dependencias:
-   ```sh
-   pip install -r requirements.txt
-   ```
-   *(Si el archivo `requirements.txt` no existe, instala manualmente Kivy y SQLAlchemy con `pip install kivy sqlalchemy`)*
+## Instalación y Despliegue con Docker
 
-## Ejecución del Proyecto
-Para ejecutar la aplicación, usa el siguiente comando:
-```sh
-python app.py
+La forma recomendada de ejecutar la aplicación es mediante Docker para asegurar la compatibilidad de todas las dependencias.
+
+### 1. Construir la imagen
+Desde la raíz del proyecto:
+```bash
+docker build -t emi-web-app .
 ```
 
-## Build Android
-Para compilar el APK con Buildozer y forzar Java 17, usa:
-```sh
-bash scripts/build_android.sh
+### 2. Ejecutar localmente
+```bash
+docker run -p 8000:8080 emi-web-app
 ```
+La aplicación estará disponible en `http://localhost:8000`.
 
-Si quieres pasar argumentos extra a Buildozer, el script los reenvia tal cual.
+## Despliegue en la Nube (Google Cloud Run)
 
-Si tu sistema tiene varias versiones de Java instaladas, la documentación de Buildozer recomienda fijar primero la versión activa con:
-```sh
-sudo update-alternatives --config java
-sudo update-alternatives --config javac
-```
-Selecciona Java 17 en ambos comandos antes de lanzar la compilación.
+1. **Habilitar la conexión a Cloud SQL:**
+   Al configurar el servicio en Cloud Run, asegúrate de añadir la instancia de Cloud SQL (`emk-db`) en la pestaña de "Conexiones".
 
-## Contribuciones
-Si deseas contribuir al desarrollo del proyecto, realiza un fork del repositorio, crea una nueva rama con tus cambios y envía un pull request.
+2. **Configurar la variable DATABASE_URL:**
+   Utiliza el formato de socket de Unix para mayor seguridad:
+   `DATABASE_URL=postgresql+psycopg2://[USER]:[PASSWORD]@/[DB_NAME]?host=/cloudsql/[PROJECT_ID]:[REGION]:emk-db`
+
+   *Nota: La aplicación creará automáticamente las tablas y el usuario root al iniciar por primera vez.*
+
+3. **Etiquetar la imagen:**
+   ```bash
+   docker tag emi-web-app gcr.io/[PROJECT_ID]/emi-web-app:v0.1
+   ```
+4. **Subir al registro:**
+   ```bash
+   docker push gcr.io/[PROJECT_ID]/emi-web-app:v0.1
+   ```
+5. **Desplegar:**
+   ```bash
+   gcloud run deploy emi-web-app --image gcr.io/[PROJECT_ID]/emi-web-app:v0.1 --platform managed --port 8080
+   ```
+
+---
+© 2025 Jean Carlo Garcia. Versión Web 0.1.
 
 ---
 © 2025 Jean Carlo Garcia. Todos los derechos reservados.
-
