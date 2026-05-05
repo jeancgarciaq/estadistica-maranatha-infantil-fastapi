@@ -1,5 +1,7 @@
 import logging
 import secrets
+import os
+import uuid
 from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
