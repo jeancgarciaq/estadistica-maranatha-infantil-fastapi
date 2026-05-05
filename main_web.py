@@ -59,7 +59,7 @@ async def auth_middleware(request: Request, call_next):
 
     db = next(get_db())
     try:
-        controller = UsuariosController(session=db)
+        controller = UsuariosController(db)
         user = (
             db.query(Usuario)
             .options(joinedload(Usuario.rol))
@@ -82,7 +82,7 @@ async def index(request: Request):
 
 @app.post("/login")
 async def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     exito, usuario, mensaje = controller.autenticar(username, password)
     
     if exito:
@@ -95,7 +95,7 @@ async def login(request: Request, username: str = Form(...), password: str = For
 
 @app.get("/register", response_class=HTMLResponse)
 async def register_view(request: Request, db: Session = Depends(get_db)):
-    controller = UsuariosController(session=db)
+    controller = UsuariosController(db)
     roles = controller.listar_roles()
     # Generamos un desafío matemático simple para el anti-spam
     num1, num2 = 7, 5 # En producción esto debería ser aleatorio
@@ -267,7 +267,7 @@ async def view_donaciones(request: Request):
 
 @app.get("/donaciones/lista", response_class=HTMLResponse)
 async def list_donaciones(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     donaciones = controller.listar_donaciones(fecha=fecha)
     return templates.TemplateResponse(request, "donaciones/list.html", {
         "donaciones": donaciones,
@@ -285,7 +285,7 @@ async def create_donacion(
     equipo: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     datos = {"descripcion": descripcion, "cantidad": cantidad, "unidad": unidad, "fecha": fecha, "equipo": equipo}
     exito, mensaje = controller.crear_donacion(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/donaciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
@@ -301,14 +301,14 @@ async def update_donacion(
     equipo: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     datos = {"descripcion": descripcion, "cantidad": cantidad, "unidad": unidad, "fecha": fecha, "equipo": equipo}
     exito, mensaje = controller.actualizar_donacion(id, datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/donaciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/donaciones/eliminar")
 async def delete_donacion(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     exito, mensaje = controller.eliminar_donacion(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/donaciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -321,7 +321,7 @@ async def view_preparados(request: Request):
 
 @app.get("/preparados/lista", response_class=HTMLResponse)
 async def list_preparados(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     preparados = controller.listar_preparados(fecha=fecha)
     return templates.TemplateResponse(request, "preparados/list.html", {
         "user": request.state.user,
@@ -340,7 +340,7 @@ async def create_preparado(
     componentes_json: str = Form(...), # Recibimos la lista de ingredientes como JSON desde el frontend
     db: Session = Depends(get_db)
 ):
-    controller = DonacionesController(session=db)
+    controller = DonacionesController(db)
     datos_res = {"descripcion": descripcion, "cantidad": cantidad, "unidad": unidad, "fecha": fecha, "equipo": equipo}
     try:
         lista_comp = json.loads(componentes_json)
@@ -375,7 +375,7 @@ async def view_distribuciones(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/distribuciones/lista", response_class=HTMLResponse)
 async def list_distribuciones(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = DistribucionesController(session=db)
+    controller = DistribucionesController(db)
     distribuciones = controller.listar_distribuciones(fecha=fecha)
     return templates.TemplateResponse(request, "distribuciones/list.html", {
         "user": request.state.user,
@@ -396,7 +396,7 @@ async def create_distribucion(
     fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = DistribucionesController(session=db)
+    controller = DistribucionesController(db)
     datos = {
         "donacion_id": donacion_id, "alimento_preparado_id": alimento_preparado_id,
         "salon_id": salon_id, "area_id": area_id, "recepcion_id": recepcion_id,
@@ -407,7 +407,7 @@ async def create_distribucion(
 
 @app.post("/distribuciones/eliminar")
 async def delete_distribucion(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = DistribucionesController(session=db)
+    controller = DistribucionesController(db)
     exito, mensaje = controller.eliminar_distribucion(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/distribuciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -437,7 +437,7 @@ async def view_areas(request: Request):
 
 @app.get("/areas/lista", response_class=HTMLResponse)
 async def list_areas(request: Request, db: Session = Depends(get_db)):
-    controller = AreasController(session=db)
+    controller = AreasController(db)
     areas = controller.listar_areas()
     return templates.TemplateResponse(request, "areas/list.html", {
         "user": request.state.user,
@@ -446,19 +446,19 @@ async def list_areas(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/areas/crear")
 async def create_area(request: Request, nombre: str = Form(...), db: Session = Depends(get_db)):
-    controller = AreasController(session=db)
+    controller = AreasController(db)
     exito, mensaje = controller.crear_area(nombre, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/areas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/areas/actualizar")
 async def update_area(request: Request, id: int = Form(...), nombre: str = Form(...), db: Session = Depends(get_db)):
-    controller = AreasController(session=db)
+    controller = AreasController(db)
     exito, mensaje = controller.actualizar_area(id, nombre, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/areas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/areas/eliminar")
 async def delete_area(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = AreasController(session=db)
+    controller = AreasController(db)
     exito, mensaje = controller.eliminar_area(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/areas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -470,7 +470,7 @@ async def view_salones(request: Request):
 
 @app.get("/salones/lista", response_class=HTMLResponse)
 async def list_salones(request: Request, db: Session = Depends(get_db)):
-    controller = SalonesController(session=db)
+    controller = SalonesController(db)
     salones = controller.listar_salones()
     return templates.TemplateResponse(request, "salones/list.html", {
         "user": request.state.user,
@@ -479,26 +479,26 @@ async def list_salones(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/salones/crear")
 async def create_salon(request: Request, nombre: str = Form(...), edad: str = Form(...), db: Session = Depends(get_db)):
-    controller = SalonesController(session=db)
+    controller = SalonesController(db)
     exito, mensaje = controller.crear_salon(nombre, edad, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/salones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/salones/actualizar")
 async def update_salon(request: Request, id: int = Form(...), nombre: str = Form(...), edad: str = Form(...), db: Session = Depends(get_db)):
-    controller = SalonesController(session=db)
+    controller = SalonesController(db)
     exito, mensaje = controller.actualizar_salon(id, nombre, edad, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/salones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/salones/eliminar")
 async def delete_salon(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = SalonesController(session=db)
+    controller = SalonesController(db)
     exito, mensaje = controller.eliminar_salon(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/salones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/aulas", response_class=HTMLResponse)
 async def view_aulas(request: Request, db: Session = Depends(get_db)):
     # Necesitamos los salones para el selector del formulario
-    controller = AulasController(session=db)
+    controller = AulasController(db)
     salones = controller.listar_salones()
     return templates.TemplateResponse(request, "aulas/index.html", {
         "user": request.state.user,
@@ -507,7 +507,7 @@ async def view_aulas(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/aulas/lista", response_class=HTMLResponse)
 async def list_aulas(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = AulasController(session=db)
+    controller = AulasController(db)
     aulas = controller.listar_aulas_por_fecha(fecha)
     return templates.TemplateResponse(request, "aulas/list.html", {
         "user": request.state.user,
@@ -530,7 +530,7 @@ async def create_aula(
     condicion: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = AulasController(session=db)
+    controller = AulasController(db)
     datos = {
         "id_salon": id_salon, "fecha": fecha, "maestra": maestra,
         "auxiliar": auxiliar, "capitan": capitan, "subcapitan": subcapitan,
@@ -555,7 +555,7 @@ async def update_aula(
     condicion: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = AulasController(session=db)
+    controller = AulasController(db)
     datos = {
         "id_salon": id_salon, "fecha": fecha, "maestra": maestra,
         "auxiliar": auxiliar, "capitan": capitan, "subcapitan": subcapitan,
@@ -566,7 +566,7 @@ async def update_aula(
 
 @app.post("/aulas/eliminar")
 async def delete_aula(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = AulasController(session=db)
+    controller = AulasController(db)
     exito, mensaje = controller.eliminar_aula(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/aulas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -578,7 +578,7 @@ async def view_recepciones(request: Request):
 
 @app.get("/recepciones/lista", response_class=HTMLResponse)
 async def list_recepciones(request: Request, db: Session = Depends(get_db)):
-    controller = RecepcionController(session=db)
+    controller = RecepcionController(db)
     recepciones = controller.listar_recepciones()
     return templates.TemplateResponse(request, "recepciones/list.html", {
         "user": request.state.user,
@@ -587,19 +587,19 @@ async def list_recepciones(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/recepciones/crear")
 async def create_recepcion(request: Request, nombre: str = Form(...), fecha: str = Form(...), db: Session = Depends(get_db)):
-    controller = RecepcionController(session=db)
+    controller = RecepcionController(db)
     exito, mensaje = controller.crear_recepcion(nombre, fecha, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/recepciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/recepciones/actualizar")
 async def update_recepcion(request: Request, id: int = Form(...), nombre: str = Form(...), fecha: str = Form(...), db: Session = Depends(get_db)):
-    controller = RecepcionController(session=db)
+    controller = RecepcionController(db)
     exito, mensaje = controller.actualizar_recepcion(id, nombre, fecha, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/recepciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/recepciones/eliminar")
 async def delete_recepcion(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = RecepcionController(session=db)
+    controller = RecepcionController(db)
     exito, mensaje = controller.eliminar_recepcion(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/recepciones?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -611,7 +611,7 @@ async def view_ensenanza(request: Request):
 
 @app.get("/ensenanza/lista", response_class=HTMLResponse)
 async def list_ensenanza(request: Request, db: Session = Depends(get_db)):
-    controller = EnsenanzaController(session=db)
+    controller = EnsenanzaController(db)
     registros = controller.listar_ensenanzas()
     return templates.TemplateResponse(request, "ensenanza/list.html", {
         "user": request.state.user,
@@ -620,19 +620,19 @@ async def list_ensenanza(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/ensenanza/crear")
 async def create_ensenanza(request: Request, capitan: str = Form(...), subcapitan: int = Form(...), fecha: str = Form(...), db: Session = Depends(get_db)):
-    controller = EnsenanzaController(session=db)
+    controller = EnsenanzaController(db)
     exito, mensaje = controller.crear_ensenanza(capitan, fecha, subcapitan, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/ensenanza?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/ensenanza/actualizar")
 async def update_ensenanza(request: Request, id: int = Form(...), capitan: str = Form(...), subcapitan: int = Form(...), fecha: str = Form(...), db: Session = Depends(get_db)):
-    controller = EnsenanzaController(session=db)
+    controller = EnsenanzaController(db)
     exito, mensaje = controller.actualizar_ensenanza(id, capitan, subcapitan, fecha, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/ensenanza?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/ensenanza/eliminar")
 async def delete_ensenanza(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = EnsenanzaController(session=db)
+    controller = EnsenanzaController(db)
     exito, mensaje = controller.eliminar_ensenanza(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/ensenanza?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -644,7 +644,7 @@ async def view_logistica(request: Request):
 
 @app.get("/logistica/lista", response_class=HTMLResponse)
 async def list_logistica(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = LogisticaController(session=db)
+    controller = LogisticaController(db)
     logisticas = controller.listar_logisticas(fecha=fecha)
     return templates.TemplateResponse(request, "logistica/list.html", {
         "user": request.state.user,
@@ -664,7 +664,7 @@ async def create_logistica(
     fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = LogisticaController(session=db)
+    controller = LogisticaController(db)
     datos = {
         "almacen": almacen, "capitan": capitan, "distribucion": distribucion,
         "hidratacion": hidratacion, "pasillo": pasillo, "secretaria": secretaria,
@@ -686,7 +686,7 @@ async def update_logistica(
     fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = LogisticaController(session=db)
+    controller = LogisticaController(db)
     datos = {
         "almacen": almacen, "capitan": capitan, "distribucion": distribucion,
         "hidratacion": hidratacion, "pasillo": pasillo, "secretaria": secretaria,
@@ -697,7 +697,7 @@ async def update_logistica(
 
 @app.post("/logistica/eliminar")
 async def delete_logistica(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = LogisticaController(session=db)
+    controller = LogisticaController(db)
     exito, mensaje = controller.eliminar_logistica(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/logistica?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -709,7 +709,7 @@ async def view_otrasareas(request: Request):
 
 @app.get("/otras_areas/lista", response_class=HTMLResponse)
 async def list_otrasareas(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    controller = OtrasAreasController(session=db)
+    controller = OtrasAreasController(db)
     registros = controller.listar_otrasareas(fecha=fecha)
     return templates.TemplateResponse(request, "otrasareas/list.html", {
         "user": request.state.user,
@@ -725,7 +725,7 @@ async def create_otrasareas(
     ujier: int = Form(0), seguridad: int = Form(0), fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = OtrasAreasController(session=db)
+    controller = OtrasAreasController(db)
     datos = {
         "alabanza": alabanza, "protocolo": protocolo, "semillitas": semillitas,
         "sonido": sonido, "teatro": teatro, "tv": tv,
@@ -743,7 +743,7 @@ async def update_otrasareas(
     ujier: int = Form(0), seguridad: int = Form(0), fecha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    controller = OtrasAreasController(session=db)
+    controller = OtrasAreasController(db)
     datos = {
         "alabanza": alabanza, "protocolo": protocolo, "semillitas": semillitas,
         "sonido": sonido, "teatro": teatro, "tv": tv,
@@ -754,7 +754,7 @@ async def update_otrasareas(
 
 @app.post("/otras_areas/eliminar")
 async def delete_otrasareas(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
-    controller = OtrasAreasController(session=db)
+    controller = OtrasAreasController(db)
     exito, mensaje = controller.eliminar_otrasareas(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/otras_areas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
