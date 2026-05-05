@@ -5,12 +5,23 @@ from sqlalchemy.orm import relationship
 
 from models.database import Base
 from models.base_class import AuditMixin
+from passlib.context import CryptContext
 
+# Configuración de seguridad para contraseñas
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ROLE_ROOT = 'root'
 ROLE_ADMIN = 'administrador'
 ROLE_MAESTRO = 'maestro'
 ROLE_DISTRIBUIDOR = 'distribuidor'
+
+# Límites de usuarios por rol
+ROLE_LIMITS = {
+    ROLE_ROOT: 2,
+    ROLE_ADMIN: 1,
+    ROLE_MAESTRO: 1,
+    ROLE_DISTRIBUIDOR: 1
+}
 
 
 DEFAULT_ROLE_PERMISSIONS = {
