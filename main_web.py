@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from models.database import get_db, configure_database
 from utils.env_loader import load_app_env
@@ -60,7 +60,12 @@ async def auth_middleware(request: Request, call_next):
     db = next(get_db())
     try:
         controller = UsuariosController(session=db)
-        user = db.query(Usuario).filter(Usuario.username == username, Usuario.activo == True).first()
+        user = (
+            db.query(Usuario)
+            .options(joinedload(Usuario.rol))
+            .filter(Usuario.username == username, Usuario.activo == True)
+            .first()
+        )
         if not user:
             raise Exception("Usuario no encontrado o inactivo")
         request.state.user = user
