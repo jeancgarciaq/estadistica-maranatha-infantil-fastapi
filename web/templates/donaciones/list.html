@@ -48,7 +48,7 @@
                 <p class="text-lg font-bold text-emerald-300">{{ donacion.cantidad | round(2) }} {{ donacion.unidad }}
                 </p>
                 <div class="flex gap-2">
-                    <a href="/donaciones?edit_id={{ donacion.id }}"
+                    <a href="/donaciones?edit_id={{ donacion.id }}&descripcion={{ donacion.descripcion|urlencode }}&cantidad={{ donacion.cantidad }}&unidad={{ donacion.unidad|urlencode }}&fecha={{ donacion.fecha.strftime('%Y-%m-%d') }}&equipo={{ donacion.equipo|urlencode }}"
                         class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-sm">
                         <i class="la la-edit"></i> Editar
                     </a>
