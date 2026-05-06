@@ -64,6 +64,23 @@
                 <p class="col-span-2"><span class="font-bold text-slate-300">Colaborador:</span> {{ aula.colaborador }}
                 </p>
             </div>
+
+            <div class="flex justify-end gap-2 border-t border-slate-700 pt-3 mt-3">
+                <a href="/aulas?id={{ aula.id }}&id_salon={{ aula.id_salon }}&fecha={{ aula.fecha.strftime('%Y-%m-%d') }}&maestra={{ aula.maestra }}&auxiliar={{ aula.auxiliar }}&capitan={{ aula.capitan }}&subcapitan={{ aula.subcapitan }}&colaborador={{ aula.colaborador }}&ninos={{ aula.ninos }}&ninas={{ aula.ninas }}&condicion={{ aula.condicion }}"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white transition-all"
+                    title="Editar">
+                    <i class="la la-edit text-xl"></i>
+                </a>
+                <form action="/aulas/eliminar" method="post" class="inline"
+                    onsubmit="return confirm('¿Eliminar registro?')">
+                    <input type="hidden" name="id" value="{{ aula.id }}">
+                    <button type="submit"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all"
+                        title="Eliminar">
+                        <i class="la la-trash text-xl"></i>
+                    </button>
+                </form>
+            </div>
         </div>
         {% else %}
         <div class="text-center py-16">
