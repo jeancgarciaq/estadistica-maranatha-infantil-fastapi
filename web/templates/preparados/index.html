@@ -14,18 +14,40 @@
         </a>
     </div>
 
+    <!-- Mensajes de Feedback -->
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('msg')) {
+            const type = urlParams.get('type') || 'success';
+            document.write(`
+                <div class="mb-6 p-4 rounded-xl border ${type === 'success' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-red-500/10 border-red-500/50 text-red-400'} flex items-center gap-3">
+                    <i class="la ${type === 'success' ? 'la-check-circle' : 'la-exclamation-circle'} text-xl"></i>
+                    <p class="text-sm font-medium">${urlParams.get('msg')}</p>
+                </div>
+            `);
+        }
+    </script>
+
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl space-y-6">
         <form id="preparadoForm" action="/preparados/crear" method="post" class="space-y-4">
+            <div id="id_field" class="hidden">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Registro</label>
+                <input type="number" name="id" id="prep_id" readonly
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-400 outline-none">
+            </div>
+
             <div class="border-b border-white/5 pb-4">
                 <h3 class="text-amber-400 font-bold text-xs uppercase tracking-widest mb-4">Resultado Final</h3>
                 <div class="space-y-4">
-                    <input type="text" name="descripcion" required placeholder="Descripción (ej. Jugo de papelón)"
+                    <input type="text" name="descripcion" id="prep_descripcion" required
+                        placeholder="Descripción (ej. Jugo de papelón)"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
 
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" step="0.01" name="cantidad" required placeholder="Cantidad"
+                        <input type="number" step="0.01" name="cantidad" id="prep_cantidad" required
+                            placeholder="Cantidad"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
-                        <select name="unidad"
+                        <select name="unidad" id="prep_unidad"
                             class="bg-slate-900 border border-slate-700 rounded-xl px-2 text-white outline-none">
                             {% for m in medidas %}<option value="{{m}}">{{m}}</option>{% endfor %}
                         </select>
@@ -34,7 +56,7 @@
                     <div class="grid grid-cols-2 gap-3">
                         <input type="date" name="fecha" id="fecha_input" required
                             class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
-                        <input type="text" name="equipo" required placeholder="Equipo"
+                        <input type="text" name="equipo" id="prep_equipo" required placeholder="Equipo"
                             class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
                     </div>
                 </div>
@@ -50,17 +72,33 @@
                     </button>
                 </div>
 
-                <div id="lista_ingredientes" class="space-y-2 mb-4">
-                    <!-- Se llena vía JS -->
+                <div class="space-y-2 mb-4">
+                    <div id="lista_ingredientes" class="space-y-2">
+                        <!-- Se llena vía JS -->
+                    </div>
                     <p class="text-slate-500 text-xs italic text-center py-4" id="vacio_msg">No hay ingredientes
                         seleccionados</p>
                 </div>
                 <input type="hidden" name="componentes_json" id="componentes_input" value="[]">
             </div>
 
-            <button type="submit"
-                class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-amber-600/30 transition-all active:scale-95 uppercase text-sm">
-                Registrar Preparado
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="submit" id="btn_submit"
+                    class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-amber-600/30 transition-all active:scale-95 uppercase text-sm">
+                    Registrar
+                </button>
+                <button type="button" onclick="cambiarAModoEdicion()" id="btn_mode"
+                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl transition-all uppercase text-xs">
+                    Modo Edición
+                </button>
+            </div>
+        </form>
+
+        <form id="deleteForm" action="/preparados/eliminar" method="post" class="hidden">
+            <input type="hidden" name="id" id="delete_id">
+            <button type="submit" onclick="return confirm('¿Está seguro de eliminar este registro?')"
+                class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
+                Eliminar Registro
             </button>
         </form>
     </div>
@@ -80,7 +118,27 @@
 
 <script>
     let ingredientes = [];
-    document.getElementById('fecha_input').valueAsDate = new Date();
+
+    function cambiarAModoEdicion() {
+        const form = document.getElementById('preparadoForm');
+        const idField = document.getElementById('id_field');
+        const delForm = document.getElementById('deleteForm');
+        const btnSubmit = document.getElementById('btn_submit');
+        const btnMode = document.getElementById('btn_mode');
+
+        const esModoEdicion = idField.classList.toggle('hidden') === false;
+        delForm.classList.toggle('hidden');
+
+        if (esModoEdicion) {
+            form.action = "/preparados/actualizar";
+            btnSubmit.innerText = "ACTUALIZAR";
+            btnMode.innerText = "MODO CREAR";
+        } else {
+            form.action = "/preparados/crear";
+            btnSubmit.innerText = "REGISTRAR";
+            btnMode.innerText = "MODO EDICIÓN";
+        }
+    }
 
     async function abrirModalMaterias() {
         const res = await fetch('/api/materias-primas');
@@ -129,6 +187,29 @@
         });
         document.getElementById('componentes_input').value = JSON.stringify(ingredientes);
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.get('id')) {
+            document.getElementById('prep_id').value = params.get('id');
+            document.getElementById('delete_id').value = params.get('id');
+            document.getElementById('prep_descripcion').value = params.get('descripcion') || '';
+            document.getElementById('prep_cantidad').value = params.get('cantidad') || '';
+            document.getElementById('prep_unidad').value = params.get('unidad') || '';
+            document.getElementById('fecha_input').value = params.get('fecha') || '';
+            document.getElementById('prep_equipo').value = params.get('equipo') || '';
+
+            try {
+                ingredientes = JSON.parse(params.get('componentes') || '[]');
+                renderIngredientes();
+            } catch (e) { console.error("Error parsing components", e); }
+
+            cambiarAModoEdicion();
+        } else {
+            document.getElementById('fecha_input').valueAsDate = new Date();
+        }
+    });
 
     function quitarIngrediente(index) {
         ingredientes.splice(index, 1);
