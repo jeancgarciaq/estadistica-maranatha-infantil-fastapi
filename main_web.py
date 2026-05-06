@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
 
-from models.database import get_db, configure_database
+from models.database import get_db, configure_database, SessionLocal
 from utils.env_loader import load_app_env
 from utils.config_loader import obtener_medidas
 from models.security import ROLE_ROOT, ROLE_LIMITS, Usuario, Rol
@@ -57,9 +57,8 @@ async def auth_middleware(request: Request, call_next):
     if not username:
         return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
-    db = next(get_db())
+    db = SessionLocal()
     try:
-        controller = UsuariosController(db)
         user = (
             db.query(Usuario)
             .options(joinedload(Usuario.rol))
@@ -69,12 +68,15 @@ async def auth_middleware(request: Request, call_next):
         if not user:
             raise Exception("Usuario no encontrado o inactivo")
         request.state.user = user
+        # Continuamos con el resto de la aplicación
+        return await call_next(request)
     except Exception as e:
+        logger.error(f"Error de autenticación en middleware: {e}")
         response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("session_user")
         return response
-
-    return await call_next(request)
+    finally:
+        db.close()
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
