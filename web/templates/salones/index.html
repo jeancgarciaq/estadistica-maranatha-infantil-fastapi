@@ -80,6 +80,7 @@
         const idField = document.getElementById('id_field');
         const delForm = document.getElementById('deleteForm');
         const btnSubmit = document.getElementById('btn_submit');
+        const btnMode = document.getElementById('btn_mode');
 
         idField.classList.toggle('hidden');
         delForm.classList.toggle('hidden');
@@ -87,18 +88,29 @@
         if (!idField.classList.contains('hidden')) {
             form.action = "/salones/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
-            btnSubmit.className = "bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-sky-600/30";
-            document.getElementById('btn_mode').innerText = "MODO CREAR";
+            btnMode.innerText = "MODO CREAR";
             document.getElementById('salon_id').required = true;
-            document.getElementById('salon_id').addEventListener('input', (e) => {
-                document.getElementById('delete_id').value = e.target.value;
-            });
         } else {
             form.action = "/salones/crear";
             btnSubmit.innerText = "CREAR";
-            document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
+            btnMode.innerText = "MODO EDICIÓN";
             document.getElementById('salon_id').required = false;
         }
     }
+
+    document.getElementById('salon_id').addEventListener('input', (e) => {
+        document.getElementById('delete_id').value = e.target.value;
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('id')) {
+            document.getElementById('salon_id').value = params.get('id');
+            document.getElementById('delete_id').value = params.get('id');
+            document.getElementById('salon_nombre').value = params.get('nombre') || '';
+            document.getElementById('salon_edad').value = params.get('edad') || '';
+            cambiarAModoEdicion();
+        }
+    });
 </script>
 {% endblock %}
