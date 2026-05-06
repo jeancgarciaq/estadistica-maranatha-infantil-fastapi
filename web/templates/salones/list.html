@@ -18,7 +18,7 @@
     <div class="space-y-4">
         {% for salon in salones %}
         <div
-            class="bg-slate-800 p-5 rounded-2xl border border-slate-700 flex justify-between items-center group active:bg-slate-700 transition-colors shadow-lg">
+            class="bg-slate-800 p-5 rounded-2xl border border-slate-700 flex justify-between items-center group shadow-lg">
             <div class="flex items-center gap-4">
                 <div
                     class="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center text-sky-400 font-bold border border-sky-500/20">
@@ -30,7 +30,22 @@
                     <p class="text-[10px] text-slate-500 uppercase mt-1">Global ID: {{ salon.sync_id[:8] }}...</p>
                 </div>
             </div>
-            <i class="la la-angle-right text-slate-600 group-active:text-sky-400 transition-colors text-xl"></i>
+            <div class="flex items-center gap-2">
+                <a href="/salones?id={{ salon.id }}&nombre={{ salon.salon|urlencode }}&edad={{ salon.edad|urlencode }}"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all"
+                    title="Editar">
+                    <i class="la la-edit text-xl"></i>
+                </a>
+                <form action="/salones/eliminar" method="post" class="inline"
+                    onsubmit="return confirm('¿Está seguro de eliminar este salón?')">
+                    <input type="hidden" name="id" value="{{ salon.id }}">
+                    <button type="submit"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all"
+                        title="Eliminar">
+                        <i class="la la-trash text-xl"></i>
+                    </button>
+                </form>
+            </div>
         </div>
         {% else %}
         <div class="text-center py-16">
