@@ -1,16 +1,9 @@
-# Dependencias de la versión Web (FastAPI)
 fastapi
 uvicorn[standard]
+sqlalchemy
 jinja2
 python-multipart
-SQLAlchemy>=2.0.0
+passlib[bcrypt]
+requests
 python-dotenv
-reportlab>=4.0.0
-httpx
-pydantic
-pydantic-settings
-sqlalchemy-utils
-passlib
-bcrypt==4.0.1
-python-jose[cryptography]
-psycopg2-binary
+bcrypt
