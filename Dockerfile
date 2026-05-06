@@ -1,32 +1,24 @@
-# Usamos una imagen ligera de Python 3.11
+# Usar una imagen oficial de Python ligera
 FROM python:3.11-slim
 
-# Evita que Python genere archivos .pyc y permite que los logs se vean en tiempo real
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Evitar que Python genere archivos .pyc y permitir logs en tiempo real
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalamos dependencias del sistema necesarias para algunas librerías de Python
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Instalar dependencias del sistema necesarias (si las hubiera)
+RUN apt-get update && apt-get install -y --no-install-recommends gcc python3-dev && rm -rf /var/lib/apt/lists/*
 
-# Copiamos el archivo de requerimientos primero para aprovechar el cache de Docker
+# Instalar dependencias de Python
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Actualizamos pip e instalamos las librerías en un solo paso
-# Aumentamos el timeout a 1000 segundos por la conexión lenta
-RUN python -m pip install --no-cache-dir --upgrade pip && \
-    python -m pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
-
-# Copiamos todo el contenido del proyecto al contenedor
+# Copiar el código de la aplicación
 COPY . .
 
-# Exponemos el puerto 8080 (puerto estándar para Google Cloud Run)
-EXPOSE 8080
+# Exponer el puerto que usa FastAPI/Uvicorn
+EXPOSE 8000
 
-# Comando para iniciar la aplicación con Uvicorn
-# Usamos 0.0.0.0 para que sea accesible externamente
-CMD ["uvicorn", "main_web:app", "--host", "0.0.0.0", "--port", "8080"]
+# Comando para iniciar la aplicación
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
