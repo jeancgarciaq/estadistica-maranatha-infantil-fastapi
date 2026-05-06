@@ -65,14 +65,20 @@
             <div class="flex justify-between items-center border-t border-white/5 pt-3 mt-3">
                 <p class="text-lg font-bold text-white">{{ dist.cantidad }} <span class="text-xs text-slate-500">{{
                         dist.unidad }}</span></p>
-                <form action="/distribuciones/eliminar" method="post"
-                    onsubmit="return confirm('¿Eliminar este registro de distribución?');">
-                    <input type="hidden" name="id" value="{{ dist.id }}">
-                    <button type="submit"
-                        class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-colors">
-                        <i class="la la-trash text-lg"></i>
-                    </button>
-                </form>
+                <div class="flex items-center gap-2">
+                    <a href="/distribuciones?id={{ dist.id }}&donacion_id={{ dist.donacion_id or '' }}&preparado_id={{ dist.alimento_preparado_id or '' }}&salon_id={{ dist.salon_id or '' }}&area_id={{ dist.area_id or '' }}&recepcion_id={{ dist.recepcion_id or '' }}&cantidad={{ dist.cantidad }}&unidad={{ dist.unidad|urlencode }}&fecha={{ dist.fecha.strftime('%Y-%m-%d') }}"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white transition-all">
+                        <i class="la la-edit text-xl"></i>
+                    </a>
+                    <form action="/distribuciones/eliminar" method="post"
+                        onsubmit="return confirm('¿Eliminar registro?');">
+                        <input type="hidden" name="id" value="{{ dist.id }}">
+                        <button type="submit"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
+                            <i class="la la-trash text-xl"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         {% else %}
