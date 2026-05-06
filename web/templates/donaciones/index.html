@@ -131,11 +131,16 @@
     window.onload = function () {
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('edit_id');
+
         if (editId) {
             cambiarAModoEdicion(); // Switch to edit mode
             document.getElementById('donacion_id').value = editId;
-            // In a real app, you'd fetch data for editId via an API and populate other fields
-            // For now, just setting the ID
+            document.getElementById('delete_id').value = editId; // Sincronizar ID para el formulario de eliminación
+            document.getElementById('donacion_descripcion').value = urlParams.get('descripcion') || '';
+            document.getElementById('donacion_cantidad').value = urlParams.get('cantidad') || '0';
+            document.getElementById('donacion_unidad').value = urlParams.get('unidad') || 'Unidad(es)';
+            document.getElementById('donacion_fecha').value = urlParams.get('fecha') || '';
+            document.getElementById('donacion_equipo').value = urlParams.get('equipo') || '';
         }
     };
 </script>
