@@ -28,7 +28,22 @@
                     <p class="text-[10px] text-slate-500 uppercase">Sincronizado: {{ area.sync_id[:8] }}...</p>
                 </div>
             </div>
-            <i class="la la-angle-right text-slate-600 group-active:text-blue-400 transition-colors"></i>
+            <div class="flex items-center gap-2">
+                <a href="/areas?id={{ area.id }}&nombre={{ area.area|urlencode }}"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all"
+                    title="Editar">
+                    <i class="la la-edit text-lg"></i>
+                </a>
+                <form action="/areas/eliminar" method="post" class="inline"
+                    onsubmit="return confirm('¿Está seguro de eliminar esta área?')">
+                    <input type="hidden" name="id" value="{{ area.id }}">
+                    <button type="submit"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all"
+                        title="Eliminar">
+                        <i class="la la-trash text-lg"></i>
+                    </button>
+                </form>
+            </div>
         </div>
         {% else %}
         <div class="text-center py-12">
