@@ -76,25 +76,38 @@
         const idField = document.getElementById('id_field');
         const delForm = document.getElementById('deleteForm');
         const btnSubmit = document.getElementById('btn_submit');
+        const btnMode = document.getElementById('btn_mode');
 
-        idField.classList.toggle('hidden');
+        const esModoEdicion = idField.classList.toggle('hidden') === false;
         delForm.classList.toggle('hidden');
 
-        if (!idField.classList.contains('hidden')) {
+        if (esModoEdicion) {
             form.action = "/areas/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
-            document.getElementById('btn_mode').innerText = "MODO CREAR";
+            btnMode.innerText = "MODO CREAR";
             document.getElementById('area_id').required = true;
-            // Sincronizar ID de eliminación
-            document.getElementById('area_id').addEventListener('input', (e) => {
-                document.getElementById('delete_id').value = e.target.value;
-            });
         } else {
             form.action = "/areas/crear";
             btnSubmit.innerText = "CREAR";
-            document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
+            btnMode.innerText = "MODO EDICIÓN";
             document.getElementById('area_id').required = false;
         }
     }
+
+    // Sincronizar ID de eliminación en tiempo real
+    document.getElementById('area_id').addEventListener('input', (e) => {
+        document.getElementById('delete_id').value = e.target.value;
+    });
+
+    // Auto-precarga desde URL si se viene desde la lista
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('id')) {
+            document.getElementById('area_id').value = params.get('id');
+            document.getElementById('delete_id').value = params.get('id');
+            document.getElementById('area_nombre').value = params.get('nombre') || '';
+            cambiarAModoEdicion();
+        }
+    });
 </script>
 {% endblock %}
