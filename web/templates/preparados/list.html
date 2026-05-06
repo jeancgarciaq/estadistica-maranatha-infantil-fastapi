@@ -33,11 +33,23 @@
 
             <div class="flex justify-between items-center border-t border-white/5 pt-3">
                 <p class="text-lg font-bold text-white">{{ p.cantidad }} {{ p.unidad }}</p>
-                <div class="flex gap-2">
-                    <button onclick="alert('Ver componentes - ID: {{p.id}}')"
-                        class="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white transition-all">
-                        <i class="la la-info-circle text-xl"></i>
-                    </button>
+                <div class="flex items-center gap-2">
+                    <a href="/preparados?id={{ p.id }}&descripcion={{ p.descripcion|urlencode }}&cantidad={{ p.cantidad }}&unidad={{ p.unidad|urlencode }}&fecha={{ p.fecha.strftime('%Y-%m-%d') }}&equipo={{ p.equipo|urlencode }}&componentes=[{% for c in p.componentes %}{&quot;id&quot;:{{c.donacion_materia_id}},&quot;descripcion&quot;:&quot;{{c.materia_prima.descripcion|replace('"', '
+                        \"')}}&quot;,&quot;cantidad&quot;:{{c.cantidad_usada}},&quot;unidad&quot;:&quot;{{c.materia_prima.unidad|replace('"', '\"'
+                        )}}&quot;}{% if not loop.last %},{% endif %}{% endfor %}]"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white transition-all"
+                        title="Editar">
+                        <i class="la la-edit text-xl"></i>
+                    </a>
+                    <form action="/preparados/eliminar" method="post" class="inline"
+                        onsubmit="return confirm('¿Está seguro de eliminar este registro?')">
+                        <input type="hidden" name="id" value="{{ p.id }}">
+                        <button type="submit"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all"
+                            title="Eliminar">
+                            <i class="la la-trash text-xl"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
 
