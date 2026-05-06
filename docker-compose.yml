@@ -9,6 +9,24 @@ services:
     volumes:
       # Persistencia para la base de datos SQLite local
       - ./models:/app/models
+    # environment:
+    #   - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/emi_db
     env_file:
       - .env
     restart: always
+
+# Para probar con PostgreSQL localmente (simulando Cloud SQL), descomenta lo siguiente:
+#  db:
+#    image: postgres:15-alpine
+#    container_name: emi_db
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres_password
+#      POSTGRES_DB: emi_db
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+
+# volumes:
+#   postgres_data:
