@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: emi_app
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistencia para la base de datos SQLite local
+      - ./models:/app/models
+    env_file:
+      - .env
+    restart: always
