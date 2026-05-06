@@ -205,46 +205,47 @@ class UsuariosController(BaseController):
             # Cargamos variables y limpiamos espacios en la contraseña
             smtp_server = os.getenv("SMTP_SERVER", "").strip()
             smtp_port_raw = os.getenv("SMTP_PORT", "465")
-            # Intentamos obtener el correo desde SMTP_EMAIL o SMTP_USER para mayor compatibilidad
-            smtp_email = (os.getenv("SMTP_EMAIL") or os.getenv("SMTP_USER") or "").strip()
+            # Intentamos obtener el correo desde múltiples variantes de nombres comunes
+            smtp_email = (os.getenv("SMTP_EMAIL") or os.getenv("SMTP_USER") or os.getenv("SMTP_USERNAME") or "").strip()
             smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 
             smtp_port = int(smtp_port_raw) if smtp_port_raw.isdigit() else 465
 
             if not all([smtp_server, smtp_email, smtp_password]):
-                missing = [k for k, v in {
-                    "SMTP_SERVER": smtp_server, 
-                    "SMTP_EMAIL/SMTP_USER": smtp_email, 
-                    "SMTP_PASSWORD": smtp_password
-                }.items() if not v]
-                logger.error(f"Configuración SMTP incompleta. Faltan: {', '.join(missing)}")
+                missing = []
+                if not smtp_server: missing.append("SMTP_SERVER")
+                if not smtp_email: missing.append("SMTP_EMAIL/SMTP_USER")
+                if not smtp_password: missing.append("SMTP_PASSWORD")
+                logger.error(f"Configuración SMTP incompleta en .env. Faltan: {', '.join(missing)}")
                 return False, "Error interno: Configuración de correo incompleta."
 
-            # En producción, cambia http://localhost:8000 por tu dominio real
-            reset_link = f"http://localhost:8000/reset-password/{token}"
+            # 2. Construir enlace para local
+            reset_link = f"http://127.0.0.1:8000/reset-password/{token}"
             
             mensaje_texto = (
                 f"Hola {usuario.username},\n\n"
-                f"Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:\n"
-                f"{reset_link}\n\n"
-                f"Este enlace expirará en 1 hora.\n\n"
-                f"Si no solicitaste este cambio, puedes ignorar este correo.\n\n"
-                f"Atentamente,\nEquipo de Soporte EMI"
+                f"Has solicitado restablecer tu contraseña. Haz clic aquí para continuar:\n{reset_link}\n\n"
+                "Este enlace es válido por 1 hora.\n\n"
+                "Si no solicitaste esto, ignora este correo."
             )
             
             msg = MIMEText(mensaje_texto)
             msg['Subject'] = "Restablecimiento de Contraseña - EMI"
             msg['From'] = smtp_email
-            msg['To'] = usuario.username # Se asume que el username es el correo
+
+            # Si el username es 'root', enviamos el correo a la cuenta configurada para pruebas
+            destinatario = usuario.username if "@" in usuario.username else smtp_email
+            msg['To'] = destinatario
 
             with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
                 server.login(smtp_email, smtp_password)
                 server.send_message(msg)
-            
+
+            logger.info(f"Correo de recuperación enviado a {destinatario}")
             return True, "Si tu cuenta existe, recibirás un correo electrónico con instrucciones."
         except Exception as e:
-            db.rollback()
-            return self.manejar_excepcion(e, "Error al procesar el restablecimiento de contraseña")
+            if db: db.rollback()
+            return self.manejar_excepcion(e, "Error al procesar el restablecimiento")
         finally:
             if not self.session:
                 db.close()
