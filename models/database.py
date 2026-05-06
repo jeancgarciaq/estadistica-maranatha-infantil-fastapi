@@ -13,9 +13,13 @@ else:
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+# Configuración del motor con límites de pool aumentados para evitar Timeouts
 engine = create_engine(
     DATABASE_URL, 
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    pool_size=10,         # Conexiones que se mantienen abiertas
+    max_overflow=20,      # Conexiones extra permitidas en picos de tráfico
+    pool_recycle=300      # Reiniciar conexiones cada 5 min para evitar cortes de red
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
