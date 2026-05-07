@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from models.servidor import Servidor
+from sqlalchemy import extract
 from sqlalchemy.exc import SQLAlchemyError
 from controllers import BaseController
 
@@ -37,14 +38,32 @@ class ServidorController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Servidor creado exitosamente.", user_context=user_context)
 
-    def listar_servidores(self):
+    def listar_servidores(self, filtros=None):
         """
         Lista todos los registros de servidores desde la base de datos.
+        :param filtros: Diccionario con criterios de búsqueda.
         :return: Lista de objetos Servidor.
         """
         db = self.get_db_session()
         try:
-            servidores = self.query_activa(db).order_by(Servidor.nombre.asc()).all()
+            query = self.query_activa(db)
+            if filtros:
+                if filtros.get('nombre'):
+                    query = query.filter(Servidor.nombre.ilike(f"%{filtros['nombre']}%"))
+                if filtros.get('cedula'):
+                    query = query.filter(Servidor.cedula == int(filtros['cedula']))
+                if filtros.get('celular'):
+                    query = query.filter(Servidor.celular.ilike(f"%{filtros['celular']}%"))
+                if filtros.get('correo'):
+                    query = query.filter(Servidor.correo.ilike(f"%{filtros['correo']}%"))
+                if filtros.get('area_servicio'):
+                    query = query.filter(Servidor.area_servicio.ilike(f"%{filtros['area_servicio']}%"))
+                if filtros.get('mes_nacimiento'):
+                    query = query.filter(extract('month', Servidor.fecha_nacimiento) == int(filtros['mes_nacimiento']))
+                if filtros.get('dia_nacimiento'):
+                    query = query.filter(extract('day', Servidor.fecha_nacimiento) == int(filtros['dia_nacimiento']))
+
+            servidores = query.order_by(Servidor.nombre.asc()).all()
             logger.info(f"{len(servidores)} servidores obtenidos.")
             return servidores
         except SQLAlchemyError as e:
@@ -103,6 +122,53 @@ class ServidorController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Servidor actualizado exitosamente.", user_context=user_context)
 
+    def generar_reporte_pdf(self, servidores):
+        """Genera un archivo PDF con la lista de servidores."""
+        from io import BytesIO
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4))
+        styles = getSampleStyleSheet()
+        elements = []
+
+        elements.append(Paragraph("Lista de Personal de Servicio (Servidores)", styles['Title']))
+        elements.append(Spacer(1, 12))
+
+        data = [["Nombre", "Cédula", "Edad", "Celular", "Correo", "Área de Servicio", "Capitán"]]
+        for s in servidores:
+            data.append([
+                s.nombre,
+                str(s.cedula),
+                str(s.edad),
+                s.celular or "N/A",
+                s.correo or "N/A",
+                s.area_servicio or "N/A",
+                s.capitan or "N/A"
+            ])
+
+        t = Table(data)
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ]))
+        elements.append(t)
+        
+        doc.build(elements)
+        pdf_value = buffer.getvalue()
+        buffer.close()
+        return pdf_value
+
     def eliminar_servidor(self, id, user_context=None):
         """
         Elimina un registro de servidor por su ID.
@@ -138,6 +204,9 @@ class ServidorController(BaseController):
         for campo in ["edad", "cedula", "numero_equipo"]:
             if campo in datos_normalizados and datos_normalizados[campo] == "":
                 datos_normalizados[campo] = None
+
+        if "fecha_nacimiento" in datos_normalizados and not datos_normalizados["fecha_nacimiento"]:
+             datos_normalizados["fecha_nacimiento"] = None
 
         return datos_normalizados
 
@@ -175,6 +244,14 @@ class ServidorController(BaseController):
                 query = query.filter(Servidor.id != current_id)
             if query.first():
                 errores.append(f"Ya existe un servidor con la cédula {cedula}.")
+
+        fecha_nacimiento = datos.get("fecha_nacimiento")
+        if fecha_nacimiento:
+            try:
+                if isinstance(fecha_nacimiento, str):
+                    datetime.strptime(fecha_nacimiento, '%Y-%m-%d')
+            except ValueError:
+                errores.append("El campo 'fecha de nacimiento' debe tener el formato 'YYYY-MM-DD'.")
 
         celular = datos.get("celular")
         if celular and (not isinstance(celular, str) or len(celular) > 20):
