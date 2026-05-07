@@ -2,14 +2,14 @@ import os
 import logging
 import json
 from typing import Optional
-from fastapi import FastAPI, Request, Depends, Form, HTTPException, status
+from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, contextlib
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
 
-from models.database import get_db, configure_database, SessionLocal
+from models.database import get_db, configure_database, SessionLocal, shutdown_db
 from utils.env_loader import load_app_env
 from utils.config_loader import obtener_medidas
 from models.security import ROLE_ROOT, ROLE_LIMITS, Usuario, Rol
@@ -25,6 +25,7 @@ from controllers.otras_areas_controller import OtrasAreasController
 from controllers.recepcion_controller import RecepcionController
 from controllers.logistica_controller import LogisticaController
 from controllers.distribucion_controller import DistribucionesController
+from controllers.servidor_controller import ServidorController
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -33,11 +34,16 @@ logger = logging.getLogger(__name__)
 # Cargar variables de entorno
 load_app_env()
 
-# Inicializar Base de Datos
-configure_database()
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ejecutar al iniciar: Crear tablas y sembrar datos
+    configure_database()
+    yield
+    # Ejecutar al apagar: Cerrar conector de Cloud SQL
+    shutdown_db()
 
 # Inicializar FastAPI
-app = FastAPI(title="Estadística Maranatha Kids - Web")
+app = FastAPI(title="Estadística Maranatha Kids - Web", lifespan=lifespan)
 security = HTTPBearer()
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
@@ -258,6 +264,88 @@ async def update_usuario(
         user_context={"user": request.state.user}
     )
     return RedirectResponse(url=f"/usuarios?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.get("/servidores", response_class=HTMLResponse)
+async def view_servidores(request: Request):
+    # Restricción de acceso: Solo root y administrador
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
+        return RedirectResponse(url="/dashboard?msg=Acceso restringido&type=error", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse(request, "servidores/index.html", {
+        "user": request.state.user
+    })
+
+@app.get("/servidores/lista", response_class=HTMLResponse)
+async def list_servidores(request: Request, db: Session = Depends(get_db)):
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
+        return HTMLResponse("Acceso denegado", status_code=status.HTTP_403_FORBIDDEN)
+    
+    controller = ServidorController(db)
+    servidores = controller.listar_servidores()
+    return templates.TemplateResponse(request, "servidores/list.html", {
+        "servidores": servidores,
+        "user": request.state.user
+    })
+
+@app.post("/servidores/crear")
+async def create_servidor(
+    request: Request,
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    numero_equipo: int = Form(None),
+    area_servicio: str = Form(None),
+    capitan: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
+        return RedirectResponse(url="/servidores?msg=No tiene permisos para crear&type=error", status_code=status.HTTP_303_SEE_OTHER)
+    
+    controller = ServidorController(db)
+    datos = {
+        "nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular,
+        "correo": correo, "numero_equipo": numero_equipo, 
+        "area_servicio": area_servicio, "capitan": capitan
+    }
+    exito, mensaje = controller.crear_servidor(datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/servidores/actualizar")
+async def update_servidor(
+    request: Request,
+    id: int = Form(...),
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    numero_equipo: int = Form(None),
+    area_servicio: str = Form(None),
+    capitan: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
+        return RedirectResponse(url="/servidores?msg=No tiene permisos para editar&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    controller = ServidorController(db)
+    datos = {
+        "nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular,
+        "correo": correo, "numero_equipo": numero_equipo, 
+        "area_servicio": area_servicio, "capitan": capitan
+    }
+    exito, mensaje = controller.actualizar_servidor(id, datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/servidores/eliminar")
+async def delete_servidor(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
+        return RedirectResponse(url="/servidores?msg=No tiene permisos para eliminar&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    controller = ServidorController(db)
+    exito, mensaje = controller.eliminar_servidor(id, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
