@@ -4,7 +4,7 @@ import sys
 # Añadir el directorio raíz del proyecto a la ruta de Python
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from models.database import engine, Base, SessionLocal, configure_database, DATABASE_URL
+from models.database import engine, Base, SessionLocal, configure_database, DATABASE_URL, shutdown_db
 from models.security import seed_security_data
 
 def main():
@@ -37,6 +37,7 @@ def main():
         print(f"Error al sembrar datos: {e}")
     finally:
         db.close()
+        shutdown_db()
 
     print(f"Base de datos recreada y lista en: {DATABASE_URL}")
 
