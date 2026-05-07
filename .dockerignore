@@ -1,13 +1,11 @@
-# Ignorar archivos y carpetas locales para que la imagen sea ligera
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.python-version
-# .env  <-- Comentado para permitir que Docker lo vea durante el build local
+*.py[cod]
+*$py.class
+.env
 .git
 .gitignore
 venv/
-.buildozer/
-bin/
+env/
 models/*.db
+scratch/
+alembic/versions/*.pyc
