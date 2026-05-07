@@ -972,4 +972,9 @@ async def logout():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main_web:app", host="127.0.0.1", port=8000, reload=True)
+    # Use the PORT env var set by Cloud Run (default 8080) and bind to 0.0.0.0
+    port = int(os.environ.get("PORT", 8080))
+    host = "0.0.0.0"
+    # Enable reload only in development environments
+    reload_flag = os.environ.get("ENV", "").lower() in ("dev", "development")
+    uvicorn.run("main_web:app", host=host, port=port, reload=reload_flag)
