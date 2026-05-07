@@ -10,3 +10,4 @@ uvicorn[standard]
 python-multipart
 Jinja2
 reportlab
+openpyxl
