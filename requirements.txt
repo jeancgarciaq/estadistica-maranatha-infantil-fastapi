@@ -1,10 +1,10 @@
+SQLAlchemy>=2.0.0
+passlib
+bcrypt==3.2.0
+alembic
+python-dotenv
+pg8000
+cloud-sql-python-connector[pg8000]
 fastapi
 uvicorn[standard]
-sqlalchemy
-jinja2
 python-multipart
-passlib[bcrypt]
-requests
-python-dotenv
-bcrypt
-psycopg2-binary
