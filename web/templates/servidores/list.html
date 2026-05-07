@@ -1,125 +1,152 @@
-<div class="table-responsive">
-    <table class="table table-hover align-middle">
-        <thead class="table-light">
+<div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-slate-900/50 border-b border-slate-700 text-xs uppercase text-slate-400 font-bold">
             <tr>
-                <th>Nombre</th>
-                <th>Cédula</th>
-                <th>Edad</th>
-                <th>Contacto</th>
-                <th>Equipo/Área</th>
-                <th>Capitán</th>
-                <th class="text-end">Acciones</th>
+                <th class="p-4">Nombre</th>
+                <th class="p-4">Cédula</th>
+                <th class="p-4">Edad</th>
+                <th class="p-4">Contacto</th>
+                <th class="p-4">Equipo/Área</th>
+                <th class="p-4">Capitán</th>
+                <th class="p-4 text-right">Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-800">
             {% for servidor in servidores %}
-            <tr>
-                <td>
-                    <div class="fw-bold">{{ servidor.nombre }}</div>
-                    <small class="text-muted">{{ servidor.correo or 'Sin correo' }}</small>
+            <tr class="hover:bg-slate-700/20 transition-colors">
+                <td class="p-4">
+                    <div class="font-bold text-slate-200">{{ servidor.nombre }}</div>
+                    <div class="text-xs text-slate-500">{{ servidor.correo or 'Sin correo' }}</div>
                 </td>
-                <td>{{ servidor.cedula }}</td>
-                <td>{{ servidor.edad }}</td>
-                <td>{{ servidor.celular or 'N/A' }}</td>
-                <td>
-                    <span class="badge bg-info text-dark">Eq: {{ servidor.numero_equipo or '-' }}</span><br>
-                    <small>{{ servidor.area_servicio or '-' }}</small>
+                <td class="p-4 text-slate-300">{{ servidor.cedula }}</td>
+                <td class="p-4 text-slate-300">{{ servidor.edad }}</td>
+                <td class="p-4 text-slate-300">{{ servidor.celular or 'N/A' }}</td>
+                <td class="p-4">
+                    <span
+                        class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold">Eq:
+                        {{ servidor.numero_equipo or '-' }}</span>
+                    <div class="text-xs text-slate-500 mt-1">{{ servidor.area_servicio or '-' }}</div>
                 </td>
-                <td>{{ servidor.capitan or 'N/A' }}</td>
-                <td class="text-end">
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-warning" data-bs-toggle="modal"
-                            data-bs-target="#modalEdit{{ servidor.id }}">
-                            <i class="fas fa-edit"></i>
+                <td class="p-4 text-slate-300 text-xs">{{ servidor.capitan or 'N/A' }}</td>
+                <td class="p-4 text-right">
+                    <div class="flex justify-end gap-2">
+                        <button
+                            onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.remove('hidden')"
+                            class="text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-600 p-2 rounded-lg transition-all">
+                            <i class="la la-edit text-xl"></i>
                         </button>
-                        <button class="btn btn-outline-danger" data-bs-toggle="modal"
-                            data-bs-target="#modalDel{{ servidor.id }}">
-                            <i class="fas fa-trash"></i>
+                        <button
+                            onclick="document.getElementById('modalDel{{ servidor.id }}').classList.remove('hidden')"
+                            class="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 p-2 rounded-lg transition-all">
+                            <i class="la la-trash text-xl"></i>
                         </button>
                     </div>
                 </td>
             </tr>
 
             <!-- Modal Editar -->
-            <div class="modal fade" id="modalEdit{{ servidor.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action="/servidores/actualizar" method="POST">
-                            <input type="hidden" name="id" value="{{ servidor.id }}">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Editar Servidor: {{ servidor.nombre }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row g-3 text-start">
-                                    <div class="col-md-8">
-                                        <label class="form-label">Nombre Completo</label>
-                                        <input type="text" name="nombre" class="form-control"
-                                            value="{{ servidor.nombre }}" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Cédula</label>
-                                        <input type="number" name="cedula" class="form-control"
-                                            value="{{ servidor.cedula }}" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Edad</label>
-                                        <input type="number" name="edad" class="form-control"
-                                            value="{{ servidor.edad }}" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Celular</label>
-                                        <input type="text" name="celular" class="form-control"
-                                            value="{{ servidor.celular or '' }}">
-                                    </div>
-                                    <div class="col-md-5">
-                                        <label class="form-label">Correo</label>
-                                        <input type="email" name="correo" class="form-control"
-                                            value="{{ servidor.correo or '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Número Equipo</label>
-                                        <input type="number" name="numero_equipo" class="form-control"
-                                            value="{{ servidor.numero_equipo or '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Área</label>
-                                        <input type="text" name="area_servicio" class="form-control"
-                                            value="{{ servidor.area_servicio or '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Capitán</label>
-                                        <input type="text" name="capitan" class="form-control"
-                                            value="{{ servidor.capitan or '' }}">
-                                    </div>
+            <div id="modalEdit{{ servidor.id }}"
+                class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl">
+                    <form action="/servidores/actualizar" method="POST" class="p-0 m-0">
+                        <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                            <h5 class="text-xl font-bold text-amber-400">Editar Servidor: {{ servidor.nombre }}</h5>
+                            <button type="button"
+                                onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.add('hidden')"
+                                class="text-slate-400 hover:text-white">
+                                <i class="la la-times text-2xl"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2 text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>
+                                    <input type="text" name="nombre"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.nombre }}" required>
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Cédula</label>
+                                    <input type="number" name="cedula"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.cedula }}" required>
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de
+                                        Nacimiento</label>
+                                    <input type="date" name="fecha_nacimiento"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white"
+                                        value="{{ servidor.fecha_nacimiento }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
+                                    <input type="number" name="edad"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.edad }}" required>
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Celular</label>
+                                    <input type="text" name="celular"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.celular or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Correo</label>
+                                    <input type="email" name="correo"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.correo or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Número Equipo</label>
+                                    <input type="number" name="numero_equipo"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.numero_equipo or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Área</label>
+                                    <input type="text" name="area_servicio"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.area_servicio or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="block text-sm font-medium mb-1 text-slate-400">Capitán</label>
+                                    <input type="text" name="capitan"
+                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        value="{{ servidor.capitan or '' }}">
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-warning">Actualizar Cambios</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="p-6 border-t border-slate-700 flex gap-3">
+                            <button type="button"
+                                onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.add('hidden')"
+                                class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                            <button type="submit"
+                                class="flex-1 bg-amber-600 hover:bg-amber-700 p-2 rounded-lg font-bold text-white text-sm">Actualizar
+                                Cambios</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
             <!-- Modal Eliminar -->
-            <div class="modal fade" id="modalDel{{ servidor.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content text-start">
-                        <form action="/servidores/eliminar" method="POST">
-                            <input type="hidden" name="id" value="{{ servidor.id }}">
-                            <div class="modal-body py-4">
-                                <p class="mb-0">¿Está seguro de eliminar al servidor <strong>{{ servidor.nombre
-                                        }}</strong>?</p>
-                                <small class="text-danger">Esta acción no se puede deshacer de forma sencilla.</small>
-                            </div>
-                            <div class="modal-footer border-0">
-                                <button type="button" class="btn btn-link link-secondary text-decoration-none"
-                                    data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
-                            </div>
-                        </form>
-                    </div>
+            <div id="modalDel{{ servidor.id }}"
+                class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl">
+                    <form action="/servidores/eliminar" method="POST" class="p-6 text-center">
+                        <input type="hidden" name="id" value="{{ servidor.id }}">
+                        <i class="la la-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+                        <h5 class="text-xl font-bold mb-2 text-white">¿Eliminar Servidor?</h5>
+                        <p class="text-sm text-slate-400 mb-6">¿Estás seguro de eliminar al servidor <strong>{{
+                                servidor.nombre }}</strong>? Esta acción no se puede deshacer de forma sencilla.</p>
+                        <div class="flex gap-3">
+                            <button type="button"
+                                onclick="document.getElementById('modalDel{{ servidor.id }}').classList.add('hidden')"
+                                class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                            <button type="submit"
+                                class="flex-1 bg-red-600 hover:bg-red-700 p-2 rounded-lg font-bold text-white">Confirmar
+                                Eliminación</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endfor %}
