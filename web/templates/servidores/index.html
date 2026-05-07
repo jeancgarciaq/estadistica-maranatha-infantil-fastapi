@@ -3,82 +3,138 @@
 {% block title %}Gestión de Servidores{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-users-cog me-2"></i>Gestión de Servidores</h2>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearServidor">
-            <i class="fas fa-plus me-2"></i>Nuevo Servidor
-        </button>
+<div class="container mx-auto p-4 max-w-6xl">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-green-400"><i class="la la-id-badge me-2"></i>Gestión de Servidores</h2>
+            <p class="text-xs text-slate-500">Administración de personal de servicio</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="toggleFiltros()"
+                class="bg-slate-700 hover:bg-slate-600 p-2 px-4 rounded-lg font-bold flex items-center gap-2 transition-all text-sm">
+                <i class="la la-filter text-xl"></i> Filtros
+            </button>
+            <button onclick="document.getElementById('modalCrearServidor').classList.remove('hidden')"
+                class="bg-blue-600 hover:bg-blue-700 p-2 px-4 rounded-lg font-bold flex items-center gap-2 transition-all text-sm">
+                <i class="la la-plus text-xl"></i> Nuevo Servidor
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario de Filtros -->
+    <div id="filtros-container" class="hidden glass rounded-xl border border-slate-700 p-4 mb-6">
+        <form id="form-filtros" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="nombre" placeholder="Buscar por Nombre"
+                class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm outline-none text-white">
+            <input type="number" name="cedula" placeholder="Buscar por Cédula"
+                class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm outline-none text-white">
+            <input type="text" name="area_servicio" placeholder="Área de Servicio"
+                class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm outline-none text-white">
+            <div class="grid grid-cols-2 gap-2">
+                <select name="mes_nacimiento"
+                    class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm outline-none text-white">
+                    <option value="">Mes Cumpleaños</option>
+                    {% for i in range(1, 13) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+                </select>
+                <input type="number" name="dia_nacimiento" placeholder="Día" min="1" max="31"
+                    class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm outline-none text-white">
+            </div>
+            <div class="md:col-span-4 flex justify-end gap-2 mt-2">
+                <button type="button" onclick="exportarPDF()"
+                    class="bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 px-4 rounded-lg font-bold transition-all text-sm">
+                    <i class="la la-file-pdf"></i> Exportar PDF
+                </button>
+                <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 p-2 px-6 rounded-lg font-bold transition-all text-sm text-white">
+                    Filtrar Lista
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Alertas de Feedback -->
-    <div id="alert-container"></div>
+    <div id="alert-container" class="mb-4"></div>
 
     <!-- Contenedor de la Lista -->
-    <div class="card shadow">
-        <div class="card-body" id="contenedor-lista-servidores">
+    <div class="glass rounded-xl overflow-hidden border border-slate-700">
+        <div id="contenedor-lista-servidores">
             <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Cargando...</span>
-                </div>
-                <p class="mt-2">Cargando lista de servidores...</p>
+                <i class="la la-spinner la-spin text-4xl text-blue-400"></i>
+                <p class="mt-2 text-slate-400">Cargando lista de servidores...</p>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal para Crear Servidor -->
-<div class="modal fade" id="modalCrearServidor" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form action="/servidores/crear" method="POST">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Registrar Nuevo Servidor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Nombre Completo</label>
-                            <input type="text" name="nombre" class="form-control" required maxlength="100">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Cédula / ID</label>
-                            <input type="number" name="cedula" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Edad</label>
-                            <input type="number" name="edad" class="form-control" required min="1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Celular</label>
-                            <input type="text" name="celular" class="form-control" maxlength="20">
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label">Correo Electrónico</label>
-                            <input type="email" name="correo" class="form-control" maxlength="100">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Número de Equipo</label>
-                            <input type="number" name="numero_equipo" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Área de Servicio</label>
-                            <input type="text" name="area_servicio" class="form-control" maxlength="100">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Capitán Responsable</label>
-                            <input type="text" name="capitan" class="form-control" maxlength="100">
-                        </div>
+<div id="modalCrearServidor"
+    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl">
+        <form action="/servidores/crear" method="POST" class="p-0 m-0">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                <h5 class="text-xl font-bold text-blue-400">Registrar Nuevo Servidor</h5>
+                <button type="button" onclick="document.getElementById('modalCrearServidor').classList.add('hidden')"
+                    class="text-slate-400 hover:text-white">
+                    <i class="la la-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>
+                        <input type="text" name="nombre"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            required maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Cédula / ID</label>
+                        <input type="number" name="cedula"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de Nacimiento</label>
+                        <input type="date" name="fecha_nacimiento"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
+                        <input type="number" name="edad"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required
+                            min="1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Celular</label>
+                        <input type="text" name="celular"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                            maxlength="20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Correo Electrónico</label>
+                        <input type="email" name="correo"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                            maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Área de Servicio</label>
+                        <input type="text" name="area_servicio"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                            maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">Capitán Responsable</label>
+                        <input type="text" name="capitan"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                            maxlength="100">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Servidor</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="p-6 border-t border-slate-700 flex gap-3">
+                <button type="button" onclick="document.getElementById('modalCrearServidor').classList.add('hidden')"
+                    class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded-lg font-bold">Guardar
+                    Servidor</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -86,8 +142,14 @@
 
 {% block scripts %}
 <script>
-    function cargarLista() {
-        fetch('/servidores/lista')
+    function cargarLista(params = "") {
+        const url = params ? `/servidores/lista?${params}` : '/servidores/lista';
+        document.getElementById('contenedor-lista-servidores').innerHTML = `
+            <div class="text-center py-5">
+                <i class="la la-spinner la-spin text-4xl text-blue-400"></i>
+                <p class="mt-2 text-slate-400">Buscando...</p>
+            </div>`;
+        fetch(url)
             .then(response => response.text())
             .then(html => {
                 document.getElementById('contenedor-lista-servidores').innerHTML = html;
@@ -97,6 +159,20 @@
                 document.getElementById('contenedor-lista-servidores').innerHTML =
                     '<div class="alert alert-danger">Error al cargar la lista de servidores.</div>';
             });
+    }
+
+    function toggleFiltros() {
+        document.getElementById('filtros-container').classList.toggle('hidden');
+    }
+
+    function exportarPDF() {
+        const formData = new FormData(document.getElementById('form-filtros'));
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+        params.append("formato", "pdf");
+        window.location.href = `/servidores/exportar?${params.toString()}`;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -110,6 +186,13 @@
             const alertHtml = `<div class="alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
             document.getElementById('alert-container').innerHTML = alertHtml;
         }
+
+        document.getElementById('form-filtros').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData);
+            cargarLista(params.toString());
+        });
     });
 </script>
 {% endblock %}
