@@ -58,6 +58,13 @@
             <i class="la la-home text-2xl"></i>
             <span class="text-[10px] uppercase font-bold">Inicio</span>
         </a>
+        {% if user.rol.nombre in ['root', 'administrador'] %}
+        <a href="/servidores"
+            class="flex flex-col items-center p-2 text-slate-400 hover:text-green-400 transition-colors">
+            <i class="la la-id-badge text-2xl"></i>
+            <span class="text-[10px] uppercase font-bold">Servidores</span>
+        </a>
+        {% endif %}
         {% if user.rol.nombre == 'root' %}
         <a href="/usuarios"
             class="flex flex-col items-center p-2 text-slate-400 hover:text-purple-400 transition-colors">
