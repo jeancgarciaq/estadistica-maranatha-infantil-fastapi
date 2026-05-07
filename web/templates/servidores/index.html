@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Servidores{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-users-cog me-2"></i>Gestión de Servidores</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearServidor">
+            <i class="fas fa-plus me-2"></i>Nuevo Servidor
+        </button>
+    </div>
+
+    <!-- Alertas de Feedback -->
+    <div id="alert-container"></div>
+
+    <!-- Contenedor de la Lista -->
+    <div class="card shadow">
+        <div class="card-body" id="contenedor-lista-servidores">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando lista de servidores...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Servidor -->
+<div class="modal fade" id="modalCrearServidor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="/servidores/crear" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Registrar Nuevo Servidor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nombre Completo</label>
+                            <input type="text" name="nombre" class="form-control" required maxlength="100">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cédula / ID</label>
+                            <input type="number" name="cedula" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Edad</label>
+                            <input type="number" name="edad" class="form-control" required min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Celular</label>
+                            <input type="text" name="celular" class="form-control" maxlength="20">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Correo Electrónico</label>
+                            <input type="email" name="correo" class="form-control" maxlength="100">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Número de Equipo</label>
+                            <input type="number" name="numero_equipo" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Área de Servicio</label>
+                            <input type="text" name="area_servicio" class="form-control" maxlength="100">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Capitán Responsable</label>
+                            <input type="text" name="capitan" class="form-control" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Servidor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function cargarLista() {
+        fetch('/servidores/lista')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('contenedor-lista-servidores').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error cargando lista:', error);
+                document.getElementById('contenedor-lista-servidores').innerHTML =
+                    '<div class="alert alert-danger">Error al cargar la lista de servidores.</div>';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        cargarLista();
+
+        // Manejo de mensajes de URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        const type = urlParams.get('type') || 'info';
+        if (msg) {
+            const alertHtml = `<div class="alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+            document.getElementById('alert-container').innerHTML = alertHtml;
+        }
+    });
+</script>
+{% endblock %}
