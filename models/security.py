@@ -38,6 +38,7 @@ DEFAULT_ROLE_PERMISSIONS = {
         'otras_areas.view', 'otras_areas.manage',
         'ensenanza.view', 'ensenanza.manage',
         'recepcion.view', 'recepcion.manage',
+        'servidores.view', 'servidores.manage',
         'reporte.view',
         'ayuda.view',
     ],
