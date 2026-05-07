@@ -2,25 +2,21 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
-from alembic import context
-
-# Añadimos la raíz del proyecto al path para poder importar los modelos
+# 1. Añadimos la raíz del proyecto al path inmediatamente
 sys.path.append(os.getcwd())
 
-# Importamos la configuración del entorno y la Base de datos
+# 2. Cargar variables de entorno ANTES de importar modelos o base de datos
 from utils.env_loader import load_app_env
+load_app_env()
+
+from sqlalchemy import engine_from_config, pool, create_engine
+from alembic import context
 from models.database import Base
 # Es CRUCIAL importar todos los modelos para que Base.metadata los reconozca
 import models.security, models.donaciones, models.salones, models.aulas
 import models.distribucion, models.logistica, models.ensenanza, models.servidor
 import models.otras_areas, models.recepcion, models.alimento_preparado
 
-load_app_env()
-
-# este es el objeto config de Alembic
 config = context.config
 
 # Interpretamos el archivo de config para el logging
@@ -31,7 +27,18 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 def get_url():
-    return os.getenv("DATABASE_URL", "sqlite:///./models/app.db")
+    url = os.getenv("DATABASE_URL", "sqlite:///./models/app.db")
+    # Asegurar compatibilidad con SQLAlchemy 2.0 y forzar el driver pg8000
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+pg8000://", 1)
+    elif url.startswith("postgresql"):
+        # Si ya tiene un driver (como +psycopg2) o no tiene ninguno, forzamos +pg8000
+        if "://" in url:
+            prefix = url.split("://")[0]
+            if prefix != "postgresql+pg8000":
+                url = url.replace(prefix, "postgresql+pg8000", 1)
+    return url
+
 
 def run_migrations_offline() -> None:
     """Ejecuta migraciones en modo 'offline'."""
@@ -49,14 +56,25 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Ejecuta migraciones en modo 'online'."""
-    configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = get_url()
-    
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    instance_connection_name = os.getenv("INSTANCE_CONNECTION_NAME")
+
+    if instance_connection_name:
+        # Si detectamos la instancia de Cloud SQL, usamos el conector que ya instalaste
+        from models.database import getconn
+        connectable = create_engine(
+            "postgresql+pg8000://",
+            creator=getconn,
+            poolclass=pool.NullPool,
+        )
+    else:
+        # Si no, usamos la URL estándar (para SQLite o Postgres local)
+        configuration = config.get_section(config.config_ini_section, {})
+        configuration["sqlalchemy.url"] = get_url()
+        connectable = engine_from_config(
+            configuration,
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
 
     with connectable.connect() as connection:
         context.configure(
