@@ -8,3 +8,5 @@ cloud-sql-python-connector[pg8000]
 fastapi
 uvicorn[standard]
 python-multipart
+Jinja2
+reportlab
