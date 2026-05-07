@@ -122,6 +122,52 @@ class ServidorController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Servidor actualizado exitosamente.", user_context=user_context)
 
+    def generar_reporte_excel(self, servidores):
+        """Genera un archivo Excel (.xlsx) con la lista de servidores."""
+        from io import BytesIO
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Lista de Servidores"
+
+        # Encabezados
+        headers = ["Nombre", "Cédula", "Edad", "F. Nacimiento", "Celular", "Correo", "Equipo", "Área", "Capitán"]
+        ws.append(headers)
+
+        # Estilo para encabezados
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+        
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        # Datos
+        for s in servidores:
+            ws.append([
+                s.nombre,
+                s.cedula,
+                s.edad,
+                str(s.fecha_nacimiento) if s.fecha_nacimiento else "N/A",
+                s.celular or "N/A",
+                s.correo or "N/A",
+                s.numero_equipo or 0,
+                s.area_servicio or "N/A",
+                s.capitan or "N/A"
+            ])
+
+        # Ajuste de ancho de columnas
+        for col in ws.columns:
+            max_length = max(len(str(cell.value)) for cell in col)
+            ws.column_dimensions[col[0].column_letter].width = max_length + 2
+
+        buffer = BytesIO()
+        wb.save(buffer)
+        return buffer.getvalue()
+
     def generar_reporte_pdf(self, servidores):
         """Genera un archivo PDF con la lista de servidores."""
         from io import BytesIO
