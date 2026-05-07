@@ -1,8 +1,17 @@
 import os
 import logging
 import json
+import asyncio # Added for potential sleep in lifespan
+import contextlib
+from functools import lru_cache
 from typing import Optional
-from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, contextlib
+
+# 1. CARGAR VARIABLES DE ENTORNO ANTES QUE CUALQUIER OTRA COSA
+from utils.env_loader import load_app_env
+load_app_env()
+
+# 2. IMPORTACIONES DE FASTAPI
+from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -10,7 +19,6 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
 
 from models.database import get_db, configure_database, SessionLocal, shutdown_db
-from utils.env_loader import load_app_env
 from utils.config_loader import obtener_medidas
 from models.security import ROLE_ROOT, ROLE_LIMITS, Usuario, Rol
 
@@ -31,20 +39,28 @@ from controllers.servidor_controller import ServidorController
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Cargar variables de entorno
-load_app_env()
-
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ejecutar al iniciar: Crear tablas y sembrar datos
     configure_database()
     yield
     # Ejecutar al apagar: Cerrar conector de Cloud SQL
+    await asyncio.sleep(0.1) # Give aiohttp a moment to clean up
     shutdown_db()
 
 # Inicializar FastAPI
 app = FastAPI(title="Estadística Maranatha Kids - Web", lifespan=lifespan)
 security = HTTPBearer()
+
+@lru_cache(maxsize=32)
+def obtener_usuario_cache(db: Session, username: str):
+    """Cache simple para evitar consultas repetitivas a Cloud SQL en cada request."""
+    return (
+        db.query(Usuario)
+        .options(joinedload(Usuario.rol))
+        .filter(Usuario.username == username, Usuario.activo == True)
+        .first()
+    )
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 templates = Jinja2Templates(directory="web/templates")
@@ -65,12 +81,7 @@ async def auth_middleware(request: Request, call_next):
 
     db = SessionLocal()
     try:
-        user = (
-            db.query(Usuario)
-            .options(joinedload(Usuario.rol))
-            .filter(Usuario.username == username, Usuario.activo == True)
-            .first()
-        )
+        user = obtener_usuario_cache(db, username)
         if not user:
             raise Exception("Usuario no encontrado o inactivo")
         request.state.user = user
@@ -276,12 +287,26 @@ async def view_servidores(request: Request):
     })
 
 @app.get("/servidores/lista", response_class=HTMLResponse)
-async def list_servidores(request: Request, db: Session = Depends(get_db)):
+async def list_servidores(
+    request: Request, 
+    nombre: Optional[str] = None,
+    cedula: Optional[int] = None,
+    celular: Optional[str] = None,
+    correo: Optional[str] = None,
+    area_servicio: Optional[str] = None,
+    mes_nacimiento: Optional[int] = None,
+    dia_nacimiento: Optional[int] = None,
+    db: Session = Depends(get_db)
+):
     if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
         return HTMLResponse("Acceso denegado", status_code=status.HTTP_403_FORBIDDEN)
     
+    filtros = {
+        "nombre": nombre, "cedula": cedula, "celular": celular, "correo": correo, 
+        "area_servicio": area_servicio, "mes_nacimiento": mes_nacimiento, "dia_nacimiento": dia_nacimiento
+    }
     controller = ServidorController(db)
-    servidores = controller.listar_servidores()
+    servidores = controller.listar_servidores(filtros=filtros)
     return templates.TemplateResponse(request, "servidores/list.html", {
         "servidores": servidores,
         "user": request.state.user
@@ -292,6 +317,7 @@ async def create_servidor(
     request: Request,
     nombre: str = Form(...),
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
@@ -305,7 +331,7 @@ async def create_servidor(
     
     controller = ServidorController(db)
     datos = {
-        "nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular,
+        "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular,
         "correo": correo, "numero_equipo": numero_equipo, 
         "area_servicio": area_servicio, "capitan": capitan
     }
@@ -318,6 +344,7 @@ async def update_servidor(
     id: int = Form(...),
     nombre: str = Form(...),
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
@@ -331,7 +358,7 @@ async def update_servidor(
 
     controller = ServidorController(db)
     datos = {
-        "nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular,
+        "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular,
         "correo": correo, "numero_equipo": numero_equipo, 
         "area_servicio": area_servicio, "capitan": capitan
     }
@@ -346,6 +373,36 @@ async def delete_servidor(request: Request, id: int = Form(...), db: Session = D
     controller = ServidorController(db)
     exito, mensaje = controller.eliminar_servidor(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.get("/servidores/exportar")
+async def export_servidores(
+    request: Request,
+    formato: str = "pdf",
+    nombre: Optional[str] = None,
+    cedula: Optional[int] = None,
+    celular: Optional[str] = None,
+    correo: Optional[str] = None,
+    area_servicio: Optional[str] = None,
+    mes_nacimiento: Optional[int] = None,
+    dia_nacimiento: Optional[int] = None,
+    db: Session = Depends(get_db)
+):
+    if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    filtros = {
+        "nombre": nombre, "cedula": cedula, "celular": celular, "correo": correo, 
+        "area_servicio": area_servicio, "mes_nacimiento": mes_nacimiento, "dia_nacimiento": dia_nacimiento
+    }
+    controller = ServidorController(db)
+    servidores = controller.listar_servidores(filtros=filtros)
+
+    if formato == "pdf":
+        pdf_content = controller.generar_reporte_pdf(servidores)
+        headers = {"Content-Disposition": "attachment; filename=servidores.pdf"}
+        return Response(content=pdf_content, media_type="application/pdf", headers=headers)
+    
+    return RedirectResponse(url="/servidores?msg=Formato no soportado&type=error")
 
 @app.get("/donaciones", response_class=HTMLResponse)
 async def view_donaciones(request: Request):
@@ -904,4 +961,4 @@ async def logout():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main_web:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main_web:app", host="127.0.0.1", port=8000, reload=True)
