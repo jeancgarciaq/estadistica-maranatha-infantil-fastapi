@@ -3,6 +3,7 @@ import logging
 import json
 import asyncio # Added for potential sleep in lifespan
 import contextlib
+import random
 from functools import lru_cache
 from typing import Optional
 
@@ -116,8 +117,9 @@ async def login(request: Request, username: str = Form(...), password: str = For
 async def register_view(request: Request, db: Session = Depends(get_db)):
     controller = UsuariosController(db)
     roles = controller.listar_roles()
-    # Generamos un desafío matemático simple para el anti-spam
-    num1, num2 = 7, 5 # En producción esto debería ser aleatorio
+    # Generamos números aleatorios para el desafío
+    num1 = random.randint(1, 10)
+    num2 = random.randint(1, 10)
     return templates.TemplateResponse(request, "register.html", {
         "roles": roles,
         "math_challenge": f"¿Cuánto es {num1} + {num2}?",
@@ -136,21 +138,24 @@ async def register_post(
     db: Session = Depends(get_db)
 ):
     controller = UsuariosController(db)
+    # Regeneramos el desafío en caso de error para que no sea estático
+    num1_err = random.randint(1, 10)
+    num2_err = random.randint(1, 10)
     # Validación de campos obligatorios para evitar el JSON de error
     if not all([username, password, rol_nombre, math_answer is not None]):
         return templates.TemplateResponse(request, "register.html", {
             "error": "Todos los campos son obligatorios.",
             "roles": controller.listar_roles(),
-            "math_challenge": "¿Cuánto es 7 + 5?",
-            "math_result": 12
+            "math_challenge": f"¿Cuánto es {num1_err} + {num2_err}?",
+            "math_result": num1_err + num2_err
         })
 
     if math_answer != math_expected:
         return templates.TemplateResponse(request, "register.html", {
             "error": "Respuesta matemática incorrecta.",
             "roles": controller.listar_roles(),
-            "math_challenge": "¿Cuánto es 7 + 5?",
-            "math_result": 12
+            "math_challenge": f"¿Cuánto es {num1_err} + {num2_err}?",
+            "math_result": num1_err + num2_err
         })
 
     datos = {
@@ -166,8 +171,8 @@ async def register_post(
     return templates.TemplateResponse(request, "register.html", {
         "error": mensaje, 
         "roles": controller.listar_roles(),
-        "math_challenge": "¿Cuánto es 7 + 5?",
-        "math_result": 12
+        "math_challenge": f"¿Cuánto es {num1_err} + {num2_err}?",
+        "math_result": num1_err + num2_err
     })
 
 @app.get("/forgot-password", response_class=HTMLResponse)
@@ -401,7 +406,13 @@ async def export_servidores(
         pdf_content = controller.generar_reporte_pdf(servidores)
         headers = {"Content-Disposition": "attachment; filename=servidores.pdf"}
         return Response(content=pdf_content, media_type="application/pdf", headers=headers)
-    
+
+    if formato == "excel":
+        excel_content = controller.generar_reporte_excel(servidores)
+        headers = {"Content-Disposition": "attachment; filename=servidores_export.xlsx"}
+        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return Response(content=excel_content, media_type=content_type, headers=headers)
+
     return RedirectResponse(url="/servidores?msg=Formato no soportado&type=error")
 
 @app.get("/donaciones", response_class=HTMLResponse)
