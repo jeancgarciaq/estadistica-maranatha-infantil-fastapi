@@ -15,7 +15,7 @@ from utils.env_loader import load_app_env
 from models.database import Base
 # Es CRUCIAL importar todos los modelos para que Base.metadata los reconozca
 import models.security, models.donaciones, models.salones, models.aulas
-import models.distribucion, models.logistica, models.ensenanza
+import models.distribucion, models.logistica, models.ensenanza, models.servidor
 import models.otras_areas, models.recepcion, models.alimento_preparado
 
 load_app_env()
