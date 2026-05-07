@@ -115,7 +115,8 @@ Si aparece `Permission denied (401)`, normalmente significa:
 8. `logistica`
 9. `otras_areas`
 10. `recepciones`
-11. `distribuciones`
-12. `usuarios`
-13. `roles`
-14. `permisos`
+11. `servidores`
+12. `distribuciones`
+13. `usuarios`
+14. `roles`
+15. `permisos`
