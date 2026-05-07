@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Date
 from models.database import Base
 from models.base_class import AuditMixin
 
@@ -10,6 +10,7 @@ class Servidor(Base, AuditMixin):
 
     nombre = Column(String(100), nullable=False)
     edad = Column(Integer, nullable=False)
+    fecha_nacimiento = Column(Date, nullable=True)
     cedula = Column(Integer, nullable=False, unique=True)
     celular = Column(String(20), nullable=True)
     correo = Column(String(100), nullable=True, unique=True)
