@@ -1,56 +1,67 @@
-<div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-slate-900/50 border-b border-slate-700 text-xs uppercase text-slate-400 font-bold">
-            <tr>
-                <th class="p-4">Nombre</th>
-                <th class="p-4">Cédula</th>
-                <th class="p-4">Edad</th>
-                <th class="p-4">Contacto</th>
-                <th class="p-4">Equipo/Área</th>
-                <th class="p-4">Capitán</th>
-                <th class="p-4 text-right">Acciones</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-800">
-            {% for servidor in servidores %}
-            <tr class="hover:bg-slate-700/20 transition-colors">
-                <td class="p-4">
-                    <div class="font-bold text-slate-200">{{ servidor.nombre }}</div>
-                    <div class="text-xs text-slate-500">{{ servidor.correo or 'Sin correo' }}</div>
-                </td>
-                <td class="p-4 text-slate-300">{{ servidor.cedula }}</td>
-                <td class="p-4 text-slate-300">{{ servidor.edad }}</td>
-                <td class="p-4 text-slate-300">{{ servidor.celular or 'N/A' }}</td>
-                <td class="p-4">
-                    <span
-                        class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold">Eq:
-                        {{ servidor.numero_equipo or '-' }}</span>
-                    <div class="text-xs text-slate-500 mt-1">{{ servidor.area_servicio or '-' }}</div>
-                </td>
-                <td class="p-4 text-slate-300 text-xs">{{ servidor.capitan or 'N/A' }}</td>
-                <td class="p-4 text-right">
-                    <div class="flex justify-end gap-2">
-                        <button
-                            onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.remove('hidden')"
-                            class="text-amber-400 hover:text-white bg-amber-500/10 hover:bg-amber-600 p-2 rounded-lg transition-all">
-                            <i class="la la-edit text-xl"></i>
-                        </button>
-                        <button
-                            onclick="document.getElementById('modalDel{{ servidor.id }}').classList.remove('hidden')"
-                            class="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 p-2 rounded-lg transition-all">
-                            <i class="la la-trash text-xl"></i>
-                        </button>
+<div class="space-y-4 p-4 md:p-6">
+    {% if servidores and servidores|length > 0 %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {% for servidor in servidores %}
+        <article class="rounded-2xl border border-slate-700 bg-slate-800/80 shadow-lg overflow-hidden">
+            <div class="p-5 border-b border-slate-700/80 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="text-lg font-bold text-slate-100 truncate">{{ servidor.nombre }}</h3>
+                        {% if servidor.numero_equipo %}
+                        <span class="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-300">
+                            Equipo {{ servidor.numero_equipo }}
+                        </span>
+                        {% endif %}
                     </div>
-                </td>
-            </tr>
+                    <p class="mt-1 text-sm text-slate-400">{{ servidor.correo or 'Sin correo registrado' }}</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button
+                        onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.remove('hidden')"
+                        class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white"
+                        aria-label="Editar servidor">
+                        <i class="la la-edit text-xl"></i>
+                    </button>
+                    <button
+                        onclick="document.getElementById('modalDel{{ servidor.id }}').classList.remove('hidden')"
+                        class="rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-red-300 transition hover:bg-red-600 hover:text-white"
+                        aria-label="Eliminar servidor">
+                        <i class="la la-trash text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-slate-700/60">
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Cédula</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.cedula }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Edad</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.edad }} años</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Contacto</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.celular or 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Capitán</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.capitan or 'N/A' }}</p>
+                </div>
+            </div>
+
+            <div class="p-5">
+                <p class="text-xs uppercase tracking-wide text-slate-500">Área de servicio</p>
+                <p class="mt-1 text-sm text-slate-200">{{ servidor.area_servicio or 'Sin área asignada' }}</p>
+            </div>
 
             <!-- Modal Editar -->
             <div id="modalEdit{{ servidor.id }}"
-                class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-                <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl">
+                class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl">
                     <form action="/servidores/actualizar" method="POST" class="p-0 m-0">
-                        <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-                            <h5 class="text-xl font-bold text-amber-400">Editar Servidor: {{ servidor.nombre }}</h5>
+                        <div class="flex items-center justify-between border-b border-slate-700 p-6">
+                            <h5 class="text-xl font-bold text-amber-400">Editar Servidor</h5>
                             <button type="button"
                                 onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.add('hidden')"
                                 class="text-slate-400 hover:text-white">
@@ -60,71 +71,70 @@
                         <div class="p-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="md:col-span-2 text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Nombre Completo</label>
                                     <input type="text" name="nombre"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.nombre }}" required>
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Cédula</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Cédula</label>
                                     <input type="number" name="cedula"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.cedula }}" required>
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de
-                                        Nacimiento</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Fecha de Nacimiento</label>
                                     <div class="relative">
                                         <input type="text" data-visible-date
-                                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white"
+                                            class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-white outline-none"
                                             placeholder="DD/MM/YYYY" autocomplete="off">
                                         <input type="date" name="fecha_nacimiento" class="hidden fecha-native" aria-hidden="true" value="{{ servidor.fecha_nacimiento or '' }}">
                                     </div>
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Edad</label>
                                     <input type="number" name="edad"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.edad }}" required>
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Celular</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Celular</label>
                                     <input type="text" name="celular"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.celular or '' }}">
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Correo</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Correo</label>
                                     <input type="email" name="correo"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.correo or '' }}">
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Número Equipo</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Número Equipo</label>
                                     <input type="number" name="numero_equipo"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.numero_equipo or '' }}">
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Área</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Área</label>
                                     <input type="text" name="area_servicio"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.area_servicio or '' }}">
                                 </div>
                                 <div class="text-start">
-                                    <label class="block text-sm font-medium mb-1 text-slate-400">Capitán</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Capitán</label>
                                     <input type="text" name="capitan"
-                                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
                                         value="{{ servidor.capitan or '' }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="p-6 border-t border-slate-700 flex gap-3">
+                        <div class="flex gap-3 border-t border-slate-700 p-6">
                             <button type="button"
                                 onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.add('hidden')"
-                                class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                                class="flex-1 rounded-lg bg-slate-700 p-2 font-bold hover:bg-slate-600">Cancelar</button>
                             <button type="submit"
-                                class="flex-1 bg-amber-600 hover:bg-amber-700 p-2 rounded-lg font-bold text-white text-sm">Actualizar
+                                class="flex-1 rounded-lg bg-amber-600 p-2 font-bold text-white hover:bg-amber-700">Actualizar
                                 Cambios</button>
                         </div>
                     </form>
@@ -133,26 +143,132 @@
 
             <!-- Modal Eliminar -->
             <div id="modalDel{{ servidor.id }}"
-                class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-                <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl">
+                class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl">
                     <form action="/servidores/eliminar" method="POST" class="p-6 text-center">
                         <input type="hidden" name="id" value="{{ servidor.id }}">
-                        <i class="la la-exclamation-triangle text-6xl text-red-500 mb-4"></i>
-                        <h5 class="text-xl font-bold mb-2 text-white">¿Eliminar Servidor?</h5>
-                        <p class="text-sm text-slate-400 mb-6">¿Estás seguro de eliminar al servidor <strong>{{
+                        <i class="la la-exclamation-triangle mb-4 text-6xl text-red-500"></i>
+                        <h5 class="mb-2 text-xl font-bold text-white">¿Eliminar Servidor?</h5>
+                        <p class="mb-6 text-sm text-slate-400">¿Estás seguro de eliminar al servidor <strong>{{
                                 servidor.nombre }}</strong>? Esta acción no se puede deshacer de forma sencilla.</p>
                         <div class="flex gap-3">
                             <button type="button"
                                 onclick="document.getElementById('modalDel{{ servidor.id }}').classList.add('hidden')"
-                                class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
+                                class="flex-1 rounded-lg bg-slate-700 p-2 font-bold hover:bg-slate-600">Cancelar</button>
                             <button type="submit"
-                                class="flex-1 bg-red-600 hover:bg-red-700 p-2 rounded-lg font-bold text-white">Confirmar
+                                class="flex-1 rounded-lg bg-red-600 p-2 font-bold text-white hover:bg-red-700">Confirmar
                                 Eliminación</button>
                         </div>
                     </form>
                 </div>
             </div>
-            {% endfor %}
-        </tbody>
-    </table>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="rounded-2xl border border-slate-700 bg-slate-800/70 p-8 text-center">
+        <i class="la la-inbox mb-3 text-5xl text-slate-500"></i>
+        <h3 class="text-lg font-bold text-slate-200">No hay servidores registrados</h3>
+        <p class="mt-2 text-sm text-slate-400">Cuando agregues servidores, aparecerán aquí en formato de tarjetas.</p>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+    (function () {
+        function parseDateFromText(text) {
+            if (!text) return null;
+            const cleaned = text.trim();
+            const dmy = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (dmy) {
+                const day = parseInt(dmy[1], 10);
+                const month = parseInt(dmy[2], 10) - 1;
+                const year = parseInt(dmy[3], 10);
+                const parsed = new Date(year, month, day);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+            const ymd = cleaned.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (ymd) {
+                const year = parseInt(ymd[1], 10);
+                const month = parseInt(ymd[2], 10) - 1;
+                const day = parseInt(ymd[3], 10);
+                const parsed = new Date(year, month, day);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+            return null;
+        }
+
+        function formatToDisplay(date) {
+            if (!date) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function calculateAge(date) {
+            if (!date) return '';
+            const today = new Date();
+            let age = today.getFullYear() - date.getFullYear();
+            const monthDiff = today.getMonth() - date.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function attachDateHandlers(root) {
+            const visibleInputs = root.querySelectorAll('input[data-visible-date]');
+            visibleInputs.forEach((visibleInput) => {
+                if (visibleInput.dataset.dateAttached === '1') return;
+                visibleInput.dataset.dateAttached = '1';
+
+                const form = visibleInput.closest('form');
+                const nativeInput = visibleInput.parentElement.querySelector('input[type="date"]');
+                const ageInput = form ? form.querySelector('input[name="edad"]') : null;
+
+                if (nativeInput && nativeInput.value) {
+                    const parsed = parseDateFromText(nativeInput.value);
+                    if (parsed) {
+                        visibleInput.value = formatToDisplay(parsed);
+                        if (ageInput && !ageInput.value) {
+                            ageInput.value = calculateAge(parsed);
+                        }
+                    }
+                }
+
+                if (nativeInput) {
+                    nativeInput.addEventListener('change', () => {
+                        const parsed = parseDateFromText(nativeInput.value);
+                        visibleInput.value = parsed ? formatToDisplay(parsed) : '';
+                        if (ageInput) {
+                            ageInput.value = parsed ? calculateAge(parsed) : '';
+                        }
+                    });
+                }
+
+                visibleInput.addEventListener('blur', () => {
+                    const parsed = parseDateFromText(visibleInput.value);
+                    if (nativeInput) {
+                        nativeInput.value = parsed
+                            ? `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`
+                            : '';
+                    }
+                    if (ageInput) {
+                        ageInput.value = parsed ? calculateAge(parsed) : '';
+                    }
+                    if (parsed) {
+                        visibleInput.value = formatToDisplay(parsed);
+                    }
+                });
+            });
+        }
+
+        const init = () => attachDateHandlers(document);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>
