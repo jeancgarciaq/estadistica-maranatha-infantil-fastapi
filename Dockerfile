@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación con Uvicorn
-CMD ["sh", "-c", "uvicorn main_web:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn main_web:app --host 0.0.0.0 --port ${PORT} --log-level debug"]
