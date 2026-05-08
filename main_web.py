@@ -99,6 +99,11 @@ async def auth_middleware(request: Request, call_next):
 async def index(request: Request):
     return templates.TemplateResponse(request, "login.html")
 
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_view(request: Request):
+    return templates.TemplateResponse(request, "login.html")
+
 @app.post("/login")
 async def login(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     controller = UsuariosController(db)
