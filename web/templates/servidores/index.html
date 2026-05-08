@@ -3,95 +3,91 @@
 {% block title %}Gestión de Servidores{% endblock %}
 
 {% block content %}
-<div class="container mx-auto p-4 max-w-6xl">
-    <div class="flex justify-between items-center mb-6">
+<div class="container mx-auto p-4 max-w-3xl pb-8">
+    <div class="mb-6 flex items-start justify-between gap-4">
         <div>
             <h2 class="text-2xl font-bold text-green-400"><i class="la la-id-badge mr-2"></i>Gestión de Servidores</h2>
             <p class="text-xs text-slate-500">Administración de personal de servicio</p>
         </div>
-        <div class="flex gap-2">
-            <button onclick="document.getElementById('modalCrearServidor').classList.remove('hidden')"
-                class="bg-blue-600 hover:bg-blue-700 p-2 px-4 rounded-lg font-bold flex items-center gap-2 transition-all text-sm">
-                <i class="la la-plus text-xl"></i> Nuevo Servidor
-            </button>
-        </div>
+        <a href="/servidores/lista"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-bold text-sky-400 transition hover:border-sky-500/40 hover:bg-sky-500/10 hover:text-sky-300">
+            <i class="la la-list text-xl"></i>
+            Ver Lista
+        </a>
     </div>
 
-    <!-- Alertas de Feedback -->
     <div id="alert-container" class="mb-4"></div>
-</div>
 
-<!-- Modal para Crear Servidor -->
-<div id="modalCrearServidor"
-    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl">
-        <form action="/servidores/crear" method="POST" class="p-0 m-0">
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
-                <h5 class="text-xl font-bold text-blue-400">Registrar Nuevo Servidor</h5>
-                <button type="button" onclick="document.getElementById('modalCrearServidor').classList.add('hidden')"
-                    class="text-slate-400 hover:text-white">
-                    <i class="la la-times text-2xl"></i>
-                </button>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>
-                        <input type="text" name="nombre"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            required maxlength="100">
+    <div class="glass rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+        <div class="border-b border-slate-700 px-6 py-5">
+            <h5 class="text-xl font-bold text-blue-400">Registrar Nuevo Servidor</h5>
+            <p class="mt-1 text-sm text-slate-400">Complete los datos del servidor para crear el registro estadístico.</p>
+        </div>
+
+        <form id="servidorForm" action="/servidores/crear" method="POST" class="p-6 pb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>
+                    <input type="text" name="nombre"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        required maxlength="100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Cédula / ID</label>
+                    <input type="number" name="cedula"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de Nacimiento</label>
+                    <div class="relative">
+                        <input type="text" data-visible-date
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white"
+                            placeholder="DD/MM/YYYY" autocomplete="off" inputmode="numeric">
+                        <input type="date" name="fecha_nacimiento" class="hidden fecha-native" aria-hidden="true">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Cédula / ID</label>
-                        <input type="number" name="cedula"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de Nacimiento</label>
-                        <div class="relative">
-                            <input type="text" data-visible-date
-                                class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white"
-                                placeholder="DD/MM/YYYY" autocomplete="off">
-                            <input type="date" name="fecha_nacimiento" class="hidden fecha-native" aria-hidden="true">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
-                        <input type="number" name="edad"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required
-                            min="1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Celular</label>
-                        <input type="text" name="celular"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                            maxlength="20">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Correo Electrónico</label>
-                        <input type="email" name="correo"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                            maxlength="100">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Área de Servicio</label>
-                        <input type="text" name="area_servicio"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                            maxlength="100">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-400">Capitán Responsable</label>
-                        <input type="text" name="capitan"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                            maxlength="100">
-                    </div>
+                    <p class="mt-1 text-[11px] text-slate-500">Formato sugerido: DD/MM/AAAA</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
+                    <input type="number" name="edad"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" required
+                        min="1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Celular</label>
+                    <input type="text" name="celular"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                        maxlength="20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Correo Electrónico</label>
+                    <input type="email" name="correo"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                        maxlength="100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Área de Servicio</label>
+                    <input type="text" name="area_servicio"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                        maxlength="100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Capitán Responsable</label>
+                    <input type="text" name="capitan"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
+                        maxlength="100">
                 </div>
             </div>
-            <div class="p-6 border-t border-slate-700 flex gap-3">
-                <button type="button" onclick="document.getElementById('modalCrearServidor').classList.add('hidden')"
-                    class="flex-1 bg-slate-700 hover:bg-slate-600 p-2 rounded-lg font-bold">Cancelar</button>
-                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded-lg font-bold">Guardar
-                    Servidor</button>
+
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="reset"
+                    class="w-full rounded-lg bg-slate-700 p-2 font-bold text-white transition hover:bg-slate-600">
+                    Limpiar
+                </button>
+                <button type="submit"
+                    class="w-full rounded-lg bg-blue-600 p-2 font-bold text-white transition hover:bg-blue-700">
+                    Guardar Servidor
+                </button>
             </div>
         </form>
     </div>
@@ -230,7 +226,6 @@
         });
     }
 
-    // attach handlers once DOM ready for create form
     document.addEventListener('DOMContentLoaded', function () {
         attachDateHandlers(document);
     });
