@@ -14,7 +14,6 @@ load_app_env()
 # 2. IMPORTACIONES DE FASTAPI
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
@@ -63,13 +62,12 @@ def obtener_usuario_cache(db: Session, username: str):
         .first()
     )
 
-app.mount("/static", StaticFiles(directory="web/static"), name="static")
 templates = Jinja2Templates(directory="web/templates")
 
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/login", "/logout", "/static", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
+    public_paths = ["/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
     
     if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
@@ -97,6 +95,7 @@ async def auth_middleware(request: Request, call_next):
         db.close()
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/login", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "login.html")
 
@@ -977,4 +976,9 @@ async def logout():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main_web:app", host="127.0.0.1", port=8000, reload=True)
+    # Use the PORT env var set by Cloud Run (default 8080) and bind to 0.0.0.0
+    port = int(os.environ.get("PORT", 8080))
+    host = "0.0.0.0"
+    # Enable reload only in development environments
+    reload_flag = os.environ.get("ENV", "").lower() in ("dev", "development")
+    uvicorn.run("main_web:app", host=host, port=port, reload=reload_flag)
