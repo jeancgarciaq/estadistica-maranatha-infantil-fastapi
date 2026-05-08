@@ -95,6 +95,7 @@ async def auth_middleware(request: Request, call_next):
         db.close()
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/login", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "login.html")
 
