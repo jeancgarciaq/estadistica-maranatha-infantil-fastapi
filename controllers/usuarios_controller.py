@@ -179,7 +179,7 @@ class UsuariosController(BaseController):
         permisos = {perm.codigo for perm in (usuario.rol.permisos or [])}
         return permiso_codigo in permisos or '*' in permisos
 
-    def solicitar_restablecimiento_contrasena(self, email_o_username):
+    def solicitar_restablecimiento_contrasena(self, email_o_username, request=None):
         """
         Genera un token de restablecimiento de contraseña y lo guarda en la base de datos.
         Luego, envía un correo electrónico con el enlace.
@@ -219,8 +219,15 @@ class UsuariosController(BaseController):
                 logger.error(f"Configuración SMTP incompleta en .env. Faltan: {', '.join(missing)}")
                 return False, "Error interno: Configuración de correo incompleta."
 
-            # 2. Construir enlace para local
-            reset_link = f"http://127.0.0.1:8000/reset-password/{token}"
+            # 2. Construir enlace usando la URL pública actual o una base configurable
+            base_url = None
+            if request is not None:
+                base_url = str(request.base_url)
+
+            if not base_url:
+                base_url = os.getenv("BASE_URL", "http://127.0.0.1:8000")
+
+            reset_link = f"{base_url.rstrip('/')}/reset-password/{token}"
             
             mensaje_texto = (
                 f"Hola {usuario.username},\n\n"
