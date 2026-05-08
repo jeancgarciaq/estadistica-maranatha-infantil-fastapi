@@ -55,7 +55,7 @@
     </form>
 
     <p class="mt-6 text-center text-sm text-slate-400">
-        ¿Ya tienes cuenta? <a href="/login" class="text-blue-400 hover:underline">Inicia sesión</a>
+        ¿Ya tienes cuenta? <a href="{{ request.url_for('index') }}" class="text-blue-400 hover:underline">Inicia sesión</a>
     </p>
 </div>
 {% endblock %}
