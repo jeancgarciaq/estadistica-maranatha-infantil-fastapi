@@ -14,7 +14,6 @@ load_app_env()
 # 2. IMPORTACIONES DE FASTAPI
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
@@ -63,13 +62,12 @@ def obtener_usuario_cache(db: Session, username: str):
         .first()
     )
 
-app.mount("/static", StaticFiles(directory="web/static"), name="static")
 templates = Jinja2Templates(directory="web/templates")
 
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/login", "/logout", "/static", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
+    public_paths = ["/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
     
     if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
         return await call_next(request)
