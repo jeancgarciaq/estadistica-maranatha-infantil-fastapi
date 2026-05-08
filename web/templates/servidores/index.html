@@ -93,8 +93,12 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 text-slate-400">Fecha de Nacimiento</label>
-                        <input type="date" name="fecha_nacimiento"
-                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                        <div class="relative">
+                            <input type="text" data-visible-date
+                                class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white"
+                                placeholder="DD/MM/YYYY" autocomplete="off">
+                            <input type="date" name="fecha_nacimiento" class="hidden fecha-native" aria-hidden="true">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 text-slate-400">Edad</label>
@@ -204,6 +208,141 @@
             const params = new URLSearchParams(formData);
             cargarLista(params.toString());
         });
+    });
+</script>
+<script>
+    // Utilities para manejo de fecha DD/MM/YYYY y cálculo de edad
+    function parseDateFromText(text) {
+        if (!text) return null;
+        text = text.trim();
+        // DD/MM/YYYY
+        const dmy = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (dmy) {
+            const dd = parseInt(dmy[1], 10);
+            const mm = parseInt(dmy[2], 10) - 1;
+            const yyyy = parseInt(dmy[3], 10);
+            const dt = new Date(yyyy, mm, dd);
+            return isNaN(dt.getTime()) ? null : dt;
+        }
+        // YYYY-MM-DD
+        const ymd = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (ymd) {
+            const yyyy = parseInt(ymd[1], 10);
+            const mm = parseInt(ymd[2], 10) - 1;
+            const dd = parseInt(ymd[3], 10);
+            const dt = new Date(yyyy, mm, dd);
+            return isNaN(dt.getTime()) ? null : dt;
+        }
+        return null;
+    }
+
+    function formatToDisplay(date) {
+        if (!date) return '';
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function formatToISO(date) {
+        if (!date) return '';
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function calculateAge(date) {
+        if (!date) return null;
+        const today = new Date();
+        let age = today.getFullYear() - date.getFullYear();
+        const m = today.getMonth() - date.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    function attachDateHandlers(root = document) {
+        const visibles = root.querySelectorAll('input[data-visible-date]');
+        visibles.forEach(v => {
+            // avoid attaching twice
+            if (v._dateAttached) return;
+            v._dateAttached = true;
+            const form = v.closest('form');
+            // find the native date input in the same wrapper or form
+            let native = v.parentElement.querySelector('input[type="date"]');
+            if (!native && form) native = form.querySelector('input[type="date"][name="fecha_nacimiento"]');
+
+            // initialize visible value from native if present
+            if (native && native.value) {
+                const dt = parseDateFromText(native.value);
+                if (dt) v.value = formatToDisplay(dt);
+                const edadInput = form && form.querySelector('input[name="edad"]');
+                if (edadInput) {
+                    const age = calculateAge(dt);
+                    if (age !== null && !isNaN(age)) edadInput.value = age;
+                }
+            }
+
+            // when user focuses the visible input, open native picker to help mobile users
+            if (native) {
+                v.addEventListener('focus', () => {
+                    try { native.showPicker && native.showPicker(); } catch (e) {};
+                    // fallback: trigger click
+                    try { native.click(); } catch (e) {};
+                });
+
+                native.addEventListener('change', () => {
+                    const dt = parseDateFromText(native.value);
+                    if (dt) v.value = formatToDisplay(dt);
+                    const edadInput = form && form.querySelector('input[name="edad"]');
+                    if (edadInput) {
+                        const age = calculateAge(dt);
+                        if (age !== null && !isNaN(age)) edadInput.value = age;
+                    }
+                });
+            }
+
+            // when user types a date in visible input, parse on blur and update native and edad
+            v.addEventListener('blur', () => {
+                const dt = parseDateFromText(v.value) || null;
+                if (native) native.value = dt ? formatToISO(dt) : '';
+                const edadInput = form && form.querySelector('input[name="edad"]');
+                if (edadInput) {
+                    const age = dt ? calculateAge(dt) : '';
+                    edadInput.value = (age !== null && !isNaN(age)) ? age : '';
+                }
+            });
+        });
+    }
+
+    // hook cargarLista to re-attach handlers after fetch
+    const _orig_cargarLista = window.cargarLista;
+    window.cargarLista = function (params = "") {
+        const url = params ? `/servidores/lista?${params}` : '/servidores/lista';
+        document.getElementById('contenedor-lista-servidores').innerHTML = `
+            <div class="text-center py-5">
+                <i class="la la-spinner la-spin text-4xl text-blue-400"></i>
+                <p class="mt-2 text-slate-400">Buscando...</p>
+            </div>`;
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('contenedor-lista-servidores').innerHTML = html;
+                // attach date handlers to newly injected html
+                attachDateHandlers(document.getElementById('contenedor-lista-servidores'));
+            })
+            .catch(error => {
+                console.error('Error cargando lista:', error);
+                document.getElementById('contenedor-lista-servidores').innerHTML =
+                    '<div class="m-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">Error al cargar la lista de servidores.</div>';
+            });
+    };
+
+    // attach handlers once DOM ready for create form
+    document.addEventListener('DOMContentLoaded', function () {
+        attachDateHandlers(document);
     });
 </script>
 {% endblock %}
