@@ -186,7 +186,7 @@ async def forgot_password_view(request: Request):
 @app.post("/forgot-password")
 async def forgot_password_post(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
     controller = UsuariosController(db)
-    exito, mensaje = controller.solicitar_restablecimiento_contrasena(email)
+    exito, mensaje = controller.solicitar_restablecimiento_contrasena(email, request=request)
     if exito:
         return templates.TemplateResponse(request, "forgot_password.html", {
             "message": mensaje,
