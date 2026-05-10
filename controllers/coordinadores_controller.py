@@ -19,15 +19,15 @@ class CoordinadoresController(BaseController):
             db.add(coordinador)
             db.flush()
             self.registrar_evento_sync(db, 'coordinadores', coordinador, 'upsert')
-        return self.ejecutar_transaccion(operacion, "Líder creado exitosamente.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Coordinador creado exitosamente.", user_context=user_context)
 
     def actualizar_coordinador(self, id, datos, user_context=None):
         def operacion(db):
             coordinador = self.query_activa(db).filter(Coordinador.id == id).first()
-            if not coordinador: raise ValueError("Líder no encontrado.")
+            if not coordinador: raise ValueError("Coordinador no encontrado.")
             for key, value in datos.items(): setattr(coordinador, key, value)
             self.registrar_evento_sync(db, 'coordinadores', coordinador, 'upsert')
-        return self.ejecutar_transaccion(operacion, "Líder actualizado.", user_context=user_context)
+        return self.ejecutar_transaccion(operacion, "Coordinador actualizado.", user_context=user_context)
 
     def eliminar_coordinador(self, id, user_context=None):
         def operacion(db):
