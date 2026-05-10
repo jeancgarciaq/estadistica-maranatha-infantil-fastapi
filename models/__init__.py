@@ -11,3 +11,8 @@ from .otras_areas import OtrasAreas
 from .recepcion import Recepcion
 from .sync_queue import SyncQueue
 from .security import Usuario, Rol, Permiso
+from .servidor import Servidor
+from .capitanes import Capitan
+from .coordinadores import Coordinador
+from .lideres import Lider
+from .pastores import Pastor
