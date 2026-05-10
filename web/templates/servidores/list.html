@@ -1,14 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Servidores - EMI{% endblock %}
+
+{% block content %}
 <div class="space-y-4 p-4 md:p-6">
     {% if servidores and servidores|length > 0 %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {% for servidor in servidores %}
         <article class="rounded-2xl border border-slate-700 bg-slate-800/80 shadow-lg overflow-hidden">
-            <div class="p-5 border-b border-slate-700/80 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div
+                class="p-5 border-b border-slate-700/80 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                         <h3 class="text-lg font-bold text-slate-100 truncate">{{ servidor.nombre }}</h3>
                         {% if servidor.numero_equipo %}
-                        <span class="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-300">
+                        <span
+                            class="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-300">
                             Equipo {{ servidor.numero_equipo }}
                         </span>
                         {% endif %}
@@ -16,14 +23,12 @@
                     <p class="mt-1 text-sm text-slate-400">{{ servidor.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <button
-                        onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.remove('hidden')"
+                    <button onclick="document.getElementById('modalEdit{{ servidor.id }}').classList.remove('hidden')"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white"
                         aria-label="Editar servidor">
                         <i class="la la-edit text-xl"></i>
                     </button>
-                    <button
-                        onclick="document.getElementById('modalDel{{ servidor.id }}').classList.remove('hidden')"
+                    <button onclick="document.getElementById('modalDel{{ servidor.id }}').classList.remove('hidden')"
                         class="rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-red-300 transition hover:bg-red-600 hover:text-white"
                         aria-label="Eliminar servidor">
                         <i class="la la-trash text-xl"></i>
@@ -83,12 +88,14 @@
                                         value="{{ servidor.cedula }}" required>
                                 </div>
                                 <div class="text-start">
-                                    <label class="mb-1 block text-sm font-medium text-slate-400">Fecha de Nacimiento</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Fecha de
+                                        Nacimiento</label>
                                     <div class="relative">
                                         <input type="text" data-visible-date
                                             class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-white outline-none"
                                             placeholder="DD/MM/YYYY" autocomplete="off">
-                                        <input type="date" name="fecha_nacimiento" class="hidden fecha-native" aria-hidden="true" value="{{ servidor.fecha_nacimiento or '' }}">
+                                        <input type="date" name="fecha_nacimiento" class="hidden fecha-native"
+                                            aria-hidden="true" value="{{ servidor.fecha_nacimiento or '' }}">
                                     </div>
                                 </div>
                                 <div class="text-start">
@@ -173,7 +180,9 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
     (function () {
         function parseDateFromText(text) {
@@ -272,3 +281,4 @@
         }
     })();
 </script>
+{% endblock %}
