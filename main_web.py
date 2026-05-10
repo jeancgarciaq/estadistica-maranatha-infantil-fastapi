@@ -34,6 +34,10 @@ from controllers.recepcion_controller import RecepcionController
 from controllers.logistica_controller import LogisticaController
 from controllers.distribucion_controller import DistribucionesController
 from controllers.servidor_controller import ServidorController
+from controllers.lideres_controller import LideresController
+from controllers.coordinadores_controller import CoordinadoresController
+from controllers.capitanes_controller import CapitanesController
+from controllers.pastores_controller import PastoresController
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -623,6 +627,76 @@ async def delete_area(request: Request, id: int = Form(...), db: Session = Depen
     controller = AreasController(db)
     exito, mensaje = controller.eliminar_area(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/areas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
+
+# --- CRUD LIDERES, COORDINADORES Y CAPITANES ---
+
+@app.get("/pastores", response_class=HTMLResponse)
+async def view_pastores(request: Request):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return RedirectResponse(url="/dashboard?msg=Acceso denegado&type=error")
+    return templates.TemplateResponse(request, "pastores/index.html", {"user": request.state.user})
+
+@app.get("/pastores/lista", response_class=HTMLResponse)
+async def list_pastores(request: Request, db: Session = Depends(get_db)):
+    pastores = PastoresController(db).listar_pastores()
+    return templates.TemplateResponse(request, "pastores/list.html", {"pastores": pastores, "user": request.state.user})
+
+@app.post("/pastores/crear")
+async def create_pastor(request: Request, nombre: str = Form(...), iglesia: str = Form(...), db: Session = Depends(get_db)):
+    controller = PastoresController(db)
+    exito, msg = controller.crear_pastor({"nombre": nombre, "iglesia": iglesia}, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/pastores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.get("/lideres", response_class=HTMLResponse)
+async def view_lideres(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return RedirectResponse(url="/dashboard?msg=Acceso denegado&type=error")
+    pastores = PastoresController(db).listar_pastores()
+    return templates.TemplateResponse(request, "lideres/index.html", {"user": request.state.user, "pastores": pastores})
+
+@app.get("/lideres/lista", response_class=HTMLResponse)
+async def list_lideres(request: Request, db: Session = Depends(get_db)):
+    controller = LideresController(db)
+    lideres = controller.listar_lideres()
+    return templates.TemplateResponse(request, "lideres/list.html", {"lideres": lideres, "user": request.state.user})
+
+@app.post("/lideres/crear")
+async def create_lider(request: Request, nombre: str = Form(...), edad: int = Form(...), cedula: int = Form(...), db: Session = Depends(get_db)):
+    controller = LideresController(db)
+    exito, msg = controller.crear_lider({"nombre": nombre, "edad": edad, "cedula": cedula}, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.get("/coordinadores", response_class=HTMLResponse)
+async def view_coordinadores(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return RedirectResponse(url="/dashboard?msg=Acceso denegado")
+    lideres = LideresController(db).listar_lideres()
+    return templates.TemplateResponse(request, "coordinadores/index.html", {"user": request.state.user, "lideres": lideres})
+
+@app.get("/coordinadores/lista", response_class=HTMLResponse)
+async def list_coordinadores(request: Request, db: Session = Depends(get_db)):
+    controller = CoordinadoresController(db)
+    coordinadores = controller.listar_coordinadores()
+    return templates.TemplateResponse(request, "coordinadores/list.html", {"coordinadores": coordinadores, "user": request.state.user})
+
+@app.post("/coordinadores/crear")
+async def create_coordinador(request: Request, nombre: str = Form(...), id_lider: int = Form(None), db: Session = Depends(get_db)):
+    controller = CoordinadoresController(db)
+    datos = {"nombre": nombre, "id_lider": id_lider, "edad": request.form().get('edad', 0), "cedula": request.form().get('cedula', 0)}
+    exito, msg = controller.crear_coordinador(datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/coordinadores?msg={msg}", status_code=303)
+
+@app.get("/capitanes", response_class=HTMLResponse)
+async def view_capitanes(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return RedirectResponse(url="/dashboard?msg=Acceso denegado")
+    coordinadores = CoordinadoresController(db).listar_coordinadores()
+    return templates.TemplateResponse(request, "capitanes/index.html", {"user": request.state.user, "coordinadores": coordinadores})
+
+@app.get("/capitanes/lista", response_class=HTMLResponse)
+async def list_capitanes(request: Request, db: Session = Depends(get_db)):
+    capitanes = CapitanesController(db).listar_capitanes()
+    return templates.TemplateResponse(request, "capitanes/list.html", {"capitanes": capitanes, "user": request.state.user})
 
 @app.get("/salones", response_class=HTMLResponse)
 async def view_salones(request: Request):
