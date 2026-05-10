@@ -57,34 +57,23 @@
                 </div>
             </div>
 
-            <!-- Personal (Maestra, Auxiliar, Capitán) -->
+            <!-- Personal (Maestra, Auxiliar, Colaborador) -->
             <div class="grid grid-cols-3 gap-3">
                 <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Maestra</label>
+                    <label
+                        class="block text-[10px] font-semibold text-slate-400 uppercase mb-2 text-center">Maestra</label>
                     <input type="number" name="maestra" id="aula_maestra" value="0" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-orange-500 text-center">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Auxiliar</label>
+                    <label
+                        class="block text-[10px] font-semibold text-slate-400 uppercase mb-2 text-center">Auxiliar</label>
                     <input type="number" name="auxiliar" id="aula_auxiliar" value="0" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-orange-500 text-center">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Capitán</label>
-                    <input type="number" name="capitan" id="aula_capitan" value="0" required
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-orange-500 text-center">
-                </div>
-            </div>
-
-            <!-- Personal (Subcapitán, Colaborador) -->
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Subcapitán</label>
-                    <input type="number" name="subcapitan" id="aula_subcapitan" value="0" required
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-orange-500 text-center">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Colaborador</label>
+                    <label
+                        class="block text-[10px] font-semibold text-slate-400 uppercase mb-2 text-center">Colaborador</label>
                     <input type="number" name="colaborador" id="aula_colaborador" value="0" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-orange-500 text-center">
                 </div>
@@ -139,8 +128,7 @@
 <script>
     function actualizarCondicion() {
         const fields = [
-            'aula_maestra', 'aula_auxiliar', 'aula_capitan',
-            'aula_subcapitan', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
+            'aula_maestra', 'aula_auxiliar', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
         ];
         let total = 0;
         fields.forEach(id => {
@@ -191,8 +179,6 @@
         document.getElementById('aula_fecha').value = urlParams.get('fecha') || "";
         document.getElementById('aula_maestra').value = urlParams.get('maestra') || 0;
         document.getElementById('aula_auxiliar').value = urlParams.get('auxiliar') || 0;
-        document.getElementById('aula_capitan').value = urlParams.get('capitan') || 0;
-        document.getElementById('aula_subcapitan').value = urlParams.get('subcapitan') || 0;
         document.getElementById('aula_colaborador').value = urlParams.get('colaborador') || 0;
         document.getElementById('aula_ninos').value = urlParams.get('ninos') || 0;
         document.getElementById('aula_ninas').value = urlParams.get('ninas') || 0;
@@ -204,8 +190,7 @@
 
     // Vincular detectores de eventos para actualizar la condición automáticamente
     [
-        'aula_maestra', 'aula_auxiliar', 'aula_capitan',
-        'aula_subcapitan', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
+        'aula_maestra', 'aula_auxiliar', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
     ].forEach(id => {
         document.getElementById(id).addEventListener('input', actualizarCondicion);
     });
