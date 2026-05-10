@@ -196,8 +196,6 @@ class AulasController(BaseController):
         errores = []
         if not isinstance(datos.get("auxiliar"), int):
             errores.append("El campo 'auxiliar' debe ser un número entero.")
-        if not isinstance(datos.get("capitan"), int):
-            errores.append("El campo 'capitan' debe ser un número entero.")
         if not isinstance(datos.get("colaborador"), int):
             errores.append("El campo 'colaborador' debe ser un número entero.")
         if not isinstance(datos.get("condicion"), str):
@@ -208,8 +206,6 @@ class AulasController(BaseController):
             errores.append("El campo 'ninos' debe ser un número entero.")
         if not isinstance(datos.get("ninas"), int):
             errores.append("El campo 'ninas' debe ser un número entero.")
-        if not isinstance(datos.get("subcapitan"), int):
-            errores.append("El campo 'subcapitan' debe ser un número entero.")
         if not isinstance(datos.get("fecha"), str):
             errores.append("El campo 'fecha' debe ser una cadena de texto con formato 'YYYY-MM-DD'.")
         else:
@@ -223,14 +219,12 @@ class AulasController(BaseController):
         # Validación de lógica de Condición vs Asistencia
         maestra = datos.get("maestra", 0)
         auxiliar = datos.get("auxiliar", 0)
-        capitan = datos.get("capitan", 0)
-        subcapitan = datos.get("subcapitan", 0)
         colaborador = datos.get("colaborador", 0)
         ninos = datos.get("ninos", 0)
         ninas = datos.get("ninas", 0)
         condicion = datos.get("condicion")
 
-        total_asistencia = sum([maestra, auxiliar, capitan, subcapitan, colaborador, ninos, ninas])
+        total_asistencia = sum([maestra, auxiliar, colaborador, ninos, ninas])
 
         if total_asistencia > 0 and condicion == "Cerrado":
             errores.append("No se puede registrar como 'Cerrado' si hay asistencia reportada.")
