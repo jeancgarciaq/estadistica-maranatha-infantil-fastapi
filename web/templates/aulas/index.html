@@ -180,8 +180,27 @@
         }
     }
 
-    // Set default date to today
-    document.getElementById('aula_fecha').valueAsDate = new Date();
+    // Cargar datos desde URL si existen (viniendo de la lista de aulas para editar)
+    if (urlParams.get('id')) {
+        if (document.getElementById('id_field').classList.contains('hidden')) {
+            cambiarAModoEdicion();
+        }
+        document.getElementById('aula_id').value = urlParams.get('id');
+        document.getElementById('delete_id').value = urlParams.get('id');
+        document.getElementById('aula_id_salon').value = urlParams.get('id_salon') || "";
+        document.getElementById('aula_fecha').value = urlParams.get('fecha') || "";
+        document.getElementById('aula_maestra').value = urlParams.get('maestra') || 0;
+        document.getElementById('aula_auxiliar').value = urlParams.get('auxiliar') || 0;
+        document.getElementById('aula_capitan').value = urlParams.get('capitan') || 0;
+        document.getElementById('aula_subcapitan').value = urlParams.get('subcapitan') || 0;
+        document.getElementById('aula_colaborador').value = urlParams.get('colaborador') || 0;
+        document.getElementById('aula_ninos').value = urlParams.get('ninos') || 0;
+        document.getElementById('aula_ninas').value = urlParams.get('ninas') || 0;
+        document.getElementById('aula_condicion').value = urlParams.get('condicion') || "Abierto";
+    } else {
+        // Solo poner fecha de hoy si no estamos editando un registro existente
+        document.getElementById('aula_fecha').valueAsDate = new Date();
+    }
 
     // Vincular detectores de eventos para actualizar la condición automáticamente
     [
