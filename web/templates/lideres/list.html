@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Líderes - EMI{% endblock %}
+
+{% block content %}
+<div class="space-y-4 p-4 md:p-6">
+    {% if lideres and lideres|length > 0 %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {% for lider in lideres %}
+        <article class="rounded-2xl border border-slate-700 bg-slate-800/80 shadow-lg overflow-hidden">
+            <div
+                class="p-5 border-b border-slate-700/80 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0 text-start">
+                    <h3 class="text-lg font-bold text-slate-100 truncate">{{ lider.nombre }}</h3>
+                    <p class="mt-1 text-sm text-slate-400">{{ lider.correo or 'Sin correo registrado' }}</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <a href="/lideres?id={{ lider.id }}&nombre={{ lider.nombre|urlencode }}&cedula={{ lider.cedula }}&edad={{ lider.edad }}&id_pastor={{ lider.id_pastor or '' }}&celular={{ (lider.celular or '')|urlencode }}&correo={{ (lider.correo or '')|urlencode }}"
+                        class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
+                        <i class="la la-edit text-xl"></i>
+                    </a>
+                    <form action="/lideres/eliminar" method="POST"
+                        onsubmit="return confirm('¿Eliminar registro de líder?')">
+                        <input type="hidden" name="id" value="{{ lider.id }}">
+                        <button type="submit"
+                            class="rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-red-300 transition hover:bg-red-600 hover:text-white">
+                            <i class="la la-trash text-xl"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-slate-700/60">
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Cédula</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ lider.cedula }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Edad</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ lider.edad }} años</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Contacto</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ lider.celular or 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Pastor</p>
+                    <p class="mt-1 text-sm font-semibold text-amber-400">
+                        {% if lider.pastor %}
+                        {{ lider.pastor.nombre }}
+                        {% else %}
+                        <span class="text-slate-500 italic text-xs">Sin asignar</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="rounded-2xl border border-slate-700 bg-slate-800/70 p-8 text-center">
+        <i class="la la-user-tie mb-3 text-5xl text-slate-500"></i>
+        <h3 class="text-lg font-bold text-slate-200">No hay líderes registrados</h3>
+        <p class="mt-2 text-sm text-slate-400">Agrega líderes para verlos aquí.</p>
+    </div>
+    {% endif %}
+
+    <div class="pt-4">
+        <a href="/lideres"
+            class="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-colors uppercase text-sm">
+            <i class="la la-plus mr-2"></i>Nuevo Líder
+        </a>
+    </div>
+</div>
+{% endblock %}
