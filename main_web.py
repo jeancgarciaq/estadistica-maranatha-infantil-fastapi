@@ -638,6 +638,8 @@ async def view_pastores(request: Request):
 
 @app.get("/pastores/lista", response_class=HTMLResponse)
 async def list_pastores(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return HTMLResponse("Acceso denegado", status_code=403)
     pastores = PastoresController(db).listar_pastores()
     return templates.TemplateResponse(request, "pastores/list.html", {"pastores": pastores, "user": request.state.user})
 
@@ -645,6 +647,18 @@ async def list_pastores(request: Request, db: Session = Depends(get_db)):
 async def create_pastor(request: Request, nombre: str = Form(...), iglesia: str = Form(...), db: Session = Depends(get_db)):
     controller = PastoresController(db)
     exito, msg = controller.crear_pastor({"nombre": nombre, "iglesia": iglesia}, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/pastores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/pastores/actualizar")
+async def update_pastor(request: Request, id: int = Form(...), nombre: str = Form(...), iglesia: str = Form(...), db: Session = Depends(get_db)):
+    controller = PastoresController(db)
+    exito, msg = controller.actualizar_pastor(id, {"nombre": nombre, "iglesia": iglesia}, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/pastores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/pastores/eliminar")
+async def delete_pastor(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    controller = PastoresController(db)
+    exito, msg = controller.eliminar_pastor(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/pastores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
 @app.get("/lideres", response_class=HTMLResponse)
@@ -656,14 +670,52 @@ async def view_lideres(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/lideres/lista", response_class=HTMLResponse)
 async def list_lideres(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return HTMLResponse("Acceso denegado", status_code=403)
     controller = LideresController(db)
     lideres = controller.listar_lideres()
-    return templates.TemplateResponse(request, "lideres/list.html", {"lideres": lideres, "user": request.state.user})
+    return templates.TemplateResponse(request, "lideres/list.html", {
+        "lideres": lideres, 
+        "user": request.state.user
+    })
 
 @app.post("/lideres/crear")
-async def create_lider(request: Request, nombre: str = Form(...), edad: int = Form(...), cedula: int = Form(...), db: Session = Depends(get_db)):
+async def create_lider(
+    request: Request, 
+    nombre: str = Form(...), 
+    edad: int = Form(...), 
+    cedula: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    id_pastor: int = Form(None),
+    db: Session = Depends(get_db)
+):
     controller = LideresController(db)
-    exito, msg = controller.crear_lider({"nombre": nombre, "edad": edad, "cedula": cedula}, user_context={"user": request.state.user})
+    datos = {"nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
+    exito, msg = controller.crear_lider(datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/lideres/actualizar")
+async def update_lider(
+    request: Request,
+    id: int = Form(...),
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    id_pastor: int = Form(None),
+    db: Session = Depends(get_db)
+):
+    controller = LideresController(db)
+    datos = {"nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
+    exito, msg = controller.actualizar_lider(id, datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/lideres/eliminar")
+async def delete_lider(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    controller = LideresController(db)
+    exito, msg = controller.eliminar_lider(id, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
 @app.get("/coordinadores", response_class=HTMLResponse)
@@ -675,16 +727,53 @@ async def view_coordinadores(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/coordinadores/lista", response_class=HTMLResponse)
 async def list_coordinadores(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return HTMLResponse("Acceso denegado", status_code=403)
     controller = CoordinadoresController(db)
     coordinadores = controller.listar_coordinadores()
-    return templates.TemplateResponse(request, "coordinadores/list.html", {"coordinadores": coordinadores, "user": request.state.user})
+    return templates.TemplateResponse(request, "coordinadores/list.html", {
+        "coordinadores": coordinadores, 
+        "user": request.state.user
+    })
 
 @app.post("/coordinadores/crear")
-async def create_coordinador(request: Request, nombre: str = Form(...), id_lider: int = Form(None), db: Session = Depends(get_db)):
+async def create_coordinador(
+    request: Request, 
+    nombre: str = Form(...), 
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    id_lider: int = Form(None), 
+    celular: str = Form(None),
+    correo: str = Form(None),
+    db: Session = Depends(get_db)
+):
     controller = CoordinadoresController(db)
-    datos = {"nombre": nombre, "id_lider": id_lider, "edad": request.form().get('edad', 0), "cedula": request.form().get('cedula', 0)}
+    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo}
     exito, msg = controller.crear_coordinador(datos, user_context={"user": request.state.user})
-    return RedirectResponse(url=f"/coordinadores?msg={msg}", status_code=303)
+    return RedirectResponse(url=f"/coordinadores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/coordinadores/actualizar")
+async def update_coordinador(
+    request: Request,
+    id: int = Form(...),
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    id_lider: int = Form(None),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    controller = CoordinadoresController(db)
+    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo}
+    exito, msg = controller.actualizar_coordinador(id, datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/coordinadores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/coordinadores/eliminar")
+async def delete_coordinador(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    controller = CoordinadoresController(db)
+    exito, msg = controller.eliminar_coordinador(id, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/coordinadores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
 @app.get("/capitanes", response_class=HTMLResponse)
 async def view_capitanes(request: Request, db: Session = Depends(get_db)):
@@ -695,8 +784,41 @@ async def view_capitanes(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/capitanes/lista", response_class=HTMLResponse)
 async def list_capitanes(request: Request, db: Session = Depends(get_db)):
+    if request.state.user.rol.nombre not in [ROLE_ROOT, 'administrador']:
+        return HTMLResponse("Acceso denegado", status_code=403)
     capitanes = CapitanesController(db).listar_capitanes()
-    return templates.TemplateResponse(request, "capitanes/list.html", {"capitanes": capitanes, "user": request.state.user})
+    coordinadores = CoordinadoresController(db).listar_coordinadores()
+    return templates.TemplateResponse(request, "capitanes/list.html", {
+        "capitanes": capitanes, 
+        "coordinadores": coordinadores,
+        "user": request.state.user
+    })
+
+@app.post("/capitanes/actualizar")
+async def update_capitan(
+    request: Request,
+    id: int = Form(...),
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    cedula: int = Form(...),
+    id_coordinador: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    controller = CapitanesController(db)
+    datos = {
+        "nombre": nombre, "edad": edad, "cedula": cedula, 
+        "id_coordinador": id_coordinador, "celular": celular, "correo": correo
+    }
+    exito, msg = controller.actualizar_capitan(id, datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/capitanes?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
+@app.post("/capitanes/eliminar")
+async def delete_capitan(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    controller = CapitanesController(db)
+    exito, msg = controller.eliminar_capitan(id, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/capitanes?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
 @app.get("/salones", response_class=HTMLResponse)
 async def view_salones(request: Request):
