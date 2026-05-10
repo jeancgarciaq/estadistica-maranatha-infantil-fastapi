@@ -129,17 +129,15 @@ class ReporteEstadisticoService:
         return 'Sin origen'
 
     def _serializar_aula(self, aula):
-        servidores = self._sumar_campos(aula, ['auxiliar', 'capitan', 'colaborador', 'maestra', 'subcapitan'])
+        servidores = self._sumar_campos(aula, ['auxiliar', 'colaborador', 'maestra'])
         return {
             'id': aula.id,
             'nombre': getattr(aula.salon, 'salon', str(aula.id_salon)),
             'ninos': int(aula.ninos or 0),
             'ninas': int(aula.ninas or 0),
             'auxiliar': int(aula.auxiliar or 0),
-            'capitan': int(aula.capitan or 0),
             'colaborador': int(aula.colaborador or 0),
             'maestra': int(aula.maestra or 0),
-            'subcapitan': int(aula.subcapitan or 0),
             'servidores': servidores,
             'total': int(aula.ninos or 0) + int(aula.ninas or 0) + servidores,
         }
@@ -692,7 +690,7 @@ class ReporteEstadisticoService:
 
         self._agregar_seccion(story, '3. Asistencia por aula', styles)
         aulas_data = [[
-            'Aula', 'Niños', 'Niñas', 'Auxiliares', 'Capitanes', 'Colaboradores', 'Maestras', 'Subcapitanes', 'Total'
+            'Aula', 'Niños', 'Niñas', 'Auxiliares', 'Colaboradores', 'Maestras', 'Total'
         ]]
         for aula in resumen.aulas:
             aulas_data.append([
@@ -700,10 +698,8 @@ class ReporteEstadisticoService:
                 self._fmt(aula['ninos']),
                 self._fmt(aula['ninas']),
                 self._fmt(aula['auxiliar']),
-                self._fmt(aula['capitan']),
                 self._fmt(aula['colaborador']),
                 self._fmt(aula['maestra']),
-                self._fmt(aula['subcapitan']),
                 self._fmt(aula['total']),
             ])
         if len(aulas_data) == 1:
