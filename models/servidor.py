@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from models.database import Base
 from models.base_class import AuditMixin
 
@@ -15,8 +16,12 @@ class Servidor(Base, AuditMixin):
     celular = Column(String(20), nullable=True)
     correo = Column(String(100), nullable=True, unique=True)
     numero_equipo = Column(Integer, nullable=True)
-    area_servicio = Column(String(100), nullable=True)
-    capitan = Column(String(100), nullable=True) # Nombre del capitán, no FK por simplicidad inicial
+
+    id_area = Column(Integer, ForeignKey('areas.id'), nullable=True)
+    area = relationship("Area", backref="servidores")
+
+    id_capitan = Column(Integer, ForeignKey('capitanes.id'), nullable=True)
+    capitan = relationship("Capitan", backref="servidores")
 
     def __repr__(self):
         return f"<Servidor(id={self.id}, nombre='{self.nombre}', cedula='{self.cedula}')>"
