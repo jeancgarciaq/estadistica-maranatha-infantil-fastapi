@@ -999,8 +999,13 @@ async def delete_ensenanza(request: Request, id: int = Form(...), db: Session = 
 
 @app.get("/logistica", response_class=HTMLResponse)
 async def view_logistica(request: Request):
+    db = SessionLocal()
+    serv_ctrl = ServidorController(db)
+    servidores = serv_ctrl.listar_servidores()
+    db.close()
     return templates.TemplateResponse(request, "logistica/index.html", {
-        "user": request.state.user
+        "user": request.state.user,
+        "servidores": servidores
     })
 
 @app.get("/logistica/lista", response_class=HTMLResponse)
@@ -1016,22 +1021,28 @@ async def list_logistica(request: Request, fecha: str = None, db: Session = Depe
 @app.post("/logistica/crear")
 async def create_logistica(
     request: Request,
-    almacen: str = Form(...),
-    capitan: int = Form(...),
-    distribucion: int = Form(0),
-    hidratacion: int = Form(0),
-    pasillo: int = Form(0),
-    secretaria: int = Form(0),
     fecha: str = Form(...),
+    id_capitan: int = Form(None),
+    id_almacen: int = Form(None),
+    id_distribucion: int = Form(None),
+    id_hidratacion: int = Form(None),
+    id_pasillo: int = Form(None),
+    id_secretaria: int = Form(None),
+    observaciones: str = Form(None),
     db: Session = Depends(get_db)
 ):
     controller = LogisticaController(db)
     datos = {
-        "almacen": almacen, "capitan": capitan, "distribucion": distribucion,
-        "hidratacion": hidratacion, "pasillo": pasillo, "secretaria": secretaria,
-        "fecha": fecha
+        "fecha": fecha,
+        "id_capitan": id_capitan,
+        "id_almacen": id_almacen,
+        "id_distribucion": id_distribucion,
+        "id_hidratacion": id_hidratacion,
+        "id_pasillo": id_pasillo,
+        "id_secretaria": id_secretaria,
+        "observaciones": observaciones
     }
-    exito, mensaje = controller.crear_logistica(datos, user_context={"user": request.state.user})
+    exito, mensaje = controller.crear_logistica_con_asistencia(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/logistica?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/logistica/actualizar")
