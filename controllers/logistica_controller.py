@@ -40,6 +40,12 @@ class LogisticaController(BaseController):
 
     def crear_logistica_con_asistencia(self, datos, user_context=None):
         """Crea el registro de logística y registra la asistencia individual de cada puesto."""
+        # Validar y convertir fecha
+        fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha_dt:
+            return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
+        datos['fecha'] = fecha_dt
+
         # Extraer IDs de servidores
         servidores_puestos = {
             'Capitán': datos.pop('id_capitan', None),
