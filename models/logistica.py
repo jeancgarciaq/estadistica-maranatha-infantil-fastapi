@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Date, Integer
+from sqlalchemy import Column, String, Date, Integer, ForeignKey, Text
+from sqlalchemy.orm import relationship
 
 from models.database import Base
 from models.base_class import AuditMixin
@@ -6,13 +7,19 @@ from models.base_class import AuditMixin
 class Logistica(Base, AuditMixin):
     __tablename__ = 'logisticas'
 
-    almacen = Column(Integer, nullable=False, default=0)
-    capitan = Column(Integer, nullable=False, default=0)
-    distribucion = Column(Integer, nullable=False, default=0)
-    hidratacion = Column(Integer, nullable=False, default=0)
-    pasillo = Column(Integer, nullable=False, default=0)
-    secretaria = Column(Integer, nullable=False, default=0)
-    fecha = Column(Date, nullable=False)
+    fecha = Column(Date, nullable=False, index=True)
+    id_capitan = Column(Integer, ForeignKey('servidores.id'), nullable=True)
+    observaciones = Column(Text, nullable=True)
+
+    # Campos de resumen (se calculan para compatibilidad con reportes)
+    almacen = Column(Integer, default=0)
+    distribucion = Column(Integer, default=0)
+    hidratacion = Column(Integer, default=0)
+    pasillo = Column(Integer, default=0)
+    secretaria = Column(Integer, default=0)
+    capitan = Column(Integer, default=0) # Conteo para reportes
+
+    capitan_encargado = relationship("Servidor", foreign_keys=[id_capitan])
 
     def __repr__(self):
-        return f"<Logistica(id={self.id}, capitan='{self.capitan}', fecha='{self.fecha}')>"
+        return f"<Logistica(id={self.id}, fecha='{self.fecha}')>"
