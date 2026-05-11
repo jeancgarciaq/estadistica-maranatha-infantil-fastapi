@@ -3,6 +3,7 @@ from models.logistica import Logistica # Assuming this model exists
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from controllers.base_controller import BaseController # Assuming BaseController exists
+from controllers.asistencia_servidores_controller import AsistenciaServidoresController
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +37,51 @@ class LogisticaController(BaseController):
             logger.info("Logística creada.")
 
         return self.ejecutar_transaccion(operacion, "Logística creada exitosamente.", user_context=user_context)
+
+    def crear_logistica_con_asistencia(self, datos, user_context=None):
+        """Crea el registro de logística y registra la asistencia individual de cada puesto."""
+        # Extraer IDs de servidores
+        servidores_puestos = {
+            'Capitán': datos.pop('id_capitan', None),
+            'Almacén': datos.pop('id_almacen', None),
+            'Distribución': datos.pop('id_distribucion', None),
+            'Hidratación': datos.pop('id_hidratacion', None),
+            'Pasillo': datos.pop('id_pasillo', None),
+            'Secretaría': datos.pop('id_secretaria', None),
+        }
+
+        # Preparar contadores de resumen para la tabla Logistica (para compatibilidad con reportes)
+        datos['almacen'] = 1 if servidores_puestos['Almacén'] else 0
+        datos['distribucion'] = 1 if servidores_puestos['Distribución'] else 0
+        datos['hidratacion'] = 1 if servidores_puestos['Hidratación'] else 0
+        datos['pasillo'] = 1 if servidores_puestos['Pasillo'] else 0
+        datos['secretaria'] = 1 if servidores_puestos['Secretaría'] else 0
+        datos['capitan'] = 1 if servidores_puestos['Capitán'] else 0
+        datos['id_capitan'] = servidores_puestos['Capitán']
+
+        def operacion(db):
+            asistencia_ctrl = AsistenciaServidoresController()
+            
+            # 1. Crear cabecera de Logistica
+            logistica = Logistica(**datos)
+            db.add(logistica)
+            db.flush()
+
+            # 2. Registrar asistencias individuales en la tabla pivote
+            for rol, s_id in servidores_puestos.items():
+                if s_id:
+                    asistencia_ctrl.registrar_asistencia(
+                        db,
+                        id_servidor=s_id,
+                        fecha=logistica.fecha,
+                        rol=rol,
+                        categoria='logistica',
+                        referencia_id=logistica.id
+                    )
+            
+            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
+
+        return self.ejecutar_transaccion(operacion, "Logística y asistencias registradas.", user_context=user_context)
 
     def actualizar_logistica(self, id, datos, user_context=None):
         """
