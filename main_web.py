@@ -38,6 +38,7 @@ from controllers.lideres_controller import LideresController
 from controllers.coordinadores_controller import CoordinadoresController
 from controllers.capitanes_controller import CapitanesController
 from controllers.pastores_controller import PastoresController
+from controllers.asistencia_servidores_controller import AsistenciaServidoresController
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -856,11 +857,14 @@ async def delete_salon(request: Request, id: int = Form(...), db: Session = Depe
 @app.get("/aulas", response_class=HTMLResponse)
 async def view_aulas(request: Request, db: Session = Depends(get_db)):
     # Necesitamos los salones para el selector del formulario
-    controller = AulasController(db)
-    salones = controller.listar_salones()
+    aulas_ctrl = AulasController(db)
+    servidores_ctrl = ServidorController(db)
+    salones = aulas_ctrl.listar_salones()
+    servidores = servidores_ctrl.listar_servidores() # Para los selects de Maestra, Auxiliar, etc.
     return templates.TemplateResponse(request, "aulas/index.html", {
         "user": request.state.user,
-        "salones": salones
+        "salones": salones,
+        "servidores": servidores
     })
 
 @app.get("/aulas/lista", response_class=HTMLResponse)
@@ -878,11 +882,9 @@ async def create_aula(
     request: Request,
     id_salon: int = Form(...),
     fecha: str = Form(...),
-    maestra: int = Form(...),
-    auxiliar: int = Form(...),
-    capitan: int = Form(...),
-    subcapitan: int = Form(...),
-    colaborador: int = Form(...),
+    id_maestra: int = Form(None),
+    id_auxiliar: int = Form(None),
+    id_colaborador: int = Form(None),
     ninos: int = Form(...),
     ninas: int = Form(...),
     condicion: str = Form(...),
@@ -890,11 +892,12 @@ async def create_aula(
 ):
     controller = AulasController(db)
     datos = {
-        "id_salon": id_salon, "fecha": fecha, "maestra": maestra,
-        "auxiliar": auxiliar, "capitan": capitan, "subcapitan": subcapitan,
-        "colaborador": colaborador, "ninos": ninos, "ninas": ninas, "condicion": condicion
+        "id_salon": id_salon, "fecha": fecha, 
+        "id_maestra": id_maestra, "id_auxiliar": id_auxiliar, "id_colaborador": id_colaborador,
+        "ninos": ninos, "ninas": ninas, "condicion": condicion
     }
-    exito, mensaje = controller.crear_aula(datos, user_context={"user": request.state.user})
+    # Notar que enviamos los IDs a un nuevo método o lógica que maneje la asistencia
+    exito, mensaje = controller.crear_aula_con_asistencia(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/aulas?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/aulas/actualizar")
