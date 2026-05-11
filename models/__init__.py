@@ -16,3 +16,4 @@ from .capitanes import Capitan
 from .coordinadores import Coordinador
 from .lideres import Lider
 from .pastores import Pastor
+from .asistencia_servidores import AsistenciaServidor
