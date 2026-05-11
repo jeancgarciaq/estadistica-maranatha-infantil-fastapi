@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from controllers.base_controller import BaseController
 from datetime import datetime
+from controllers.asistencia_servidores_controller import AsistenciaServidoresController
 import logging
 
 # Configuración de logging
@@ -32,10 +33,47 @@ class AulasController(BaseController):
 
         def operacion(db):
             aula = Aula(**datos)
+    def crear_aula_con_asistencia(self, datos, user_context=None):
+        """Crea el aula y registra los servidores en la tabla pivote de asistencia."""
+        # Extraemos los IDs de servidores antes de pasar a la creación de la entidad Aula
+        id_maestra = datos.pop('id_maestra', None)
+        id_auxiliar = datos.pop('id_auxiliar', None)
+        id_colaborador = datos.pop('id_colaborador', None)
+        
+        # Calculamos los conteos numéricos para la tabla aulas (compatibilidad con reportes)
+        datos['maestra'] = 1 if id_maestra else 0
+        datos['auxiliar'] = 1 if id_auxiliar else 0
+        datos['colaborador'] = 1 if id_colaborador else 0
+
+        def operacion(db):
+            asistencia_ctrl = AsistenciaServidoresController()
+            
+            # 1. Crear el aula
+            aula = Aula(**datos)
             db.add(aula)
             db.flush()
+            
+            # 2. Registrar asistencias individuales
+            servidores_a_registrar = [
+                (id_maestra, 'Maestra'),
+                (id_auxiliar, 'Auxiliar'),
+                (id_colaborador, 'Colaborador')
+            ]
+            
+            for s_id, rol in servidores_a_registrar:
+                if s_id:
+                    asistencia_ctrl.registrar_asistencia(
+                        db, 
+                        id_servidor=s_id, 
+                        fecha=aula.fecha, 
+                        rol=rol, 
+                        categoria='aula', 
+                        referencia_id=aula.id
+                    )
+            
             self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
-            logger.info("Aula creada.")
+
+        return self.ejecutar_transaccion(operacion, "Aula y asistencia registradas.", user_context=user_context)
 
         return self.ejecutar_transaccion(operacion, "Aula creada exitosamente.", user_context=user_context)
 
