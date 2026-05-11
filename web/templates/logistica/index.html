@@ -7,7 +7,7 @@
     <div class="mb-6 flex items-center justify-between">
         <div>
             <h2 class="text-xl font-bold text-white">Gestión de Logística</h2>
-            <p class="text-slate-400 text-sm">Registro de personal por área logística</p>
+            <p class="text-slate-400 text-sm">Asignación de equipo y puestos</p>
         </div>
         <a href="/logistica/lista" class="text-yellow-400 hover:text-yellow-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
@@ -30,72 +30,121 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="logisticaForm" action="/logistica/crear" method="post" class="space-y-4">
+        <form id="logisticaForm" action="/logistica/crear" method="post" class="space-y-6">
+            <!-- ID solo para edición -->
             <div id="id_field" class="hidden">
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Logística</label>
+                <label class="block text-[10px] font-bold text-yellow-500 uppercase mb-1 ml-1 tracking-wider">ID de
+                    Registro</label>
                 <input type="number" name="id" id="logistica_id"
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500">
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 font-mono">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Almacén</label>
-                    <input type="number" name="almacen" id="logistica_almacen" value="0" required
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Capitán</label>
-                    <input type="number" name="capitan" id="logistica_capitan" value="0" required
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Distribución</label>
-                    <input type="number" name="distribucion" id="logistica_distribucion" value="0"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Hidratación</label>
-                    <input type="number" name="hidratacion" id="logistica_hidratacion" value="0"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
+            <!-- SECCIÓN 1: Responsable y Fecha -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">
+                    Jornada y Responsable</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Capitán de
+                            Logística</label>
+                        <select name="id_capitan" id="logistica_id_capitan" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none">
+                            <option value="">Seleccione al responsable...</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Fecha del
+                            Servicio</label>
+                        <input type="date" name="fecha" id="logistica_fecha" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 text-center">
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Pasillo</label>
-                    <input type="number" name="pasillo" id="logistica_pasillo" value="0"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Secretaría</label>
-                    <input type="number" name="secretaria" id="logistica_secretaria" value="0"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500"
-                        placeholder="Cantidad">
+            <!-- SECCIÓN 2: Distribución de Puestos -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">
+                    Asignación de Puestos</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label
+                            class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Almacén</label>
+                        <select name="id_almacen" id="logistica_id_almacen"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none text-sm">
+                            <option value="">Sin asignar</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Distribución
+                            Alimentos</label>
+                        <select name="id_distribucion" id="logistica_id_distribucion"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none text-sm">
+                            <option value="">Sin asignar</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Hidratación</label>
+                        <select name="id_hidratacion" id="logistica_id_hidratacion"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none text-sm">
+                            <option value="">Sin asignar</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Pasillo /
+                            Orden</label>
+                        <select name="id_pasillo" id="logistica_id_pasillo"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none text-sm">
+                            <option value="">Sin asignar</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Secretaría</label>
+                        <select name="id_secretaria" id="logistica_id_secretaria"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 appearance-none text-sm">
+                            <option value="">Sin asignar</option>
+                            {% for servidor in servidores %}
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha</label>
-                <input type="date" name="fecha" id="logistica_fecha" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 text-center">
+            <!-- SECCIÓN 3: Observaciones -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">
+                    Notas Adicionales</h3>
+                <textarea name="observaciones" id="logistica_observaciones" rows="3"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 text-sm"
+                    placeholder="Detalles sobre novedades del equipo..."></textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 pt-4">
+            <!-- Botones de Acción -->
+            <div class="flex flex-col gap-3 pt-4">
                 <button type="submit" id="btn_submit"
-                    class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-yellow-600/30 uppercase text-sm">
-                    Registrar
+                    class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-yellow-600/30 uppercase text-sm tracking-widest">
+                    Guardar Logística
                 </button>
                 <button type="button" onclick="cambiarAModoEdicion()" id="btn_mode"
-                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl transition-all uppercase text-xs">
-                    Modo Edición
+                    class="w-full bg-slate-700/50 hover:bg-slate-600 text-slate-300 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-slate-700">
+                    Cambiar a Modo Edición
                 </button>
             </div>
         </form>
@@ -103,7 +152,7 @@
         <form id="deleteForm" action="/logistica/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar registro de logística?')"
-                class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
+                class="w-full bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-bold py-4 rounded-2xl border border-red-500/30 transition-all mt-4 uppercase text-xs tracking-widest">
                 Eliminar Registro
             </button>
         </form>
@@ -111,6 +160,7 @@
 </div>
 
 <script>
+
     function cambiarAModoEdicion() {
         const form = document.getElementById('logisticaForm');
         const idField = document.getElementById('id_field');
@@ -135,21 +185,28 @@
             document.getElementById('logistica_id').required = false;
         }
     }
-    document.getElementById('logistica_fecha').valueAsDate = new Date();
 
     window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('edit_id');
         if (editId) {
             cambiarAModoEdicion();
             document.getElementById('logistica_id').value = editId;
-            document.getElementById('logistica_almacen').value = urlParams.get('almacen') || "0";
-            document.getElementById('logistica_capitan').value = urlParams.get('capitan') || "0";
-            document.getElementById('logistica_distribucion').value = urlParams.get('distribucion') || "0";
-            document.getElementById('logistica_hidratacion').value = urlParams.get('hidratacion') || "0";
-            document.getElementById('logistica_pasillo').value = urlParams.get('pasillo') || "0";
-            document.getElementById('logistica_secretaria').value = urlParams.get('secretaria') || "0";
+            document.getElementById('delete_id').value = editId;
+
+            // Pre-cargar valores de los selectores si vienen en la URL
+            // Nota: En una fase posterior, lo ideal sería obtener los IDs de los servidores reales
+            // asignados a cada puesto mediante una consulta AJAX.
+            document.getElementById('logistica_id_capitan').value = urlParams.get('capitan_id') || "";
+            document.getElementById('logistica_id_almacen').value = urlParams.get('almacen_id') || "";
+            document.getElementById('logistica_id_distribucion').value = urlParams.get('distribucion_id') || "";
+            document.getElementById('logistica_id_hidratacion').value = urlParams.get('hidratacion_id') || "";
+            document.getElementById('logistica_id_pasillo').value = urlParams.get('pasillo_id') || "";
+            document.getElementById('logistica_id_secretaria').value = urlParams.get('secretaria_id') || "";
+            document.getElementById('logistica_observaciones').value = urlParams.get('obs') || "";
+
             if (urlParams.get('fecha')) document.getElementById('logistica_fecha').value = urlParams.get('fecha');
+        } else {
+            document.getElementById('logistica_fecha').valueAsDate = new Date();
         }
     };
 </script>
