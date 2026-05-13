@@ -125,7 +125,52 @@
     </a>
     {% endif %}
 
-    <!-- 11. Reporte Estadístico -->
+    <!-- 11. Pastores -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/pastores"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-violet-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-church text-2xl text-violet-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Pastores</span>
+    </a>
+    {% endif %}
+
+    <!-- 12. Líderes -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/lideres"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-user-tie text-2xl text-cyan-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Líderes</span>
+    </a>
+    {% endif %}
+
+    <!-- 13. Coordinadores -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/coordinadores"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-fuchsia-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-user-check text-2xl text-fuchsia-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Coordinadores</span>
+    </a>
+    {% endif %}
+
+    <!-- 14. Capitanes -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/capitanes"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-anchor text-2xl text-pink-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center">Capitanes</span>
+    </a>
+    {% endif %}
+
+
+    <!-- 15. Reporte Estadístico -->
     {% if is_root or 'reporte.view' in user_perms %}
     <a href="/reportes"
         class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
@@ -136,7 +181,7 @@
     </a>
     {% endif %}
 
-    <!-- 12. Ayuda -->
+    <!-- 16. Ayuda -->
     {% if is_root or 'ayuda.view' in user_perms %} {# Enlace a la vista de ayuda #}
     <a href="/ayuda"
         class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
