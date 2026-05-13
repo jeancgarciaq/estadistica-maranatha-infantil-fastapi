@@ -291,13 +291,18 @@ async def update_usuario(
     return RedirectResponse(url=f"/usuarios?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/servidores", response_class=HTMLResponse)
-async def view_servidores(request: Request):
+async def view_servidores(request: Request, db: Session = Depends(get_db)):
     # Restricción de acceso: Solo root y administrador
     if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
         return RedirectResponse(url="/dashboard?msg=Acceso restringido&type=error", status_code=status.HTTP_303_SEE_OTHER)
     
+    areas = AreasController(db).listar_areas()
+    capitanes = CapitanesController(db).listar_capitanes()
+
     return templates.TemplateResponse(request, "servidores/index.html", {
-        "user": request.state.user
+        "user": request.state.user,
+        "areas": areas,
+        "capitanes": capitanes
     })
 
 @app.get("/servidores/lista", response_class=HTMLResponse)
@@ -321,8 +326,13 @@ async def list_servidores(
     }
     controller = ServidorController(db)
     servidores = controller.listar_servidores(filtros=filtros)
+    areas = AreasController(db).listar_areas()
+    capitanes = CapitanesController(db).listar_capitanes()
+
     return templates.TemplateResponse(request, "servidores/list.html", {
         "servidores": servidores,
+        "areas": areas,
+        "capitanes": capitanes,
         "user": request.state.user
     })
 
@@ -335,9 +345,9 @@ async def create_servidor(
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
-    numero_equipo: int = Form(None),
-    area_servicio: str = Form(None),
-    capitan: str = Form(None),
+    numero_equipo: Optional[int] = Form(None),
+    id_area: Optional[int] = Form(None),
+    id_capitan: Optional[int] = Form(None),
     db: Session = Depends(get_db)
 ):
     if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
@@ -347,7 +357,7 @@ async def create_servidor(
     datos = {
         "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular,
         "correo": correo, "numero_equipo": numero_equipo, 
-        "area_servicio": area_servicio, "capitan": capitan
+        "id_area": id_area, "id_capitan": id_capitan
     }
     exito, mensaje = controller.crear_servidor(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
@@ -362,9 +372,9 @@ async def update_servidor(
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
-    numero_equipo: int = Form(None),
-    area_servicio: str = Form(None),
-    capitan: str = Form(None),
+    numero_equipo: Optional[int] = Form(None),
+    id_area: Optional[int] = Form(None),
+    id_capitan: Optional[int] = Form(None),
     db: Session = Depends(get_db)
 ):
     if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
@@ -374,7 +384,7 @@ async def update_servidor(
     datos = {
         "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular,
         "correo": correo, "numero_equipo": numero_equipo, 
-        "area_servicio": area_servicio, "capitan": capitan
+        "id_area": id_area, "id_capitan": id_capitan
     }
     exito, mensaje = controller.actualizar_servidor(id, datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/servidores?msg={mensaje}&type={'success' if exito else 'error'}", status_code=status.HTTP_303_SEE_OTHER)
