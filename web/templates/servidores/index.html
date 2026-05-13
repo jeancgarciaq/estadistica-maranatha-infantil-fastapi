@@ -67,15 +67,23 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1 text-slate-400">Área de Servicio</label>
-                    <input type="text" name="area_servicio"
-                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                        maxlength="100">
+                    <select name="id_area"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccione un área...</option>
+                        {% for a in areas %}
+                        <option value="{{ a.id }}">{{ a.area }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1 text-slate-400">Capitán Responsable</label>
-                    <input type="text" name="capitan"
-                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none"
-                        maxlength="100">
+                    <select name="id_capitan"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccione un capitán...</option>
+                        {% for c in capitanes %}
+                        <option value="{{ c.id }}">{{ c.nombre }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 
