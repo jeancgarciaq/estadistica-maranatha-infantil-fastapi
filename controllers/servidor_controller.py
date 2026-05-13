@@ -1,9 +1,12 @@
 import logging
 from datetime import datetime
 from models.servidor import Servidor
-from sqlalchemy import extract
+from sqlalchemy import extract, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
 from controllers import BaseController
+from models.areas import Area
+from models.capitanes import Capitan
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -46,7 +49,10 @@ class ServidorController(BaseController):
         """
         db = self.get_db_session()
         try:
-            query = self.query_activa(db)
+            query = self.query_activa(db).options(
+                joinedload(Servidor.area),
+                joinedload(Servidor.capitan)
+            )
             if filtros:
                 if filtros.get('nombre'):
                     query = query.filter(Servidor.nombre.ilike(f"%{filtros['nombre']}%"))
@@ -56,8 +62,8 @@ class ServidorController(BaseController):
                     query = query.filter(Servidor.celular.ilike(f"%{filtros['celular']}%"))
                 if filtros.get('correo'):
                     query = query.filter(Servidor.correo.ilike(f"%{filtros['correo']}%"))
-                if filtros.get('area_servicio'):
-                    query = query.filter(Servidor.area_servicio.ilike(f"%{filtros['area_servicio']}%"))
+                if filtros.get('id_area'):
+                    query = query.filter(Servidor.id_area == int(filtros['id_area']))
                 if filtros.get('mes_nacimiento'):
                     query = query.filter(extract('month', Servidor.fecha_nacimiento) == int(filtros['mes_nacimiento']))
                 if filtros.get('dia_nacimiento'):
@@ -155,8 +161,8 @@ class ServidorController(BaseController):
                 s.celular or "N/A",
                 s.correo or "N/A",
                 s.numero_equipo or 0,
-                s.area_servicio or "N/A",
-                s.capitan or "N/A"
+                s.area.area if s.area else "N/A",
+                s.capitan.nombre if s.capitan else "N/A"
             ])
 
         # Ajuste de ancho de columnas
@@ -192,8 +198,8 @@ class ServidorController(BaseController):
                 str(s.edad),
                 s.celular or "N/A",
                 s.correo or "N/A",
-                s.area_servicio or "N/A",
-                s.capitan or "N/A"
+                s.area.area if s.area else "N/A",
+                s.capitan.nombre if s.capitan else "N/A"
             ])
 
         t = Table(data)
@@ -240,16 +246,21 @@ class ServidorController(BaseController):
         Normaliza los datos de entrada para facilitar validaciones.
         """
         datos_normalizados = dict(datos)
-        for campo in ["nombre", "celular", "correo", "area_servicio", "capitan"]:
+        for campo in ["nombre", "celular", "correo"]:
             if campo in datos_normalizados and isinstance(datos_normalizados[campo], str):
                 datos_normalizados[campo] = datos_normalizados[campo].strip()
                 if datos_normalizados[campo] == "":
                     datos_normalizados[campo] = None
         
         # Convertir campos numéricos que puedan venir como string vacío a None
-        for campo in ["edad", "cedula", "numero_equipo"]:
-            if campo in datos_normalizados and datos_normalizados[campo] == "":
+        for campo in ["edad", "cedula", "numero_equipo", "id_area", "id_capitan"]:
+            if campo in datos_normalizados and (datos_normalizados[campo] == "" or datos_normalizados[campo] is None):
                 datos_normalizados[campo] = None
+            elif campo in datos_normalizados:
+                try:
+                    datos_normalizados[campo] = int(datos_normalizados[campo])
+                except (ValueError, TypeError):
+                    pass
 
         if "fecha_nacimiento" in datos_normalizados and not datos_normalizados["fecha_nacimiento"]:
              datos_normalizados["fecha_nacimiento"] = None
@@ -318,12 +329,16 @@ class ServidorController(BaseController):
         if numero_equipo is not None and (not isinstance(numero_equipo, int) or numero_equipo <= 0):
             errores.append("El campo 'numero de equipo' debe ser un número entero positivo.")
 
-        area_servicio = datos.get("area_servicio")
-        if area_servicio and (not isinstance(area_servicio, str) or len(area_servicio) > 100):
-            errores.append("El campo 'area de servicio' debe ser una cadena de texto de hasta 100 caracteres.")
+        id_area = datos.get("id_area")
+        if id_area:
+            area = db.query(Area).filter(Area.id == id_area, Area.is_deleted.is_(False)).first()
+            if not area:
+                errores.append("El área de servicio seleccionada no es válida.")
 
-        capitan = datos.get("capitan")
-        if capitan and (not isinstance(capitan, str) or len(capitan) > 100):
-            errores.append("El campo 'capitan' debe ser una cadena de texto de hasta 100 caracteres.")
+        id_capitan = datos.get("id_capitan")
+        if id_capitan:
+            cap = db.query(Capitan).filter(Capitan.id == id_capitan, Capitan.is_deleted.is_(False)).first()
+            if not cap:
+                errores.append("El capitán seleccionado no es válido.")
 
         return errores
