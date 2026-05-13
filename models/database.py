@@ -87,7 +87,7 @@ def configure_database():
     Nota: En producción es mejor usar Alembic, pero esto asegura que la app corra.
     """
     from models.security import seed_security_data
-    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor
+    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
