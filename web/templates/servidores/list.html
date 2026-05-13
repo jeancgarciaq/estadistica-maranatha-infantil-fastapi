@@ -51,13 +51,13 @@
                 </div>
                 <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Capitán</p>
-                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.capitan or 'N/A' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.capitan.nombre if servidor.capitan else 'N/A' }}</p>
                 </div>
             </div>
 
             <div class="p-5">
                 <p class="text-xs uppercase tracking-wide text-slate-500">Área de servicio</p>
-                <p class="mt-1 text-sm text-slate-200">{{ servidor.area_servicio or 'Sin área asignada' }}</p>
+                <p class="mt-1 text-sm text-slate-200">{{ servidor.area.area if servidor.area else 'Sin área asignada' }}</p>
             </div>
 
             <!-- Modal Editar -->
@@ -124,15 +124,23 @@
                                 </div>
                                 <div class="text-start">
                                     <label class="mb-1 block text-sm font-medium text-slate-400">Área</label>
-                                    <input type="text" name="area_servicio"
-                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
-                                        value="{{ servidor.area_servicio or '' }}">
+                                    <select name="id_area"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione un área...</option>
+                                        {% for a in areas %}
+                                        <option value="{{ a.id }}" {% if servidor.id_area == a.id %}selected{% endif %}>{{ a.area }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                                 <div class="text-start">
                                     <label class="mb-1 block text-sm font-medium text-slate-400">Capitán</label>
-                                    <input type="text" name="capitan"
-                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
-                                        value="{{ servidor.capitan or '' }}">
+                                    <select name="id_capitan"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione un capitán...</option>
+                                        {% for c in capitanes %}
+                                        <option value="{{ c.id }}" {% if servidor.id_capitan == c.id %}selected{% endif %}>{{ c.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
                         </div>
