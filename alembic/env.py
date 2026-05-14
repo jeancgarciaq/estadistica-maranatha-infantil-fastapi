@@ -13,9 +13,7 @@ from sqlalchemy import engine_from_config, pool, create_engine
 from alembic import context
 from models.database import Base
 # Es CRUCIAL importar todos los modelos para que Base.metadata los reconozca
-import models.security, models.donaciones, models.salones, models.aulas
-import models.distribucion, models.logistica, models.ensenanza, models.servidor
-import models.otras_areas, models.recepcion, models.alimento_preparado
+import models
 
 config = context.config
 
