@@ -695,6 +695,7 @@ async def create_lider(
     request: Request, 
     nombre: str = Form(...), 
     edad: int = Form(...), 
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
@@ -702,7 +703,7 @@ async def create_lider(
     db: Session = Depends(get_db)
 ):
     controller = LideresController(db)
-    datos = {"nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
+    datos = {"nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
     exito, msg = controller.crear_lider(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
@@ -712,6 +713,7 @@ async def update_lider(
     id: int = Form(...),
     nombre: str = Form(...),
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     celular: str = Form(None),
     correo: str = Form(None),
@@ -719,7 +721,7 @@ async def update_lider(
     db: Session = Depends(get_db)
 ):
     controller = LideresController(db)
-    datos = {"nombre": nombre, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
+    datos = {"nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular, "correo": correo, "id_pastor": id_pastor}
     exito, msg = controller.actualizar_lider(id, datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/lideres?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
@@ -752,6 +754,7 @@ async def create_coordinador(
     request: Request, 
     nombre: str = Form(...), 
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     id_lider: int = Form(None), 
     celular: str = Form(None),
@@ -759,7 +762,7 @@ async def create_coordinador(
     db: Session = Depends(get_db)
 ):
     controller = CoordinadoresController(db)
-    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo}
+    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular, "correo": correo}
     exito, msg = controller.crear_coordinador(datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/coordinadores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
@@ -769,6 +772,7 @@ async def update_coordinador(
     id: int = Form(...),
     nombre: str = Form(...),
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     id_lider: int = Form(None),
     celular: str = Form(None),
@@ -776,7 +780,7 @@ async def update_coordinador(
     db: Session = Depends(get_db)
 ):
     controller = CoordinadoresController(db)
-    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "cedula": cedula, "celular": celular, "correo": correo}
+    datos = {"nombre": nombre, "id_lider": id_lider, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, "celular": celular, "correo": correo}
     exito, msg = controller.actualizar_coordinador(id, datos, user_context={"user": request.state.user})
     return RedirectResponse(url=f"/coordinadores?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
 
@@ -811,6 +815,7 @@ async def update_capitan(
     id: int = Form(...),
     nombre: str = Form(...),
     edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
     cedula: int = Form(...),
     id_coordinador: int = Form(...),
     celular: str = Form(None),
@@ -819,7 +824,7 @@ async def update_capitan(
 ):
     controller = CapitanesController(db)
     datos = {
-        "nombre": nombre, "edad": edad, "cedula": cedula, 
+        "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, 
         "id_coordinador": id_coordinador, "celular": celular, "correo": correo
     }
     exito, msg = controller.actualizar_capitan(id, datos, user_context={"user": request.state.user})
