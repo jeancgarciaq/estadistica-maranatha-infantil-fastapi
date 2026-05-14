@@ -809,6 +809,26 @@ async def list_capitanes(request: Request, db: Session = Depends(get_db)):
         "user": request.state.user
     })
 
+@app.post("/capitanes/crear")
+async def create_capitan(
+    request: Request,
+    nombre: str = Form(...),
+    edad: int = Form(...),
+    fecha_nacimiento: str = Form(None),
+    cedula: int = Form(...),
+    id_coordinador: int = Form(...),
+    celular: str = Form(None),
+    correo: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    controller = CapitanesController(db)
+    datos = {
+        "nombre": nombre, "edad": edad, "fecha_nacimiento": fecha_nacimiento, "cedula": cedula, 
+        "id_coordinador": id_coordinador, "celular": celular, "correo": correo
+    }
+    exito, msg = controller.crear_capitan(datos, user_context={"user": request.state.user})
+    return RedirectResponse(url=f"/capitanes?msg={msg}&type={'success' if exito else 'error'}", status_code=303)
+
 @app.post("/capitanes/actualizar")
 async def update_capitan(
     request: Request,
