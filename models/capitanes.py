@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
+from datetime import datetime, date
 from models.database import Base
 from models.base_class import AuditMixin
 
@@ -21,3 +22,19 @@ class Capitan(Base, AuditMixin):
 
     def __repr__(self):
         return f"<Capitan(id={self.id}, nombre='{self.nombre}', cedula='{self.cedula}')>"
+
+    @validates('fecha_nacimiento')
+    def validar_fecha_nacimiento(self, key, value):
+        """Calcula la edad automáticamente cuando se asigna la fecha de nacimiento."""
+        if value:
+            if isinstance(value, str):
+                try:
+                    fecha_dt = datetime.strptime(value, '%Y-%m-%d').date()
+                except ValueError:
+                    return value
+            else:
+                fecha_dt = value
+            
+            today = date.today()
+            self.edad = today.year - fecha_dt.year - ((today.month, today.day) < (fecha_dt.month, fecha_dt.day))
+        return value
