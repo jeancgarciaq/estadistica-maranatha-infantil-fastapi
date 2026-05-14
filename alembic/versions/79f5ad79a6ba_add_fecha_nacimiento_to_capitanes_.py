@@ -20,9 +20,52 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    pass
+    # Añadir fecha_nacimiento y cambiar edad a Integer en capitanes
+    with op.batch_alter_table('capitanes', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('fecha_nacimiento', sa.Date(), nullable=True))
+        batch_op.alter_column('edad',
+               existing_type=sa.VARCHAR(),
+               type_=sa.Integer(),
+               existing_nullable=True,
+               postgresql_using='edad::integer')
 
+    # Añadir fecha_nacimiento y cambiar edad a Integer en coordinadores
+    with op.batch_alter_table('coordinadores', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('fecha_nacimiento', sa.Date(), nullable=True))
+        batch_op.alter_column('edad',
+               existing_type=sa.VARCHAR(),
+               type_=sa.Integer(),
+               existing_nullable=True,
+               postgresql_using='edad::integer')
+
+    # Añadir fecha_nacimiento y cambiar edad a Integer en lideres
+    with op.batch_alter_table('lideres', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('fecha_nacimiento', sa.Date(), nullable=True))
+        batch_op.alter_column('edad',
+               existing_type=sa.VARCHAR(),
+               type_=sa.Integer(),
+               existing_nullable=True,
+               postgresql_using='edad::integer')
 
 def downgrade() -> None:
     """Downgrade schema."""
-    pass
+    with op.batch_alter_table('lideres', schema=None) as batch_op:
+        batch_op.alter_column('edad',
+               existing_type=sa.Integer(),
+               type_=sa.VARCHAR(),
+               existing_nullable=True)
+        batch_op.drop_column('fecha_nacimiento')
+
+    with op.batch_alter_table('coordinadores', schema=None) as batch_op:
+        batch_op.alter_column('edad',
+               existing_type=sa.Integer(),
+               type_=sa.VARCHAR(),
+               existing_nullable=True)
+        batch_op.drop_column('fecha_nacimiento')
+
+    with op.batch_alter_table('capitanes', schema=None) as batch_op:
+        batch_op.alter_column('edad',
+               existing_type=sa.Integer(),
+               type_=sa.VARCHAR(),
+               existing_nullable=True)
+        batch_op.drop_column('fecha_nacimiento')
