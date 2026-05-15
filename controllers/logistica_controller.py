@@ -32,8 +32,6 @@ class LogisticaController(BaseController):
         def operacion(db):
             logistica = Logistica(**datos)
             db.add(logistica)
-            db.flush()
-            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
             logger.info("Logística creada.")
 
         return self.ejecutar_transaccion(operacion, "Logística creada exitosamente.", user_context=user_context)
@@ -84,8 +82,6 @@ class LogisticaController(BaseController):
                         categoria='logistica',
                         referencia_id=logistica.id
                     )
-            
-            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
 
         return self.ejecutar_transaccion(operacion, "Logística y asistencias registradas.", user_context=user_context)
 
@@ -116,7 +112,6 @@ class LogisticaController(BaseController):
             for key, value in datos.items():
                 setattr(logistica, key, value)
             
-            self.registrar_evento_sync(db, 'logistica', logistica, 'upsert')
             logger.info(f"Logística actualizada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Logística actualizada exitosamente.", user_context=user_context)
@@ -136,7 +131,6 @@ class LogisticaController(BaseController):
                 raise ValueError("Logística no encontrada.")
             
             self.marcar_eliminado(logistica, db)
-            self.registrar_evento_sync(db, 'logistica', logistica, 'delete')
             logger.info(f"Logística eliminada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Logística eliminada exitosamente.", user_context=user_context)
