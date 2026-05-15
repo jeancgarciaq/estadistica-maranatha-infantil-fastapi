@@ -21,7 +21,7 @@ class Coordinador(Base, AuditMixin):
     lider = relationship("Lider", backref="coordinadores")
 
     id_area = Column(Integer, ForeignKey('areas.id'), nullable=True)
-    area = relationship("Area", backref="coordinadores")
+    area = relationship("Area", back_populates="coordinadores")
 
     def __repr__(self):
         return f"<Coordinador(id={self.id}, nombre='{self.nombre}', cedula='{self.cedula}')>"
