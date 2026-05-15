@@ -23,8 +23,6 @@ class AreasController(BaseController):
         def operacion(db):
             area = Area(area=nombre)
             db.add(area)
-            db.flush()
-            self.registrar_evento_sync(db, 'areas', area, 'upsert')
             logger.info(f"Área creada: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Área creada exitosamente.", user_context=user_context)
@@ -41,7 +39,6 @@ class AreasController(BaseController):
                 raise ValueError("Área no encontrada.")
             
             area.area = nombre
-            self.registrar_evento_sync(db, 'areas', area, 'upsert')
             logger.info(f"Área actualizada: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Área actualizada exitosamente.", user_context=user_context)
@@ -56,7 +53,6 @@ class AreasController(BaseController):
                 raise ValueError("Área no encontrada.")
             
             self.marcar_eliminado(area, db)
-            self.registrar_evento_sync(db, 'areas', area, 'delete')
             logger.info(f"Área eliminada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Área eliminada exitosamente.", user_context=user_context)
@@ -83,11 +79,14 @@ class AreasController(BaseController):
         # Validar que al menos uno de los campos esté lleno
         if not id and not nombre:
             return False, None, "Debe proporcionar un ID o un nombre para buscar el área."
-        if id and not isinstance(id, int):
-            return False, None, "El ID debe ser un número entero."
-        if nombre and not isinstance(nombre, str):
-            return False, None, "El nombre debe ser una cadena de texto."
-            
+
+        # Intentar convertir ID a int si viene como string
+        if id:
+            try:
+                id = int(id)
+            except (ValueError, TypeError):
+                return False, None, "El ID proporcionado no es un número válido."
+
         try:
             area = self.buscar_por_id_o_nombre(id=id, nombre=nombre, nombre_campo="area")
             if area:
