@@ -4,7 +4,6 @@ from datetime import datetime, date
 
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
-from utils.firebase_sync import SyncManager
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +18,6 @@ class BaseController:
         """
         self.model = model
         self.session = session
-        self.sync_manager = SyncManager()
 
     def get_db_session(self):
         """
@@ -61,7 +59,6 @@ class BaseController:
         try:
             with db.begin():
                 operacion(db)
-            self._sincronizar_si_corresponde(db, user_context)
             if mensaje_exito:
                 return True, mensaje_exito
             return True, "Operación exitosa"
@@ -107,10 +104,6 @@ class BaseController:
 
         db.add(registro)
         return True
-
-    def registrar_evento_sync(self, db, entity_name, registro, operation='upsert'):
-        """Encola un cambio local para sincronización con Firebase."""
-        return self.sync_manager.enqueue_model(db, entity_name, registro, operation=operation)
 
     def query_activa(self, db):
         """Devuelve una query filtrada por registros activos cuando el modelo lo soporta."""
