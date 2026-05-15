@@ -30,17 +30,19 @@ class Servidor(Base, AuditMixin):
     @validates('fecha_nacimiento')
     def validar_fecha_nacimiento(self, key, value):
         """Calcula la edad automáticamente cuando se asigna la fecha de nacimiento."""
-        if value:
+        if value and value != "":
             # Si viene como string desde el formulario, convertirlo a objeto date
             if isinstance(value, str):
                 try:
-                    fecha_dt = datetime.strptime(value, '%Y-%m-%d').date()
+                    # Soporta formato ISO y el estándar YYYY-MM-DD
+                    fecha_dt = datetime.strptime(value.split('T')[0], '%Y-%m-%d').date()
                 except ValueError:
-                    return value # Dejar que el validador del controlador maneje el error de formato
+                    return None
             else:
                 fecha_dt = value
             
-            # Cálculo de edad
-            today = date.today()
-            self.edad = today.year - fecha_dt.year - ((today.month, today.day) < (fecha_dt.month, fecha_dt.day))
-        return value
+            if isinstance(fecha_dt, (date, datetime)):
+                today = date.today()
+                self.edad = today.year - fecha_dt.year - ((today.month, today.day) < (fecha_dt.month, fecha_dt.day))
+            return fecha_dt
+        return None
