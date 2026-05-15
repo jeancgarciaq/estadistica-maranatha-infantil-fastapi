@@ -29,15 +29,17 @@ class Coordinador(Base, AuditMixin):
     @validates('fecha_nacimiento')
     def validar_fecha_nacimiento(self, key, value):
         """Calcula la edad automáticamente cuando se asigna la fecha de nacimiento."""
-        if value:
+        if value and value != "":
             if isinstance(value, str):
                 try:
-                    fecha_dt = datetime.strptime(value, '%Y-%m-%d').date()
+                    fecha_dt = datetime.strptime(value.split('T')[0], '%Y-%m-%d').date()
                 except ValueError:
-                    return value
+                    return None
             else:
                 fecha_dt = value
             
-            today = date.today()
-            self.edad = today.year - fecha_dt.year - ((today.month, today.day) < (fecha_dt.month, fecha_dt.day))
-        return value
+            if isinstance(fecha_dt, (date, datetime)):
+                today = date.today()
+                self.edad = today.year - fecha_dt.year - ((today.month, today.day) < (fecha_dt.month, fecha_dt.day))
+            return fecha_dt
+        return None
