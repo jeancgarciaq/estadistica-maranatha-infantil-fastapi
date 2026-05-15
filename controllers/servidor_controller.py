@@ -1,344 +1,83 @@
 import logging
-from datetime import datetime
-from models.servidor import Servidor
-from sqlalchemy import extract, select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
-from controllers import BaseController
+from controllers.base_controller import BaseController
+from models.servidor import Servidor
 from models.areas import Area
 from models.capitanes import Capitan
 
-# Configuración de logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class ServidorController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=Servidor, session=session)
-        logger.info("ServidorController inicializado.")
 
-    def crear_servidor(self, datos, user_context=None):
+    def crear_servidor(self, datos: dict, user_context=None):
         """
-        Crea un nuevo registro de servidor en la base de datos.
-        :param datos: Diccionario con los datos del servidor.
-        :return: (Exito, Mensaje)
+        Crea un nuevo servidor validando duplicados y resolviendo IDs de relaciones.
         """
-        if not isinstance(datos, dict):
-            return False, "Los datos proporcionados no son válidos."
-
-        datos_normalizados = self._normalizar_datos(datos)
+        # Limpieza y validación básica
+        nombre = datos.get('nombre', '').strip()
+        try:
+            # Forzamos que la cédula sea entero para evitar errores de tipo en SQLite/Postgres
+            cedula = int(datos.get('cedula')) if datos.get('cedula') else None
+        except (ValueError, TypeError):
+            return False, "La cédula debe ser un valor numérico."
+            
+        correo = datos.get('correo', '').strip() or None
+        
+        if not nombre or not cedula:
+            return False, "Nombre y Cédula son campos obligatorios."
 
         def operacion(db):
-            errores = self.validar_datos(datos_normalizados, db, is_new=True)
-            if errores:
-                raise ValueError("\n".join(errores))
+            # 1. Validar Restricciones Únicas (Evita fallos críticos de integridad)
+            if db.query(Servidor).filter(Servidor.cedula == cedula, Servidor.is_deleted.is_(False)).first():
+                raise ValueError(f"Ya existe un servidor con la cédula {cedula}.")
+            
+            if correo:
+                if db.query(Servidor).filter(Servidor.correo == correo, Servidor.is_deleted.is_(False)).first():
+                    raise ValueError(f"El correo {correo} ya está registrado.")
 
-            servidor = Servidor(**datos_normalizados)
-            db.add(servidor)
-            db.flush()
-            self.registrar_evento_sync(db, 'servidores', servidor, 'upsert')
-            logger.info("Servidor creado.")
+            # 2. Resolución de Relaciones (Mapping de nombres a IDs)
+            id_area = datos.get('id_area')
+            if not id_area and datos.get('area_servicio'):
+                area_obj = db.query(Area).filter(Area.area == datos['area_servicio'].strip()).first()
+                if area_obj:
+                    id_area = area_obj.id
+
+            id_capitan = datos.get('id_capitan')
+            if not id_capitan and datos.get('capitan'):
+                cap_obj = db.query(Capitan).filter(Capitan.nombre == datos['capitan'].strip()).first()
+                if cap_obj:
+                    id_capitan = cap_obj.id
+
+            # 3. Crear instancia del modelo
+            nuevo_servidor = Servidor(
+                nombre=nombre,
+                cedula=cedula,
+                correo=correo,
+                celular=datos.get('celular'),
+                numero_equipo=int(datos.get('numero_equipo')) if datos.get('numero_equipo') else None,
+                fecha_nacimiento=datos.get('fecha_nacimiento'),
+                id_area=id_area,
+                id_capitan=id_capitan
+            )
+            
+            # Si no se envía fecha, la edad es obligatoria (según tu modelo nullable=False)
+            if not nuevo_servidor.fecha_nacimiento:
+                try:
+                    nuevo_servidor.edad = int(datos.get('edad'))
+                except (ValueError, TypeError):
+                    raise ValueError("Debe proporcionar la edad o la fecha de nacimiento.")
+
+            db.add(nuevo_servidor)
+            logger.info(f"Servidor '{nombre}' preparado para guardado local y sincronización.")
 
         return self.ejecutar_transaccion(operacion, "Servidor creado exitosamente.", user_context=user_context)
 
-    def listar_servidores(self, filtros=None):
-        """
-        Lista todos los registros de servidores desde la base de datos.
-        :param filtros: Diccionario con criterios de búsqueda.
-        :return: Lista de objetos Servidor.
-        """
+    def listar_servidores(self):
         db = self.get_db_session()
         try:
-            query = self.query_activa(db).options(
-                joinedload(Servidor.area),
-                joinedload(Servidor.capitan)
-            )
-            if filtros:
-                if filtros.get('nombre'):
-                    query = query.filter(Servidor.nombre.ilike(f"%{filtros['nombre']}%"))
-                if filtros.get('cedula'):
-                    query = query.filter(Servidor.cedula == int(filtros['cedula']))
-                if filtros.get('celular'):
-                    query = query.filter(Servidor.celular.ilike(f"%{filtros['celular']}%"))
-                if filtros.get('correo'):
-                    query = query.filter(Servidor.correo.ilike(f"%{filtros['correo']}%"))
-                if filtros.get('id_area'):
-                    query = query.filter(Servidor.id_area == int(filtros['id_area']))
-                if filtros.get('mes_nacimiento'):
-                    query = query.filter(extract('month', Servidor.fecha_nacimiento) == int(filtros['mes_nacimiento']))
-                if filtros.get('dia_nacimiento'):
-                    query = query.filter(extract('day', Servidor.fecha_nacimiento) == int(filtros['dia_nacimiento']))
-
-            servidores = query.order_by(Servidor.nombre.asc()).all()
-            logger.info(f"{len(servidores)} servidores obtenidos.")
-            return servidores
-        except SQLAlchemyError as e:
-            logger.error(f"Error al listar servidores: {e}")
-            return []
+            return self.query_activa(db).all()
         finally:
             if not self.session:
                 db.close()
-
-    def obtener_servidor(self, id):
-        """
-        Obtiene un registro de servidor por su ID.
-        :param id: ID del servidor.
-        :return: Objeto Servidor o None.
-        """
-        db = self.get_db_session()
-        try:
-            return self.query_activa(db).filter(Servidor.id == id).first()
-        except SQLAlchemyError as e:
-            logger.error(f"Error al obtener servidor: {e}")
-            return None
-        finally:
-            if not self.session:
-                db.close()
-
-    def actualizar_servidor(self, id, datos, user_context=None):
-        """
-        Actualiza un registro de servidor existente.
-        :param id: ID del servidor a actualizar.
-        :param datos: Diccionario con los datos actualizados.
-        :return: (Exito, Mensaje)
-        """
-        if not id or not isinstance(id, int):
-            return False, "El ID del servidor es obligatorio y debe ser un número entero."
-
-        datos_normalizados = self._normalizar_datos(datos)
-
-        def operacion(db):
-            servidor = db.query(Servidor).filter(Servidor.id == id, Servidor.is_deleted.is_(False)).first()
-            if not servidor:
-                raise ValueError("Servidor no encontrado.")
-
-            # Combinar datos existentes con los nuevos para la validación
-            datos_para_validar = {k: getattr(servidor, k) for k in servidor.__table__.columns.keys()}
-            datos_para_validar.update(datos_normalizados)
-
-            errores = self.validar_datos(datos_para_validar, db, is_new=False, current_id=id)
-            if errores:
-                raise ValueError("\n".join(errores))
-
-            for key, value in datos_normalizados.items():
-                setattr(servidor, key, value)
-            
-            self.registrar_evento_sync(db, 'servidores', servidor, 'upsert')
-            logger.info(f"Servidor actualizado: ID {id}")
-
-        return self.ejecutar_transaccion(operacion, "Servidor actualizado exitosamente.", user_context=user_context)
-
-    def generar_reporte_excel(self, servidores):
-        """Genera un archivo Excel (.xlsx) con la lista de servidores."""
-        from io import BytesIO
-        import openpyxl
-        from openpyxl.styles import Font, Alignment, PatternFill
-
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Lista de Servidores"
-
-        # Encabezados
-        headers = ["Nombre", "Cédula", "Edad", "F. Nacimiento", "Celular", "Correo", "Equipo", "Área", "Capitán"]
-        ws.append(headers)
-
-        # Estilo para encabezados
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
-        
-        for cell in ws[1]:
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center")
-
-        # Datos
-        for s in servidores:
-            ws.append([
-                s.nombre,
-                s.cedula,
-                s.edad,
-                str(s.fecha_nacimiento) if s.fecha_nacimiento else "N/A",
-                s.celular or "N/A",
-                s.correo or "N/A",
-                s.numero_equipo or 0,
-                s.area.area if s.area else "N/A",
-                s.capitan.nombre if s.capitan else "N/A"
-            ])
-
-        # Ajuste de ancho de columnas
-        for col in ws.columns:
-            max_length = max(len(str(cell.value)) for cell in col)
-            ws.column_dimensions[col[0].column_letter].width = max_length + 2
-
-        buffer = BytesIO()
-        wb.save(buffer)
-        return buffer.getvalue()
-
-    def generar_reporte_pdf(self, servidores):
-        """Genera un archivo PDF con la lista de servidores."""
-        from io import BytesIO
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A4, landscape
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4))
-        styles = getSampleStyleSheet()
-        elements = []
-
-        elements.append(Paragraph("Lista de Personal de Servicio (Servidores)", styles['Title']))
-        elements.append(Spacer(1, 12))
-
-        data = [["Nombre", "Cédula", "Edad", "Celular", "Correo", "Área de Servicio", "Capitán"]]
-        for s in servidores:
-            data.append([
-                s.nombre,
-                str(s.cedula),
-                str(s.edad),
-                s.celular or "N/A",
-                s.correo or "N/A",
-                s.area.area if s.area else "N/A",
-                s.capitan.nombre if s.capitan else "N/A"
-            ])
-
-        t = Table(data)
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ]))
-        elements.append(t)
-        
-        doc.build(elements)
-        pdf_value = buffer.getvalue()
-        buffer.close()
-        return pdf_value
-
-    def eliminar_servidor(self, id, user_context=None):
-        """
-        Elimina un registro de servidor por su ID.
-        :param id: ID del servidor a eliminar.
-        :return: (Exito, Mensaje)
-        """
-        if not id or not isinstance(id, int):
-            return False, "El ID del servidor es obligatorio y debe ser un número entero."
-
-        def operacion(db):
-            servidor = db.query(Servidor).filter(Servidor.id == id, Servidor.is_deleted.is_(False)).first()
-            if not servidor:
-                raise ValueError("Servidor no encontrado.")
-            
-            self.marcar_eliminado(servidor, db)
-            self.registrar_evento_sync(db, 'servidores', servidor, 'delete')
-            logger.info(f"Servidor eliminado: ID {id}")
-
-        return self.ejecutar_transaccion(operacion, "Servidor eliminado exitosamente.", user_context=user_context)
-
-    def _normalizar_datos(self, datos):
-        """
-        Normaliza los datos de entrada para facilitar validaciones.
-        """
-        datos_normalizados = dict(datos)
-        for campo in ["nombre", "celular", "correo"]:
-            if campo in datos_normalizados and isinstance(datos_normalizados[campo], str):
-                datos_normalizados[campo] = datos_normalizados[campo].strip()
-                if datos_normalizados[campo] == "":
-                    datos_normalizados[campo] = None
-        
-        # Convertir campos numéricos que puedan venir como string vacío a None
-        for campo in ["edad", "cedula", "numero_equipo", "id_area", "id_capitan"]:
-            if campo in datos_normalizados and (datos_normalizados[campo] == "" or datos_normalizados[campo] is None):
-                datos_normalizados[campo] = None
-            elif campo in datos_normalizados:
-                try:
-                    datos_normalizados[campo] = int(datos_normalizados[campo])
-                except (ValueError, TypeError):
-                    pass
-
-        if "fecha_nacimiento" in datos_normalizados and not datos_normalizados["fecha_nacimiento"]:
-             datos_normalizados["fecha_nacimiento"] = None
-
-        return datos_normalizados
-
-    def validar_datos(self, datos, db, is_new=True, current_id=None):
-        """
-        Valida los datos proporcionados para crear o actualizar un servidor.
-        :param datos: Diccionario con los datos del servidor.
-        :param db: Sesión de la base de datos.
-        :param is_new: Booleano que indica si es una creación (True) o actualización (False).
-        :param current_id: ID del servidor actual si es una actualización.
-        :return: Lista de errores encontrados.
-        """
-        errores = []
-
-        nombre = datos.get("nombre")
-        if not nombre or not isinstance(nombre, str) or not nombre.strip():
-            errores.append("El campo 'nombre' es obligatorio y debe ser una cadena de texto.")
-        elif len(nombre) > 100:
-            errores.append("El campo 'nombre' no puede superar los 100 caracteres.")
-
-        edad = datos.get("edad")
-        if edad is None:
-            errores.append("El campo 'edad' es obligatorio.")
-        elif not isinstance(edad, int) or edad <= 0:
-            errores.append("El campo 'edad' debe ser un número entero positivo.")
-
-        cedula = datos.get("cedula")
-        if cedula is None:
-            errores.append("El campo 'cedula' es obligatorio.")
-        elif not isinstance(cedula, int) or cedula <= 0:
-            errores.append("El campo 'cedula' debe ser un número entero positivo.")
-        else:
-            query = db.query(Servidor).filter(Servidor.cedula == cedula, Servidor.is_deleted.is_(False))
-            if not is_new and current_id:
-                query = query.filter(Servidor.id != current_id)
-            if query.first():
-                errores.append(f"Ya existe un servidor con la cédula {cedula}.")
-
-        fecha_nacimiento = datos.get("fecha_nacimiento")
-        if fecha_nacimiento:
-            try:
-                if isinstance(fecha_nacimiento, str):
-                    datetime.strptime(fecha_nacimiento, '%Y-%m-%d')
-            except ValueError:
-                errores.append("El campo 'fecha de nacimiento' debe tener el formato 'YYYY-MM-DD'.")
-
-        celular = datos.get("celular")
-        if celular and (not isinstance(celular, str) or len(celular) > 20):
-            errores.append("El campo 'celular' debe ser una cadena de texto de hasta 20 caracteres.")
-
-        correo = datos.get("correo")
-        if correo:
-            if not isinstance(correo, str) or len(correo) > 100 or "@" not in correo:
-                errores.append("El campo 'correo' debe ser una dirección de correo electrónico válida de hasta 100 caracteres.")
-            else:
-                query = db.query(Servidor).filter(Servidor.correo == correo, Servidor.is_deleted.is_(False))
-                if not is_new and current_id:
-                    query = query.filter(Servidor.id != current_id)
-                if query.first():
-                    errores.append(f"Ya existe un servidor con el correo electrónico {correo}.")
-
-        numero_equipo = datos.get("numero_equipo")
-        if numero_equipo is not None and (not isinstance(numero_equipo, int) or numero_equipo <= 0):
-            errores.append("El campo 'numero de equipo' debe ser un número entero positivo.")
-
-        id_area = datos.get("id_area")
-        if id_area:
-            area = db.query(Area).filter(Area.id == id_area, Area.is_deleted.is_(False)).first()
-            if not area:
-                errores.append("El área de servicio seleccionada no es válida.")
-
-        id_capitan = datos.get("id_capitan")
-        if id_capitan:
-            cap = db.query(Capitan).filter(Capitan.id == id_capitan, Capitan.is_deleted.is_(False)).first()
-            if not cap:
-                errores.append("El capitán seleccionado no es válido.")
-
-        return errores
