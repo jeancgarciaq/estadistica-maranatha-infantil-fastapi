@@ -15,12 +15,12 @@
                     <p class="mt-1 text-sm text-slate-400">{{ coordinador.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/coordinadores?id={{ coordinador.id }}&nombre={{ coordinador.nombre|urlencode }}&cedula={{ coordinador.cedula }}&edad={{ coordinador.edad }}&id_lider={{ coordinador.id_lider or '' }}&celular={{ (coordinador.celular or '')|urlencode }}&correo={{ (coordinador.correo or '')|urlencode }}"
+                    <a href="/coordinadores?id={{ coordinador.id }}&nombre={{ coordinador.nombre|urlencode }}&cedula={{ coordinador.cedula }}&edad={{ coordinador.edad }}&id_lider={{ coordinador.id_lider or '' }}&id_area={{ coordinador.id_area or '' }}&celular={{ (coordinador.celular or '')|urlencode }}&correo={{ (coordinador.correo or '')|urlencode }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
                     <!-- Botón para eliminar (Redirige a la vista index con confirmación) -->
-                    <form action="/coordinadores/eliminar" method="POST"
+                    <form action=" /coordinadores/eliminar" method="POST"
                         onsubmit="return confirm('¿Eliminar coordinador?')">
                         <input type="hidden" name="id" value="{{ coordinador.id }}">
                         <button type="submit"
@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-slate-700/60">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-700/50">
                 <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Cédula</p>
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ coordinador.cedula }}</p>
@@ -41,14 +41,20 @@
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ coordinador.edad }} años</p>
                 </div>
                 <div class="bg-slate-800 p-4">
-                    <p class="text-xs uppercase tracking-wide text-slate-500">Contacto</p>
-                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ coordinador.celular or 'N/A' }}</p>
-                </div>
-                <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Líder</p>
                     <p class="mt-1 text-sm font-semibold text-amber-400">
                         {% if coordinador.lider %}
                         {{ coordinador.lider.nombre }}
+                        {% else %}
+                        <span class="text-slate-500 italic text-xs">Sin asignar</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Área</p>
+                    <p class="mt-1 text-sm font-semibold text-amber-400 text-teal-400">
+                        {% if coordinador.area %}
+                        {{ coordinador.area.area }}
                         {% else %}
                         <span class="text-slate-500 italic text-xs">Sin asignar</span>
                         {% endif %}
