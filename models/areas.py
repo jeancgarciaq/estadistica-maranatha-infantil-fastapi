@@ -12,6 +12,7 @@ class Area(Base, AuditMixin):
     area = Column(String(100), nullable=False, unique=True)  # Longitud máxima de 100 caracteres
 
     distribuciones = relationship("Distribucion", back_populates="area")
+    coordinadores = relationship("Coordinador", back_populates="area")
 
     def __repr__(self):
         return f"<Area(id={self.id}, area='{self.area}')>"
