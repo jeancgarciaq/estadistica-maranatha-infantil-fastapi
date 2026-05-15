@@ -116,8 +116,6 @@ class UsuariosController(BaseController):
             setattr(nuevo_usuario, 'activo', True)
 
             db.add(nuevo_usuario)
-            db.flush()  # Necesario para obtener el ID antes de encolar
-            self.registrar_evento_sync(db, 'usuarios', nuevo_usuario, 'upsert')
 
         return self.ejecutar_transaccion(operacion, 'Usuario creado exitosamente.', user_context=user_context)
 
@@ -147,7 +145,6 @@ class UsuariosController(BaseController):
             if activo is not None:
                 setattr(usuario, 'activo', bool(activo))
 
-            self.registrar_evento_sync(db, 'usuarios', usuario, 'upsert')
             logger.info("Usuario actualizado localmente y encolado para sync: ID %s", user_id)
 
         return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.', user_context=user_context)
