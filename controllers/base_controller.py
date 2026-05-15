@@ -62,8 +62,13 @@ class BaseController:
             if mensaje_exito:
                 return True, mensaje_exito
             return True, "Operación exitosa"
-        except (SQLAlchemyError, ValueError) as e:
-            return self.manejar_excepcion(e, "Error en la transacción")
+        except ValueError as e:
+            # Los ValueError son validaciones de negocio que queremos mostrar tal cual
+            logger.warning(f"Error de validación: {e}")
+            return False, str(e)
+        except SQLAlchemyError as e:
+            # Errores de base de datos (integridad, conexión, etc.)
+            return self.manejar_excepcion(e, "No se pudo guardar la información por un error técnico")
         finally:
             if not self.session:
                 db.close()
