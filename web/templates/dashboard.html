@@ -169,8 +169,40 @@
     </a>
     {% endif %}
 
+    <!-- 15. Docentes -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/docentes"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-chalkboard-teacher text-2xl text-emerald-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Docentes</span>
+    </a>
+    {% endif %}
 
-    <!-- 15. Reporte Estadístico -->
+    <!-- 16. Auxiliares -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/auxiliares"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-user-tag text-2xl text-orange-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Auxiliares</span>
+    </a>
+    {% endif %}
+
+    <!-- 17. Colaboradores -->
+    {% if is_root or user.rol.nombre == 'administrador' %}
+    <a href="/colaboradores"
+        class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
+        <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+            <i class="la la-user-friends text-2xl text-blue-400"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-center leading-tight">Colaboradores</span>
+    </a>
+    {% endif %}
+
+    <!-- 18. Reporte Estadístico -->
     {% if is_root or 'reporte.view' in user_perms %}
     <a href="/reportes"
         class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
@@ -181,7 +213,7 @@
     </a>
     {% endif %}
 
-    <!-- 16. Ayuda -->
+    <!-- 19. Ayuda -->
     {% if is_root or 'ayuda.view' in user_perms %} {# Enlace a la vista de ayuda #}
     <a href="/ayuda"
         class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col items-center gap-3 active:scale-95 transition-all">
