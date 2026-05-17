@@ -16,73 +16,59 @@ class AulasController(BaseController):
         super().__init__(model=Aula, session=session)
         logger.info("AulasController inicializado.")
 
-    def crear_aula(self, datos, user_context=None):
-        """
-        Crea un aula con los datos proporcionados.
-        :param datos: Diccionario con los datos del aula.
-        :return: (Exito, Mensaje)
-        """
+    def crear_aula_con_asistencia(self, datos, user_context=None):
+        """Crea el aula y registra los servidores en la tabla pivote de asistencia."""
         errores = self.validar_datos(datos)
         if errores:
             return False, "\n".join(errores)
 
-        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
-        if not fecha:
+        fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha_dt:
             return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        datos['fecha'] = fecha
+        datos['fecha'] = fecha_dt
 
-        def operacion(db):
-            aula = Aula(**datos)
-    def crear_aula_con_asistencia(self, datos, user_context=None):
-        """Crea el aula y registra los servidores en la tabla pivote de asistencia."""
-        # Extraemos los IDs de servidores antes de pasar a la creación de la entidad Aula
-        id_maestra = datos.pop('id_maestra', None)
-        id_auxiliar = datos.pop('id_auxiliar', None)
-        id_colaborador = datos.pop('id_colaborador', None)
+        # Extraemos los IDs. Maestra y Auxiliar son 1-a-1 y se guardan en el modelo Aula.
+        # Los colaboradores pueden ser múltiples y se registran en la tabla de asistencia.
+        id_maestra = datos.get('id_maestra')
+        id_auxiliar = datos.get('id_auxiliar')
+        ids_colaboradores = datos.pop('ids_colaboradores', [])
         
-        # Calculamos los conteos numéricos para la tabla aulas (compatibilidad con reportes)
-        datos['maestra'] = 1 if id_maestra else 0
-        datos['auxiliar'] = 1 if id_auxiliar else 0
-        datos['colaborador'] = 1 if id_colaborador else 0
+        if ids_colaboradores and not isinstance(ids_colaboradores, list):
+            ids_colaboradores = [ids_colaboradores]
 
         def operacion(db):
             asistencia_ctrl = AsistenciaServidoresController()
             
-            # 1. Crear el aula
+            # 1. Crear el aula (vinculada a maestra y auxiliar si existen)
             aula = Aula(**datos)
             db.add(aula)
             db.flush()
             
             # 2. Registrar asistencias individuales
-            servidores_a_registrar = [
-                (id_maestra, 'Maestra'),
-                (id_auxiliar, 'Auxiliar'),
-                (id_colaborador, 'Colaborador')
-            ]
+            if id_maestra:
+                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id)
             
-            for s_id, rol in servidores_a_registrar:
+            if id_auxiliar:
+                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id)
+
+            for s_id in ids_colaboradores:
                 if s_id:
                     asistencia_ctrl.registrar_asistencia(
                         db, 
-                        id_servidor=s_id, 
-                        fecha=aula.fecha, 
-                        rol=rol, 
-                        categoria='aula', 
-                        referencia_id=aula.id
+                        s_id,
+                        aula.fecha,
+                        'Colaborador',
+                        'aula',
+                        aula.id
                     )
             
             self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
 
         return self.ejecutar_transaccion(operacion, "Aula y asistencia registradas.", user_context=user_context)
 
-        return self.ejecutar_transaccion(operacion, "Aula creada exitosamente.", user_context=user_context)
-
     def actualizar_aula(self, id, datos, user_context=None):
         """
         Actualiza un aula existente con los datos proporcionados.
-        :param id: ID del aula a actualizar.
-        :param datos: Diccionario con los datos actualizados del aula.
-        :return: (Exito, Mensaje)
         """
         if not id or not isinstance(id, int):
             return False, "El ID del aula es obligatorio y debe ser un número entero."
@@ -91,10 +77,17 @@ class AulasController(BaseController):
         if errores:
             return False, "\n".join(errores)
 
-        fecha = self.validar_y_convertir_fecha(datos.get('fecha'))
-        if not fecha:
+        fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
+        if not fecha_dt:
             return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        datos['fecha'] = fecha
+        datos['fecha'] = fecha_dt
+
+        id_maestra = datos.get('id_maestra')
+        id_auxiliar = datos.get('id_auxiliar')
+        ids_colaboradores = datos.pop('ids_colaboradores', [])
+
+        if ids_colaboradores and not isinstance(ids_colaboradores, list):
+            ids_colaboradores = [ids_colaboradores]
 
         def operacion(db):
             aula = db.query(Aula).filter(Aula.id == id, Aula.is_deleted.is_(False)).first()
@@ -103,6 +96,18 @@ class AulasController(BaseController):
             
             for key, value in datos.items():
                 setattr(aula, key, value)
+
+            # Actualizar asistencias individuales (limpiar e insertar nuevas)
+            asistencia_ctrl = AsistenciaServidoresController()
+            asistencia_ctrl.limpiar_asistencias_referencia(db, 'aula', aula.id)
+
+            if id_maestra:
+                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id)
+            if id_auxiliar:
+                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id)
+            for s_id in ids_colaboradores:
+                if s_id:
+                    asistencia_ctrl.registrar_asistencia(db, s_id, aula.fecha, 'Colaborador', 'aula', aula.id)
             
             self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
             logger.info(f"Aula actualizada: ID {id}")
@@ -232,14 +237,22 @@ class AulasController(BaseController):
         :return: Lista de errores encontrados.
         """
         errores = []
-        if not isinstance(datos.get("auxiliar"), int):
-            errores.append("El campo 'auxiliar' debe ser un número entero.")
-        if not isinstance(datos.get("colaborador"), int):
-            errores.append("El campo 'colaborador' debe ser un número entero.")
+
+        # Validación de IDs de Servidores (claves foráneas)
+        for campo_id in ["id_maestra", "id_auxiliar"]:
+            val = datos.get(campo_id)
+            if val is not None and not isinstance(val, int):
+                errores.append(f"El campo '{campo_id}' debe ser un número entero (ID).")
+
+        ids_col = datos.get("ids_colaboradores")
+        if ids_col is not None:
+            if not isinstance(ids_col, (int, list)):
+                errores.append("El campo 'ids_colaboradores' debe ser un ID o una lista de IDs.")
+            elif isinstance(ids_col, list) and not all(isinstance(i, int) for i in ids_col):
+                errores.append("Todos los IDs de colaboradores deben ser números enteros.")
+
         if not isinstance(datos.get("condicion"), str):
             errores.append("El campo 'condicion' debe ser una cadena de texto.")
-        if not isinstance(datos.get("maestra"), int):
-            errores.append("El campo 'maestra' debe ser un número entero.")
         if not isinstance(datos.get("ninos"), int):
             errores.append("El campo 'ninos' debe ser un número entero.")
         if not isinstance(datos.get("ninas"), int):
@@ -254,19 +267,24 @@ class AulasController(BaseController):
         if not isinstance(datos.get("id_salon"), int):
             errores.append("El campo 'id_salon' debe ser un número entero.")
 
-        # Validación de lógica de Condición vs Asistencia
-        maestra = datos.get("maestra", 0)
-        auxiliar = datos.get("auxiliar", 0)
-        colaborador = datos.get("colaborador", 0)
+        # Validación de lógica de Condición vs Asistencia (basada en la presencia de servidores)
+        tiene_maestra = 1 if datos.get("id_maestra") else 0
+        tiene_auxiliar = 1 if datos.get("id_auxiliar") else 0
+        
+        ids_col = datos.get("ids_colaboradores") or []
+        if isinstance(ids_col, int):
+            ids_col = [ids_col]
+        cant_colaboradores = len(ids_col)
+        
         ninos = datos.get("ninos", 0)
         ninas = datos.get("ninas", 0)
         condicion = datos.get("condicion")
 
-        total_asistencia = sum([maestra, auxiliar, colaborador, ninos, ninas])
+        total_asistencia = sum([tiene_maestra, tiene_auxiliar, cant_colaboradores, ninos, ninas])
 
         if total_asistencia > 0 and condicion == "Cerrado":
             errores.append("No se puede registrar como 'Cerrado' si hay asistencia reportada.")
         elif total_asistencia == 0 and condicion == "Abierto":
-            errores.append("Si no hay asistencia (todos los campos en 0), la condición debe ser 'Cerrado'.")
+            errores.append("Si no hay asistencia (niños, niñas o servidores), la condición debe ser 'Cerrado'.")
 
         return errores
