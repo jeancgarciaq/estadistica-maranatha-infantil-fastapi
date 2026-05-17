@@ -92,13 +92,13 @@
                         </select>
                     </div>
                     <div>
-                        <label
-                            class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Colaborador</label>
-                        <select name="id_colaborador" id="aula_colaborador"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 appearance-none">
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1 ml-1">Colaboradores
+                            (selección múltiple)</label>
+                        <select name="ids_colaboradores" id="aula_colaboradores" multiple size="5"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 appearance-none h-auto">
                             <option value="">Sin asignar</option>
                             {% for servidor in servidores %}
-                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            <option value="{{ servidor.id }}">{{ servidor.nombre }} (ID: {{ servidor.id }})</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -166,11 +166,12 @@
     function actualizarCondicion() {
         let total = 0;
 
-        // Para selectores: si hay algo seleccionado (ID != "") cuenta como 1
-        ['aula_maestra', 'aula_auxiliar', 'aula_colaborador'].forEach(id => {
+        // Para selectores individuales: si hay algo seleccionado (ID != "") cuenta como 1
+        ['aula_maestra', 'aula_auxiliar'].forEach(id => {
             if (document.getElementById(id).value !== "") total += 1;
         });
-        // Para números: sumar el valor real
+        // Para colaboradores (multi-select): sumar la cantidad de seleccionados
+        total += document.getElementById('aula_colaboradores').selectedOptions.length;
         ['aula_ninos', 'aula_ninas'].forEach(id => {
             total += parseInt(document.getElementById(id).value) || 0;
         });
@@ -217,9 +218,20 @@
         document.getElementById('delete_id').value = urlParams.get('id');
         document.getElementById('aula_id_salon').value = urlParams.get('id_salon') || "";
         document.getElementById('aula_fecha').value = urlParams.get('fecha') || "";
-        document.getElementById('aula_maestra').value = urlParams.get('maestra') || 0;
-        document.getElementById('aula_auxiliar').value = urlParams.get('auxiliar') || 0;
-        document.getElementById('aula_colaborador').value = urlParams.get('colaborador') || 0;
+        document.getElementById('aula_maestra').value = urlParams.get('id_maestra') || "";
+        document.getElementById('aula_auxiliar').value = urlParams.get('id_auxiliar') || "";
+
+        // Manejar múltiples colaboradores
+        const collaboratorsParam = urlParams.get('ids_colaboradores');
+        if (collaboratorsParam) {
+            const selectedCollaboratorIds = collaboratorsParam.split(',').map(id => parseInt(id.trim()));
+            const collaboratorSelect = document.getElementById('aula_colaboradores');
+            Array.from(collaboratorSelect.options).forEach(option => {
+                if (selectedCollaboratorIds.includes(parseInt(option.value))) {
+                    option.selected = true;
+                }
+            });
+        }
         document.getElementById('aula_ninos').value = urlParams.get('ninos') || 0;
         document.getElementById('aula_ninas').value = urlParams.get('ninas') || 0;
         document.getElementById('aula_condicion').value = urlParams.get('condicion') || "Abierto";
@@ -229,9 +241,7 @@
     }
 
     // Vincular detectores de eventos para actualizar la condición automáticamente
-    [
-        'aula_maestra', 'aula_auxiliar', 'aula_colaborador', 'aula_ninos', 'aula_ninas'
-    ].forEach(id => {
+    ['aula_maestra', 'aula_auxiliar', 'aula_colaboradores', 'aula_ninos', 'aula_ninas'].forEach(id => {
         document.getElementById(id).addEventListener('input', actualizarCondicion);
     });
     actualizarCondicion(); // Ejecutar al cargar para validar estado inicial
