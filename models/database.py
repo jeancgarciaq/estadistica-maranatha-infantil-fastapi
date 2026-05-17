@@ -3,6 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from google.cloud.sql.connector import Connector, IPTypes
+import logging
+from alembic import command
+from alembic.config import Config
 
 # En la web, usamos una ruta relativa o absoluta definida en el entorno
 # Si estamos en local usa SQLite, si estamos en la nube usará el string de PostgreSQL
@@ -11,6 +14,8 @@ INSTANCE_CONNECTION_NAME = os.getenv("INSTANCE_CONNECTION_NAME") # e.g. project:
 
 # Inicializar el conector de Google Cloud SQL
 connector = Connector(refresh_strategy="LAZY")
+
+logger = logging.getLogger(__name__)
 
 def getconn():
     """Función para que SQLAlchemy obtenga conexiones a través del conector de Google."""
@@ -83,12 +88,23 @@ Base = declarative_base()
 
 def configure_database():
     """
-    Crea las tablas si no existen. 
-    Nota: En producción es mejor usar Alembic, pero esto asegura que la app corra.
+    Sincroniza el esquema de la base de datos usando Alembic y siembra datos iniciales.
     """
     from models.security import seed_security_data
-    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes
-    Base.metadata.create_all(bind=engine)
+    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores
+
+    # Intentar ejecutar migraciones de Alembic programáticamente al iniciar la app
+    try:
+        # Se asume que alembic.ini está en la raíz del proyecto
+        alembic_cfg = Config("alembic.ini")
+        # Aplicar todas las migraciones pendientes hasta la versión más reciente (head)
+        command.upgrade(alembic_cfg, "head")
+        logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head).")
+    except Exception as e:
+        logger.warning(f"⚠️ No se pudieron aplicar las migraciones vía Alembic: {e}")
+        logger.info("Intentando fallback con Base.metadata.create_all (solo creará tablas nuevas)...")
+        # Fallback para garantizar que al menos las tablas existan si Alembic falla o no está configurado
+        Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
     try:
