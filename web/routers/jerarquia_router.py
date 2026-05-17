@@ -36,6 +36,8 @@ async def list_coordinadores(request: Request, db: Session = Depends(get_db)):
     return await JerarquiaWebHandler(db, templates).get_coordinadores_list(request)
 
 @router.get("/capitanes")
+async def view_capitanes(request: Request, db: Session = Depends(get_db)):
+    return await JerarquiaWebHandler(db, templates).get_capitanes_index(request)
 
 # Rutas de Docentes
 @router.get("/docentes")
@@ -75,5 +77,3 @@ async def list_colaboradores(request: Request, db: Session = Depends(get_db)):
 @router.post("/colaboradores/crear")
 async def create_colaborador(request: Request, nombre: str = Form(...), cedula: int = Form(...), edad: int = Form(...), db: Session = Depends(get_db)):
     return await JerarquiaWebHandler(db, templates).post_colaborador_crear(request, {"nombre": nombre, "cedula": cedula, "edad": edad})
-async def view_capitanes(request: Request, db: Session = Depends(get_db)):
-    return await JerarquiaWebHandler(db, templates).get_capitanes_index(request)
