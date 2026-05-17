@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Datos - EMI{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-blue-400">Análisis Estadístico</h2>
+        <a href="/dashboard" class="text-sm text-slate-400 hover:underline">Volver</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card: Tendencia de Donaciones -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <h3 class="text-lg font-semibold mb-4 text-slate-200">Tendencia de Donaciones (30 días)</h3>
+            <canvas id="chartDonaciones" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Card: Resumen Operativo -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <h3 class="text-lg font-semibold mb-4 text-slate-200">Resumen Operativo</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 text-center">
+                    <span class="block text-2xl font-bold text-blue-400">{{ metricas.total_jornadas }}</span>
+                    <span class="text-[10px] uppercase text-slate-400">Jornadas Logísticas</span>
+                </div>
+                <!-- Más indicadores aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="donaciones-data" type="application/json">
+    {{ datos_donaciones | tojson | safe }}
+</script>
+<script>
+    const ctxDonaciones = document.getElementById('chartDonaciones').getContext('2d');
+    const dataDonaciones = JSON.parse(document.getElementById('donaciones-data').textContent || '[]');
+
+    new Chart(ctxDonaciones, {
+        type: 'line',
+        data: {
+            labels: dataDonaciones.map(d => new Date(d.fecha).toLocaleDateString()),
+            datasets: [{
+                label: 'Volumen Donado',
+                data: dataDonaciones.map(d => d.volumen),
+                borderColor: '#60a5fa',
+                backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}
