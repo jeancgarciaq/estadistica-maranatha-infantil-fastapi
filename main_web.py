@@ -13,13 +13,13 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBearer
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Session, joinedload
 
 from models.database import configure_database, SessionLocal, shutdown_db
 from models.security import ROLE_ROOT, Usuario
 
 # Importar Routers Refactorizados
-from web.routers import alimentos_router, servidores_router, auth_router, usuarios_router, jerarquia_router, operaciones_router, infraestructura_router
+from web.routers import alimentos_router, servidores_router, auth_router, usuarios_router, jerarquia_router, operaciones_router, infraestructura_router, reportes_router, ayuda_router
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -94,55 +94,6 @@ async def auth_middleware(request: Request, call_next):
 @app.get("/dashboard")
 async def dashboard(request: Request):
     return templates.TemplateResponse(request, "dashboard.html", {
-        "user": request.state.user
-    })
-
-
-@app.get("/reportes", response_class=HTMLResponse)
-async def view_reportes(request: Request, fecha: str = None, db: Session = Depends(get_db)):
-    resumen_texto = "Seleccione una fecha y genere el resumen."
-    
-    if fecha:
-        try:
-            servicio = ReporteEstadisticoService(db)
-            resumen_data = servicio.obtener_resumen(fecha)
-            resumen_texto = servicio.formatear_vista_previa(resumen_data)
-        except Exception as e:
-            logger.error(f"Error al generar resumen para la web: {e}")
-            resumen_texto = f"Error al generar resumen: {e}"
-
-    return templates.TemplateResponse(request, "reportes/index.html", {
-        "user": request.state.user,
-        "fecha_filtro": fecha,
-        "resumen_texto": resumen_texto
-    })
-
-@app.post("/reportes/generar-pdf")
-async def generar_reporte_pdf(request: Request, fecha: str = Form(...), db: Session = Depends(get_db)):
-    if not fecha:
-        raise HTTPException(status_code=400, detail="Debe seleccionar una fecha para generar el PDF.")
-    
-    try:
-        servicio = ReporteEstadisticoService(db)
-        resumen = servicio.obtener_resumen(fecha)
-        graficos = servicio.generar_graficos(resumen)
-        pdf_file_path = servicio.generar_pdf(resumen, graficos)
-        
-        return FileResponse(
-            path=pdf_file_path,
-            media_type="application/pdf",
-            filename=os.path.basename(pdf_file_path)
-        )
-    except ModuleNotFoundError as e:
-        logger.error(f"Error: {e}. Reportlab no está instalado.")
-        raise HTTPException(status_code=500, detail=f"Error en el servidor: {e}. Asegúrese de que reportlab esté instalado.")
-    except Exception as e:
-        logger.error(f"Error al generar PDF: {e}")
-        raise HTTPException(status_code=500, detail=f"Error al generar el PDF: {e}")
-
-@app.get("/ayuda", response_class=HTMLResponse)
-async def view_ayuda(request: Request):
-    return templates.TemplateResponse(request, "ayudas/index.html", {
         "user": request.state.user
     })
 
