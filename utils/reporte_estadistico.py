@@ -32,6 +32,7 @@ except ModuleNotFoundError:
     REPORTLAB_DISPONIBLE = False
 
 from sqlalchemy.orm import joinedload
+from sqlalchemy import and_
 
 from models.aulas import Aula
 from models.donaciones import Donacion
@@ -42,6 +43,7 @@ from models.distribucion import Distribucion
 from models.areas import Area
 from models.otras_areas import OtrasAreas
 from models.recepcion import Recepcion
+from models.logistica import Logistica
 
 
 @dataclass
@@ -63,8 +65,10 @@ class ResumenEstadistico:
     faltante_preparado: float
     preparacion_completa: bool
     aulas: list
+    aulas_por_categoria: dict # Agrupación por Maternal, Infantil, Pre-juvenil
     otras_areas: list
     recepciones: list
+    logisticas: list # Nueva sección discriminada
     donaciones: list
     preparados: list
     componentes: list
@@ -129,17 +133,34 @@ class ReporteEstadisticoService:
         return 'Sin origen'
 
     def _serializar_aula(self, aula):
-        servidores = self._sumar_campos(aula, ['auxiliar', 'colaborador', 'maestra'])
+        # Contamos servidores reales a partir de las nuevas relaciones jerárquicas
+        cant_maestra = 1 if aula.id_maestra else 0
+        cant_auxiliar = 1 if aula.id_auxiliar else 0
+        
+        # Obtenemos la lista de asistencias de colaboradores registrados para esta sesión
+        asistencias_colab = getattr(aula, 'colaboradores_asistencias', [])
+        cant_colaboradores = len(asistencias_colab)
+        servidores = cant_maestra + cant_auxiliar + cant_colaboradores
+
+        maestra_nom = aula.maestra_rel.nombre if aula.maestra_rel else "N/A"
+        auxiliar_nom = aula.auxiliar_rel.nombre if aula.auxiliar_rel else "N/A"
+        
+        # Concatenamos nombres de todos los colaboradores para una visualización precisa
+        nombres_colab = [a.servidor.nombre for a in asistencias_colab if a.servidor]
+        colaborador_txt = ", ".join(nombres_colab) if nombres_colab else "N/A"
+        
         return {
             'id': aula.id,
             'nombre': getattr(aula.salon, 'salon', str(aula.id_salon)),
+            'categoria': getattr(aula.salon, 'edad', 'General'),
             'ninos': int(aula.ninos or 0),
             'ninas': int(aula.ninas or 0),
-            'auxiliar': int(aula.auxiliar or 0),
-            'colaborador': int(aula.colaborador or 0),
-            'maestra': int(aula.maestra or 0),
+            'maestra': maestra_nom,
+            'auxiliar': auxiliar_nom,
+            'colaborador': colaborador_txt,
             'servidores': servidores,
             'total': int(aula.ninos or 0) + int(aula.ninas or 0) + servidores,
+            'condicion': getattr(aula, 'condicion', 'Abierto')
         }
 
     def _serializar_otra_area(self, registro):
@@ -156,6 +177,19 @@ class ReporteEstadisticoService:
             'seguridad': int(registro.seguridad or 0),
             'servidores': servidores,
             'fecha': registro.fecha,
+        }
+
+    def _serializar_logistica(self, log):
+        # Recuperamos nombres de los capitanes y responsables de área
+        return {
+            'id': log.id,
+            'capitan': getattr(log, 'capitan_rel', None).nombre if hasattr(log, 'capitan_rel') and log.capitan_rel else "No asignado",
+            'almacen': "Sí" if log.almacen else "No",
+            'distribucion': "Sí" if log.distribucion else "No",
+            'hidratacion': "Sí" if log.hidratacion else "No",
+            'pasillo': "Sí" if log.pasillo else "No",
+            'secretaria': "Sí" if log.secretaria else "No",
+            'observaciones': log.observaciones or ""
         }
 
     def _serializar_recepcion(self, recepcion):
@@ -256,9 +290,20 @@ class ReporteEstadisticoService:
     def obtener_resumen(self, fecha_corte):
         fecha_corte = self._parse_fecha(fecha_corte)
 
-        aulas = self.session.query(Aula).options(joinedload(Aula.salon)).filter(Aula.fecha == fecha_corte).all()
+        aulas = (
+            self.session.query(Aula)
+            .options(
+                joinedload(Aula.salon),
+                joinedload(Aula.maestra_rel),
+                joinedload(Aula.auxiliar_rel),
+                joinedload(Aula.colaboradores_asistencias).joinedload('servidor')
+            )
+            .filter(Aula.fecha == fecha_corte)
+            .all()
+        )
         otras_areas = self.session.query(OtrasAreas).filter(OtrasAreas.fecha == fecha_corte).all()
         recepciones = self.session.query(Recepcion).filter(Recepcion.fecha == fecha_corte).all()
+        logisticas = self.session.query(Logistica).filter(Logistica.fecha == fecha_corte).all()
         donaciones = self.session.query(Donacion).filter(Donacion.fecha == fecha_corte).all()
         preparados = self.session.query(AlimentoPreparado).filter(AlimentoPreparado.fecha == fecha_corte).all()
         componentes = (
@@ -293,10 +338,16 @@ class ReporteEstadisticoService:
         aulas_data = [self._serializar_aula(aula) for aula in aulas]
         otras_areas_data = [self._serializar_otra_area(registro) for registro in otras_areas]
         recepciones_data = [self._serializar_recepcion(recepcion) for recepcion in recepciones]
+        logisticas_data = [self._serializar_logistica(log) for log in logisticas]
         donaciones_data = [self._serializar_donacion(donacion) for donacion in donaciones]
         preparados_data = [self._serializar_preparado(preparado) for preparado in preparados]
         componentes_data = [self._serializar_componente(componente) for componente in componentes]
         distribuciones_data = [self._serializar_distribucion(distribucion) for distribucion in distribuciones]
+
+        # Agrupar aulas por categoría (Edad)
+        aulas_por_cat = defaultdict(list)
+        for a in aulas_data:
+            aulas_por_cat[a['categoria']].append(a)
 
         # Determinar salones cerrados
         salones_cerrados_data = [self._serializar_salon(s) for s in todos_salones 
@@ -306,7 +357,7 @@ class ReporteEstadisticoService:
         asistencia_ninas = sum(item['ninas'] for item in aulas_data)
         asistencia_servidores_aulas = sum(item['servidores'] for item in aulas_data)
         asistencia_servidores_areas = sum(item['servidores'] for item in otras_areas_data)
-        asistencia_servidores_recepcion = len(recepciones_data)
+        asistencia_servidores_recepcion = len(recepciones_data) + sum(1 for l in logisticas_data if l['capitan'] != "No asignado")
         asistencia_servidores = asistencia_servidores_aulas + asistencia_servidores_areas + asistencia_servidores_recepcion
         total_asistencia = asistencia_ninos + asistencia_ninas + asistencia_servidores
 
@@ -345,8 +396,10 @@ class ReporteEstadisticoService:
             faltante_preparado=faltante_preparado,
             preparacion_completa=preparacion_completa,
             aulas=aulas_data,
+            aulas_por_categoria=dict(aulas_por_cat),
             otras_areas=otras_areas_data,
             recepciones=recepciones_data,
+            logisticas=logisticas_data,
             donaciones=donaciones_data,
             preparados=preparados_data,
             componentes=componentes_data,
@@ -365,18 +418,20 @@ class ReporteEstadisticoService:
             f"Niñas: {resumen.asistencia_ninas}",
             f"Servidores de aulas: {resumen.asistencia_servidores_aulas}",
             f"Servidores de otras áreas: {resumen.asistencia_servidores_areas}",
-            f"Servidores de recepción: {resumen.asistencia_servidores_recepcion}",
+            f"Servidores de recepción/logística: {resumen.asistencia_servidores_recepcion}",
             f"Total servidores: {resumen.asistencia_servidores}",
             f"Total asistencia: {resumen.total_asistencia}",
             '',
-            '2. Asistencia por aula',
+            '2. Asistencia Detallada por Aulas',
         ]
-        if resumen.aulas:
-            for aula in resumen.aulas:
-                lineas.append(
-                    f"- {aula['nombre']}: Niños {aula['ninos']}, Niñas {aula['ninas']}, "
-                    f"Servidores {aula['servidores']}, Total {aula['total']}"
-                )
+        if resumen.aulas_por_categoria:
+            for cat, lista in resumen.aulas_por_categoria.items():
+                lineas.append(f"\n--- Categoría: {cat} ---")
+                for aula in lista:
+                    lineas.append(
+                        f"- {aula['nombre']}: {aula['ninos']} Niños, {aula['ninas']} Niñas | "
+                        f"Maestra: {aula['maestra']} | Aux: {aula['auxiliar']} | Colab: {aula['colaborador']}"
+                    )
         else:
             lineas.append('- Sin registros de aulas.')
 
@@ -458,6 +513,18 @@ class ReporteEstadisticoService:
 
         lineas.extend([
             '',
+            '9. Gestión de Logística',
+        ])
+        if resumen.logisticas:
+            for log in resumen.logisticas:
+                lineas.append(
+                    f"- Capitán: {log['capitan']} | Almacén: {log['almacen']} | Hidratación: {log['hidratacion']} | Pasillo: {log['pasillo']}"
+                )
+        else:
+            lineas.append('- Sin registros de logística.')
+
+        lineas.extend([
+            '',
             '9. Recepción',
         ])
         if resumen.recepciones:
@@ -475,117 +542,6 @@ class ReporteEstadisticoService:
                 lineas.append(f"- {salon['nombre']} (Edad: {salon['edad']})")
         else:
             lineas.append('- Todos los salones tuvieron registro de asistencia.')
-
-
-        lineas.extend([
-            '',
-            '11. Salones Cerrados (sin registro de asistencia)',
-        ])
-        if resumen.salones_cerrados:
-            for salon in resumen.salones_cerrados:
-                lineas.append(f"- {salon['nombre']} (Edad: {salon['edad']})")
-        # La sección 11 original se ha movido, este bloque se elimina o se comenta si no es necesario.
-        # else:
-        #     lineas.append('- Todos los salones tuvieron registro de asistencia.')
-
-        lineas.extend([
-            '',
-            '3. Asistencia por aula', # Era la sección 2
-        ])
-        if resumen.aulas:
-            for aula in resumen.aulas:
-                lineas.append(
-                    f"- {aula['nombre']}: Niños {aula['ninos']}, Niñas {aula['ninas']}, "
-                    f"Servidores {aula['servidores']}, Total {aula['total']}"
-                )
-        else:
-            lineas.append('- Sin registros de aulas.')
-
-        lineas.extend([
-            '',
-            '4. Donaciones registradas', # Era la sección 3
-        ])
-        if resumen.donaciones:
-            for donacion in resumen.donaciones:
-                lineas.append(f"- {donacion['descripcion']}: {self._fmt(donacion['cantidad'])} {donacion['unidad']}")
-        else:
-            lineas.append('- Sin donaciones registradas.')
-
-        lineas.extend([
-            '',
-            '5. Alimentos preparados', # Era la sección 4
-        ])
-        if resumen.preparados:
-            for preparado in resumen.preparados:
-                lineas.append(f"- {preparado['descripcion']}: {self._fmt(preparado['cantidad'])} {preparado['unidad']} ({preparado['equipo']})")
-        else:
-            lineas.append('- Sin alimentos preparados registrados.')
-
-        lineas.extend([
-            '',
-            '6. Conversión de donaciones en alimentos preparados', # Era la sección 5
-        ])
-        if resumen.componentes:
-            agrupados = defaultdict(list)
-            for componente in resumen.componentes:
-                agrupados[componente['preparado_id']].append(componente)
-            for items in agrupados.values():
-                lineas.append(f"- {items[0]['preparado_descripcion']}:")
-                for item in items:
-                    lineas.append(
-                        f"  * {item['materia_descripcion']}: {self._fmt(item['cantidad_usada'])} {item['unidad']}"
-                    )
-        else:
-            lineas.append('- Sin conversión registrada.')
-
-        lineas.extend([
-            '',
-            '7. Distribución detallada', # Era la sección 6
-        ])
-        if resumen.distribuciones:
-            for distribucion in resumen.distribuciones:
-                lineas.append(
-                    f"- {distribucion['origen']} -> {distribucion['destino']}: {self._fmt(distribucion['cantidad'])} {distribucion['unidad']}"
-                )
-        else:
-            lineas.append('- Sin distribuciones registradas.')
-
-        lineas.extend([
-            '',
-            '8. Pendientes sin distribuir', # Era la sección 7
-            f"Donaciones pendientes: {len(resumen.donaciones_sin_distribuir)}",
-        ])
-        for pendiente in resumen.donaciones_sin_distribuir:
-            lineas.append(
-                f"- {pendiente['descripcion']}: usada en preparados {self._fmt(pendiente['cantidad_usada_en_preparados'])} {pendiente['unidad']}, pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
-            )
-        lineas.append(f"Alimentos preparados pendientes: {len(resumen.preparados_sin_distribuir)}")
-        for pendiente in resumen.preparados_sin_distribuir:
-            lineas.append(
-                f"- {pendiente['descripcion']}: pendiente {self._fmt(pendiente['pendiente'])} {pendiente['unidad']}"
-            )
-
-        lineas.extend([
-            '',
-            '9. Servidores de otras áreas', # Era la sección 8
-        ])
-        if resumen.otras_areas:
-            for registro in resumen.otras_areas:
-                lineas.append(
-                    f"- ID {registro['id']}: total {registro['servidores']} (Alabanza {registro['alabanza']}, Protocolo {registro['protocolo']}, Semillitas {registro['semillitas']}, Sonido {registro['sonido']}, Teatro {registro['teatro']}, TV {registro['tv']}, Ujier {registro['ujier']}, Seguridad {registro['seguridad']})"
-                )
-        else:
-            lineas.append('- Sin registros de otras áreas.')
-
-        lineas.extend([
-            '',
-            '10. Recepción', # Era la sección 9
-        ])
-        if resumen.recepciones:
-            for recepcion in resumen.recepciones:
-                lineas.append(f"- ID {recepcion['id']}: {recepcion['nombre']}")
-        else:
-            lineas.append('- Sin registros de recepción.')
 
         lineas.extend([
             '',
@@ -680,7 +636,7 @@ class ReporteEstadisticoService:
             graficos_validos = [v for v in graficos.values() if v]
             if graficos_validos:
                 story.append(Spacer(1, 0.5 * cm))
-                self._agregar_seccion(story, '2. Gráficos de referencia', styles)
+                self._agregar_seccion(story, '3. Gráficos de referencia', styles)
                 for item in graficos_validos:
                     if isinstance(item, str) and os.path.exists(item):
                         story.append(Image(item, width=16 * cm, height=7.5 * cm))
@@ -688,26 +644,27 @@ class ReporteEstadisticoService:
                         story.append(item) # Insertar Drawing directamente
                     story.append(Spacer(1, 0.3 * cm))
 
-        self._agregar_seccion(story, '3. Asistencia por aula', styles)
-        aulas_data = [[
-            'Aula', 'Niños', 'Niñas', 'Auxiliares', 'Colaboradores', 'Maestras', 'Total'
-        ]]
-        for aula in resumen.aulas:
-            aulas_data.append([
-                aula['nombre'],
-                self._fmt(aula['ninos']),
-                self._fmt(aula['ninas']),
-                self._fmt(aula['auxiliar']),
-                self._fmt(aula['colaborador']),
-                self._fmt(aula['maestra']),
-                self._fmt(aula['total']),
-            ])
-        if len(aulas_data) == 1:
-            story.append(Paragraph('Sin registros de aulas.', styles['CuerpoInforme']))
+        self._agregar_seccion(story, '4. Asistencia detallada por aula', styles)
+        if resumen.aulas_por_categoria:
+            for cat, aulas_cat in resumen.aulas_por_categoria.items():
+                story.append(Paragraph(f"Categoría: {cat}", styles['SubTituloInforme']))
+                data_cat = [['Aula', 'Niños', 'Niñas', 'Maestra', 'Auxiliar', 'Colaboradores', 'Total']]
+                for a in aulas_cat:
+                    data_cat.append([
+                        a['nombre'],
+                        self._fmt(a['ninos']),
+                        self._fmt(a['ninas']),
+                        a['maestra'],
+                        a['auxiliar'],
+                        a['colaborador'],
+                        self._fmt(a['total']),
+                    ])
+                story.append(self._tabla(data_cat, [3*cm, 1*cm, 1*cm, 2.5*cm, 2.5*cm, 3.5*cm, 1.5*cm]))
+                story.append(Spacer(1, 0.4 * cm))
         else:
-            story.append(self._tabla(aulas_data))
+            story.append(Paragraph('Sin registros de aulas.', styles['CuerpoInforme']))
 
-        self._agregar_seccion(story, '4. Donaciones registradas', styles)
+        self._agregar_seccion(story, '5. Donaciones registradas', styles)
         donaciones_data = [['Descripción', 'Cantidad', 'Unidad', 'Equipo']]
         for donacion in resumen.donaciones:
             donaciones_data.append([
@@ -721,7 +678,7 @@ class ReporteEstadisticoService:
         else:
             story.append(self._tabla(donaciones_data))
 
-        self._agregar_seccion(story, '5. Alimentos preparados', styles)
+        self._agregar_seccion(story, '6. Alimentos preparados', styles)
         preparados_data = [['Descripción', 'Cantidad', 'Unidad', 'Equipo']]
         for preparado in resumen.preparados:
             preparados_data.append([
@@ -735,7 +692,7 @@ class ReporteEstadisticoService:
         else:
             story.append(self._tabla(preparados_data))
 
-        self._agregar_seccion(story, '6. Conversión de donaciones en alimentos preparados', styles)
+        self._agregar_seccion(story, '7. Conversión de donaciones en alimentos preparados', styles)
         if resumen.componentes:
             conversion_data = [['Preparado', 'Materia prima', 'Cantidad usada', 'Unidad']]
             for componente in resumen.componentes:
@@ -749,7 +706,7 @@ class ReporteEstadisticoService:
         else:
             story.append(Paragraph('Sin conversión registrada.', styles['CuerpoInforme']))
 
-        self._agregar_seccion(story, '7. Distribución detallada', styles)
+        self._agregar_seccion(story, '8. Distribución detallada', styles)
         distribuciones_data = [['Origen', 'Destino', 'Cantidad', 'Unidad']]
         for distribucion in resumen.distribuciones:
             distribuciones_data.append([
@@ -763,7 +720,7 @@ class ReporteEstadisticoService:
         else:
             story.append(self._tabla(distribuciones_data))
 
-        self._agregar_seccion(story, '8. Alimentos o donaciones no distribuidos', styles)
+        self._agregar_seccion(story, '9. Alimentos o donaciones no distribuidos', styles)
         if not resumen.donaciones_sin_distribuir and not resumen.preparados_sin_distribuir:
             story.append(Paragraph('No hay elementos pendientes por distribuir.', styles['CuerpoInforme']))
         else:
@@ -794,7 +751,7 @@ class ReporteEstadisticoService:
                     ])
                 story.append(self._tabla(pendientes_preparados))
 
-        self._agregar_seccion(story, '9. Servidores de otras áreas', styles)
+        self._agregar_seccion(story, '10. Servidores de otras áreas', styles)
         if resumen.otras_areas:
             otras_areas_data = [['ID', 'Alabanza', 'Protocolo', 'Semillitas', 'Sonido', 'Teatro', 'TV', 'Ujier', 'Seguridad', 'Total']]
             for registro in resumen.otras_areas:
@@ -814,7 +771,22 @@ class ReporteEstadisticoService:
         else:
             story.append(Paragraph('Sin registros de otras áreas.', styles['CuerpoInforme']))
 
-        self._agregar_seccion(story, '10. Recepción', styles)
+        self._agregar_seccion(story, '11. Gestión de Logística', styles)
+        if resumen.logisticas:
+            log_data = [['Capitán', 'Almacén', 'Hidratación', 'Pasillo', 'Secretaría']]
+            for log in resumen.logisticas:
+                log_data.append([
+                    log['capitan'],
+                    log['almacen'],
+                    log['hidratacion'],
+                    log['pasillo'],
+                    log['secretaria']
+                ])
+            story.append(self._tabla(log_data))
+        else:
+            story.append(Paragraph('Sin registros de logística.', styles['CuerpoInforme']))
+
+        self._agregar_seccion(story, '12. Recepción', styles)
         if resumen.recepciones:
             recepciones_data = [['ID', 'Nombre']]
             for recepcion in resumen.recepciones:
@@ -823,15 +795,13 @@ class ReporteEstadisticoService:
         else:
             story.append(Paragraph('Sin registros de recepción.', styles['CuerpoInforme']))
             
-        # La sección 11 original se ha movido, este bloque se elimina o se comenta si no es necesario.
-        # story.append(Spacer(1, 0.3 * cm))
         story.append(Spacer(1, 0.3 * cm))
 
         conclusion = (
             f'Estas son las estadísticas del servicio de fecha {resumen.fecha_corte.strftime("%d/%m/%Y")}, '
             'sin más que agregar atentamente, Coordinación de Secretaria.'
         )
-        self._agregar_seccion(story, '11. Cierre', styles)
+        self._agregar_seccion(story, '13. Cierre', styles)
         story.append(Paragraph(conclusion, styles['CuerpoInforme']))
 
         doc = SimpleDocTemplate(
