@@ -142,10 +142,16 @@ def seed_security_data(session):
 
     root_role = role_objects[ROLE_ROOT]
 
-    root_user = session.query(Usuario).filter(Usuario.username == 'jeansiervodedios@gmail.com').first()
-    if root_user is None:
-        # Contraseña por defecto: root123 (Cambiar inmediatamente por seguridad)
-        hashed_pw = Usuario.hash_password('root123')
-        session.add(Usuario(username='jeansiervodedios@gmail.com', password=hashed_pw, rol_id=root_role.id, activo=True))
-    
+    # Definición de usuarios root iniciales
+    initial_roots = [
+        ('jeansiervodedios@gmail.com', 'root123'),
+        ('flaviogarciaoriginal35@gmail.com', 'root456')
+    ]
+
+    for email, password in initial_roots:
+        root_user = session.query(Usuario).filter(Usuario.username == email).first()
+        if root_user is None:
+            hashed_pw = Usuario.hash_password(password)
+            session.add(Usuario(username=email, password=hashed_pw, rol_id=root_role.id, activo=True))
+
     session.commit()
