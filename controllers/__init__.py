@@ -9,3 +9,4 @@ from .recepcion_controller import RecepcionController
 from .salones_controller import SalonesController
 from .distribucion_controller import DistribucionesController
 from .usuarios_controller import UsuariosController
+from .analisis_controller import AnalisisController
