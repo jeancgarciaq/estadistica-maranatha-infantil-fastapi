@@ -11,7 +11,7 @@ load_app_env()
 
 from sqlalchemy import engine_from_config, pool, create_engine
 from alembic import context
-from models.database import Base
+from models.database import Base, engine as application_engine
 # Es CRUCIAL importar todos los modelos para que Base.metadata los reconozca
 import models
 
@@ -56,27 +56,9 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Ejecuta migraciones en modo 'online'."""
-    instance_connection_name = os.getenv("INSTANCE_CONNECTION_NAME")
-
-    if instance_connection_name:
-        # Si detectamos la instancia de Cloud SQL, usamos el conector que ya instalaste
-        from models.database import getconn
-        connectable = create_engine(
-            "postgresql+pg8000://",
-            creator=getconn,
-            poolclass=pool.NullPool,
-        )
-    else:
-        # Si no, usamos la URL estándar (para SQLite o Postgres local)
-        configuration = config.get_section(config.config_ini_section, {})
-        configuration["sqlalchemy.url"] = get_url()
-        connectable = engine_from_config(
-            configuration,
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-        )
-
-    with connectable.connect() as connection:
+    # Usamos el motor ya configurado en la aplicación para evitar bloqueos de archivo en SQLite
+    # y asegurar que en la nube se use el conector correcto automáticamente.
+    with application_engine.connect() as connection:
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
