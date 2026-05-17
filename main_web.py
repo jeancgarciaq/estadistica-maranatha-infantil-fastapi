@@ -2,6 +2,7 @@ import os
 import logging
 import asyncio # Added for potential sleep in lifespan
 import contextlib
+import time
 from functools import lru_cache
 
 # 1. CARGAR VARIABLES DE ENTORNO ANTES QUE CUALQUIER OTRA COSA
@@ -27,8 +28,13 @@ logger = logging.getLogger(__name__)
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ejecutar al iniciar: Crear tablas y sembrar datos
+    logger.info("🚀 Iniciando proceso de startup (lifespan)...")
+    start_time = time.time()
+    
+    # Ejecutar configuración de base de datos
     configure_database()
+    
+    logger.info(f"✨ Startup completado en {time.time() - start_time:.2f} segundos.")
     yield
     # Ejecutar al apagar: Cerrar conector de Cloud SQL
     await asyncio.sleep(0.1) # Give aiohttp a moment to clean up
