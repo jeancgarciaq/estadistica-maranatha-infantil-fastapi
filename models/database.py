@@ -1,4 +1,5 @@
 import os
+import time
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -105,8 +106,12 @@ def configure_database():
     Sincroniza el esquema de la base de datos usando Alembic y siembra datos iniciales.
     """
     logger.info("🛠️ Iniciando configure_database...")
+    start_time = time.time()
     from models.security import seed_security_data
     import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores
+
+    # Liberar conexiones activas para evitar 'Database is locked' en SQLite durante la migración
+    engine.dispose()
 
     # Intentar ejecutar migraciones de Alembic programáticamente al iniciar la app
     try:
@@ -126,9 +131,10 @@ def configure_database():
             command.stamp(alembic_cfg, "head")
             logger.info("✅ Base de datos marcada como actualizada (stamp head).")
         else:
+            logger.info("🧩 Ejecutando migraciones de Alembic hasta head...")
             # Aplicar todas las migraciones pendientes hasta la versión más reciente (head)
             command.upgrade(alembic_cfg, "head")
-            logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head).")
+            logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head) en %.2fs.", time.time() - start_time)
     except Exception as e:
         logger.warning(f"⚠️ No se pudieron aplicar las migraciones vía Alembic: {e}")
         logger.info("Intentando fallback con Base.metadata.create_all (solo creará tablas nuevas)...")
@@ -139,7 +145,7 @@ def configure_database():
     db = SessionLocal()
     try:
         seed_security_data(db)
-        logger.info("✅ Datos de seguridad sembrados correctamente.")
+        logger.info("✅ Datos de seguridad sembrados correctamente en %.2fs.", time.time() - start_time)
     finally:
         db.close()
 
