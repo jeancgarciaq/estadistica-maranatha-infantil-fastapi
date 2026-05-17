@@ -104,17 +104,23 @@ def configure_database():
     """
     Sincroniza el esquema de la base de datos usando Alembic y siembra datos iniciales.
     """
+    logger.info("🛠️ Iniciando configure_database...")
     from models.security import seed_security_data
     import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores
 
     # Intentar ejecutar migraciones de Alembic programáticamente al iniciar la app
     try:
-        # Se asume que alembic.ini está en la raíz del proyecto
-        alembic_cfg = Config("alembic.ini")
+        ini_path = "alembic.ini"
+        if not os.path.exists(ini_path):
+            logger.error(f"❌ No se encontró el archivo {ini_path} en {os.getcwd()}")
+            raise FileNotFoundError(f"Archivo de configuración {ini_path} no encontrado.")
+
+        alembic_cfg = Config(ini_path)
+        logger.info(f"📖 Configuración de Alembic cargada desde {ini_path}")
 
         # Lógica para sincronizar la base de datos sin ejecutar SQL de creación
         reset_mode = os.getenv("RESET_ALEMBIC", "false").lower() == "true"
-
+        
         if reset_mode:
             logger.info("🔄 Modo RESET detectado. Ejecutando 'alembic stamp head'...")
             command.stamp(alembic_cfg, "head")
@@ -129,9 +135,11 @@ def configure_database():
         # Fallback para garantizar que al menos las tablas existan si Alembic falla o no está configurado
         Base.metadata.create_all(bind=engine)
     
+    logger.info("🌱 Iniciando siembra de datos (seeding)...")
     db = SessionLocal()
     try:
         seed_security_data(db)
+        logger.info("✅ Datos de seguridad sembrados correctamente.")
     finally:
         db.close()
 
