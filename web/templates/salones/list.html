@@ -26,12 +26,13 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-slate-100 text-lg">{{ salon.salon }}</h3>
-                    <p class="text-sm text-sky-400/80 font-medium">Edad: {{ salon.edad }}</p>
+                    <p class="text-sm text-sky-400/80 font-medium">Edad: {{ salon.edad }} | Área: {{ salon.area.area if
+                        salon.area else 'Sin área' }}</p>
                     <p class="text-[10px] text-slate-500 uppercase mt-1">Global ID: {{ salon.sync_id[:8] }}...</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/salones?id={{ salon.id }}&nombre={{ salon.salon|urlencode }}&edad={{ salon.edad|urlencode }}"
+                <a href="/salones?id={{ salon.id }}&nombre={{ salon.salon|urlencode }}&edad={{ salon.edad|urlencode }}&id_area={{ salon.id_area or '' }}"
                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all"
                     title="Editar">
                     <i class="la la-edit text-xl"></i>
