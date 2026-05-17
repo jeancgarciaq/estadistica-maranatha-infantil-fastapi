@@ -57,16 +57,23 @@
 
             <!-- Personal -->
             <div class="text-[11px] text-slate-400 grid grid-cols-2 gap-y-1 border-t border-slate-700 pt-3">
-                <p><span class="font-bold text-slate-300">Maestra:</span> {{ aula.maestra }}</p>
-                <p><span class="font-bold text-slate-300">Auxiliar:</span> {{ aula.auxiliar }}</p>
-                <p><span class="font-bold text-slate-300">Capitán:</span> {{ aula.capitan }}</p>
-                <p><span class="font-bold text-slate-300">Subcapitán:</span> {{ aula.subcapitan }}</p>
-                <p class="col-span-2"><span class="font-bold text-slate-300">Colaborador:</span> {{ aula.colaborador }}
+                <p><span class="font-bold text-slate-300">Maestra:</span> {{ aula.maestra_rel.nombre if aula.maestra_rel
+                    else 'N/A' }}</p>
+                <p><span class="font-bold text-slate-300">Auxiliar:</span> {{ aula.auxiliar_rel.nombre if
+                    aula.auxiliar_rel else 'N/A' }}</p>
+                <p class="col-span-2"><span class="font-bold text-slate-300">Colaboradores:</span>
+                    {% if aula.colaboradores_asistencias %}
+                    {% for asistencia in aula.colaboradores_asistencias %}
+                    {{ asistencia.servidor.nombre }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    N/A
+                    {% endif %}
                 </p>
             </div>
 
             <div class="flex justify-end gap-2 border-t border-slate-700 pt-3 mt-3">
-                <a href="/aulas?id={{ aula.id }}&id_salon={{ aula.id_salon }}&fecha={{ aula.fecha.strftime('%Y-%m-%d') }}&maestra={{ aula.maestra }}&auxiliar={{ aula.auxiliar }}&capitan={{ aula.capitan }}&subcapitan={{ aula.subcapitan }}&colaborador={{ aula.colaborador }}&ninos={{ aula.ninos }}&ninas={{ aula.ninas }}&condicion={{ aula.condicion }}"
+                <a href="/aulas?id={{ aula.id }}&id_salon={{ aula.id_salon }}&fecha={{ aula.fecha.strftime('%Y-%m-%d') }}&id_maestra={{ aula.id_maestra or '' }}&id_auxiliar={{ aula.id_auxiliar or '' }}&ids_colaboradores={{ aula.colaboradores_asistencias | map(attribute='servidor.id') | join(',') }}&ninos={{ aula.ninos }}&ninas={{ aula.ninas }}&condicion={{ aula.condicion }}"
                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white transition-all"
                     title="Editar">
                     <i class="la la-edit text-xl"></i>
