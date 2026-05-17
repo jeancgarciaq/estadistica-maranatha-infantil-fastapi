@@ -17,3 +17,6 @@ from .coordinadores import Coordinador
 from .lideres import Lider
 from .pastores import Pastor
 from .asistencia_servidores import AsistenciaServidor
+from .docentes import Docente
+from .auxiliares import Auxiliar
+from .colaboradores import Colaborador
