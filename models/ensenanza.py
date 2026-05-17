@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date, validates
+from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.orm import validates
 from models.database import Base
 from datetime import datetime
 from models.base_class import AuditMixin
