@@ -1,12 +1,23 @@
 from .base_controller import BaseController
+
+
 from .areas_controller import AreasController
+from .analisis_controller import AnalisisController
+from .asistencia_servidores_controller import AsistenciaServidoresController
 from .aulas_controller import AulasController
+from .auxiliares_controller import AuxiliaresController
+from .capitanes_controller import CapitanesController
+from .colaboradores_controller import ColaboradoresController
+from .coordinadores_controller import CoordinadoresController
+from .distribucion_controller import DistribucionesController
+from .docentes_controller import DocentesController
 from .donaciones_controller import DonacionesController
 from .ensenanza_controller import EnsenanzaController
+from .lideres_controller import LideresController
 from .logistica_controller import LogisticaController
 from .otras_areas_controller import OtrasAreasController
+from .pastores_controller import PastoresController
 from .recepcion_controller import RecepcionController
 from .salones_controller import SalonesController
-from .distribucion_controller import DistribucionesController
+from .servidor_controller import ServidorController
 from .usuarios_controller import UsuariosController
-from .analisis_controller import AnalisisController
