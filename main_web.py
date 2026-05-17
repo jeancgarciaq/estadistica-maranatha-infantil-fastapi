@@ -19,7 +19,7 @@ from models.database import configure_database, SessionLocal, shutdown_db
 from models.security import ROLE_ROOT, Usuario
 
 # Importar Routers Refactorizados
-from web.routers import alimentos_router, servidores_router, auth_router, usuarios_router, jerarquia_router, operaciones_router, infraestructura_router, reportes_router, ayuda_router, analisis_router
+from web.routers import alimentos_router, servidores_router, auth_router, usuarios_router, jerarquia_router, infraestructura_router, reportes_router, ayuda_router, analisis_router
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
@@ -44,7 +44,6 @@ app.include_router(servidores_router.router)
 app.include_router(auth_router.router)
 app.include_router(usuarios_router.router)
 app.include_router(jerarquia_router.router)
-app.include_router(operaciones_router.router)
 app.include_router(infraestructura_router.router)
 app.include_router(reportes_router.router)
 app.include_router(ayuda_router.router)
