@@ -25,7 +25,7 @@ class ServidoresWebHandler(BaseWebHandler):
         if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
             return Response("Acceso denegado", status_code=403)
         
-        servidores = self.controller.listar_servidores(filtros=filtros)
+        servidores = self.controller.listar_servidores()
         return self.render(request, "servidores/list.html", {
             "servidores": servidores,
             "areas": self.areas_ctrl.listar_areas(),
@@ -54,7 +54,7 @@ class ServidoresWebHandler(BaseWebHandler):
         return self.redirect("/servidores", mensaje, "success" if exito else "error")
 
     async def exportar(self, request, formato: str, filtros: dict):
-        servidores = self.controller.listar_servidores(filtros=filtros)
+        servidores = self.controller.listar_servidores()
         if formato == "pdf":
             content = self.controller.generar_reporte_pdf(servidores)
             return Response(content=content, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=servidores.pdf"})
