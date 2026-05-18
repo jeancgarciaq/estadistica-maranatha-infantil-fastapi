@@ -39,6 +39,10 @@ async def list_coordinadores(request: Request, db: Session = Depends(get_db)):
 async def view_capitanes(request: Request, db: Session = Depends(get_db)):
     return await JerarquiaWebHandler(db, templates).get_capitanes_index(request)
 
+@router.get("/capitanes/lista")
+async def list_capitanes(request: Request, db: Session = Depends(get_db)):
+    return await JerarquiaWebHandler(db, templates).get_capitanes_list(request)
+
 # Rutas de Docentes
 @router.get("/docentes")
 async def view_docentes(request: Request, db: Session = Depends(get_db)):
