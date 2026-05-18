@@ -13,7 +13,7 @@ class BaseWebHandler:
             full_context["user"] = request.state.user
         if context:
             full_context.update(context)
-        return self.templates.TemplateResponse(template_name, full_context)
+        return self.templates.TemplateResponse(request, template_name, full_context)
 
     def redirect(self, url: str, msg: str = None, type: str = "success"):
         """Crea una redirección con mensaje flash opcional."""
