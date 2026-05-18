@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from controllers.areas_controller import AreasController
 from controllers.salones_controller import SalonesController
+from controllers.aulas_controller import AulasController
 from controllers.recepcion_controller import RecepcionController
 from controllers.ensenanza_controller import EnsenanzaController
 from controllers.logistica_controller import LogisticaController
@@ -13,6 +14,7 @@ class InfraestructuraWebHandler(BaseWebHandler):
         super().__init__(templates)
         self.areas_ctrl = AreasController(db)
         self.salones_ctrl = SalonesController(db)
+        self.aulas_ctrl = AulasController(db)
         self.recepcion_ctrl = RecepcionController(db)
         self.ensenanza_ctrl = EnsenanzaController(db)
         self.logistica_ctrl = LogisticaController(db)
@@ -31,6 +33,14 @@ class InfraestructuraWebHandler(BaseWebHandler):
         exito, msg = self.areas_ctrl.crear_area(nombre, user_context={"user": request.state.user})
         return self.redirect("/areas", msg, "success" if exito else "error")
 
+    async def post_area_actualizar(self, request, id, nombre):
+        exito, msg = self.areas_ctrl.actualizar_area(id, nombre, user_context={"user": request.state.user})
+        return self.redirect("/areas", msg, "success" if exito else "error")
+
+    async def post_area_eliminar(self, request, id):
+        exito, msg = self.areas_ctrl.eliminar_area(id, user_context={"user": request.state.user})
+        return self.redirect("/areas", msg, "success" if exito else "error")
+
     # Salones
     async def get_salones_index(self, request):
         return self.render(request, "salones/index.html")
@@ -41,6 +51,14 @@ class InfraestructuraWebHandler(BaseWebHandler):
 
     async def post_salon_crear(self, request, nombre, edad):
         exito, msg = self.salones_ctrl.crear_salon(nombre, edad, user_context={"user": request.state.user})
+        return self.redirect("/salones", msg, "success" if exito else "error")
+
+    async def post_salon_actualizar(self, request, id, nombre, edad):
+        exito, msg = self.salones_ctrl.actualizar_salon(id, nombre, edad, user_context={"user": request.state.user})
+        return self.redirect("/salones", msg, "success" if exito else "error")
+
+    async def post_salon_eliminar(self, request, id):
+        exito, msg = self.salones_ctrl.eliminar_salon(id, user_context={"user": request.state.user})
         return self.redirect("/salones", msg, "success" if exito else "error")
 
     # Recepciones
@@ -54,6 +72,36 @@ class InfraestructuraWebHandler(BaseWebHandler):
     async def post_recepcion_crear(self, request, nombre, fecha):
         exito, msg = self.recepcion_ctrl.crear_recepcion(nombre, fecha, user_context={"user": request.state.user})
         return self.redirect("/recepciones", msg, "success" if exito else "error")
+
+    async def post_recepcion_actualizar(self, request, id, nombre, fecha):
+        exito, msg = self.recepcion_ctrl.actualizar_recepcion(id, nombre, fecha, user_context={"user": request.state.user})
+        return self.redirect("/recepciones", msg, "success" if exito else "error")
+
+    async def post_recepcion_eliminar(self, request, id):
+        exito, msg = self.recepcion_ctrl.eliminar_recepcion(id, user_context={"user": request.state.user})
+        return self.redirect("/recepciones", msg, "success" if exito else "error")
+
+    # Aulas
+    async def get_aulas_index(self, request):
+        salones = self.salones_ctrl.listar_salones()
+        servidores = self.serv_ctrl.listar_servidores()
+        return self.render(request, "aulas/index.html", {"salones": salones, "servidores": servidores})
+
+    async def get_aulas_list(self, request, fecha=None):
+        aulas = self.aulas_ctrl.listar_aulas_por_fecha(fecha=fecha)
+        return self.render(request, "aulas/list.html", {"aulas": aulas, "fecha_filtro": fecha})
+
+    async def post_aula_crear(self, request, datos):
+        exito, msg = self.aulas_ctrl.crear_aula_con_asistencia(datos, user_context={"user": request.state.user})
+        return self.redirect("/aulas", msg, "success" if exito else "error")
+
+    async def post_aula_actualizar(self, request, id, datos):
+        exito, msg = self.aulas_ctrl.actualizar_aula(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/aulas", msg, "success" if exito else "error")
+
+    async def post_aula_eliminar(self, request, id):
+        exito, msg = self.aulas_ctrl.eliminar_aula(id, user_context={"user": request.state.user})
+        return self.redirect("/aulas", msg, "success" if exito else "error")
 
     # Enseñanza
     async def get_ensenanza_index(self, request):
