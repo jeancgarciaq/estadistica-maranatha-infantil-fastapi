@@ -112,34 +112,39 @@ def configure_database():
 
     # Liberar conexiones activas para evitar 'Database is locked' en SQLite durante la migración
     engine.dispose()
-
-    # Intentar ejecutar migraciones de Alembic programáticamente al iniciar la app
-    try:
-        ini_path = "alembic.ini"
-        if not os.path.exists(ini_path):
-            logger.error(f"❌ No se encontró el archivo {ini_path} en {os.getcwd()}")
-            raise FileNotFoundError(f"Archivo de configuración {ini_path} no encontrado.")
-
-        alembic_cfg = Config(ini_path)
-        logger.info(f"📖 Configuración de Alembic cargada desde {ini_path}")
-
-        # Lógica para sincronizar la base de datos sin ejecutar SQL de creación
-        reset_mode = os.getenv("RESET_ALEMBIC", "false").lower() == "true"
-        
-        if reset_mode:
-            logger.info("🔄 Modo RESET detectado. Ejecutando 'alembic stamp head'...")
-            command.stamp(alembic_cfg, "head")
-            logger.info("✅ Base de datos marcada como actualizada (stamp head).")
-        else:
-            logger.info("🧩 Ejecutando migraciones de Alembic hasta head...")
-            # Aplicar todas las migraciones pendientes hasta la versión más reciente (head)
-            command.upgrade(alembic_cfg, "head")
-            logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head) en %.2fs.", time.time() - start_time)
-    except Exception as e:
-        logger.warning(f"⚠️ No se pudieron aplicar las migraciones vía Alembic: {e}")
-        logger.info("Intentando fallback con Base.metadata.create_all (solo creará tablas nuevas)...")
-        # Fallback para garantizar que al menos las tablas existan si Alembic falla o no está configurado
+    # Si estamos en SQLite local, evitar invocar Alembic (evita bloqueos y esperas).
+    # En este modo simplemente creamos las tablas nuevas con SQLAlchemy.
+    if "sqlite" in DATABASE_URL:
+        logger.info("🧪 Modo SQLite detectado: creando tablas con Base.metadata.create_all en vez de ejecutar Alembic.")
         Base.metadata.create_all(bind=engine)
+    else:
+        # Intentar ejecutar migraciones de Alembic programáticamente al iniciar la app
+        try:
+            ini_path = "alembic.ini"
+            if not os.path.exists(ini_path):
+                logger.error(f"❌ No se encontró el archivo {ini_path} en {os.getcwd()}")
+                raise FileNotFoundError(f"Archivo de configuración {ini_path} no encontrado.")
+
+            alembic_cfg = Config(ini_path)
+            logger.info(f"📖 Configuración de Alembic cargada desde {ini_path}")
+
+            # Lógica para sincronizar la base de datos sin ejecutar SQL de creación
+            reset_mode = os.getenv("RESET_ALEMBIC", "false").lower() == "true"
+            
+            if reset_mode:
+                logger.info("🔄 Modo RESET detectado. Ejecutando 'alembic stamp head'...")
+                command.stamp(alembic_cfg, "head")
+                logger.info("✅ Base de datos marcada como actualizada (stamp head).")
+            else:
+                logger.info("🧩 Ejecutando migraciones de Alembic hasta head...")
+                # Aplicar todas las migraciones pendientes hasta la versión más reciente (head)
+                command.upgrade(alembic_cfg, "head")
+                logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head) en %.2fs.", time.time() - start_time)
+        except Exception as e:
+            logger.warning(f"⚠️ No se pudieron aplicar las migraciones vía Alembic: {e}")
+            logger.info("Intentando fallback con Base.metadata.create_all (solo creará tablas nuevas)...")
+            # Fallback para garantizar que al menos las tablas existan si Alembic falla o no está configurado
+            Base.metadata.create_all(bind=engine)
     
     logger.info("🌱 Iniciando siembra de datos (seeding)...")
     db = SessionLocal()
