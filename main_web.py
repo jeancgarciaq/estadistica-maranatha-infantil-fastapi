@@ -106,7 +106,7 @@ async def dashboard(request: Request):
 if __name__ == "__main__":
     import uvicorn
     # Use the PORT env var set by Cloud Run (default 8080) and bind to 0.0.0.0
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8001))
     host = "0.0.0.0"
     # Enable reload only in development environments
     reload_flag = os.environ.get("ENV", "").lower() in ("dev", "development")
