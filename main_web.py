@@ -90,7 +90,7 @@ async def auth_middleware(request: Request, call_next):
         # Continuamos con el resto de la aplicación
         return await call_next(request)
     except Exception as e:
-        logger.error(f"Error de autenticación en middleware: {e}")
+        logger.error(f"Error crítico detectado: {e}", exc_info=True)
         response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("session_user")
         return response
