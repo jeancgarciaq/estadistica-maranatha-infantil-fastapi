@@ -108,7 +108,7 @@ def configure_database():
     logger.info("🛠️ Iniciando configure_database...")
     start_time = time.time()
     from models.security import seed_security_data
-    import models.security, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores
+    import models.security, models.areas, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.servidor, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores
 
     # Liberar conexiones activas para evitar 'Database is locked' en SQLite durante la migración
     engine.dispose()
