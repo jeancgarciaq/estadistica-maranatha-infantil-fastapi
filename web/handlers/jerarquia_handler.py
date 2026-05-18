@@ -94,3 +94,10 @@ class JerarquiaWebHandler(BaseWebHandler):
     async def get_capitanes_index(self, request):
         coordinadores = self.coordinadores_ctrl.listar_coordinadores()
         return self.render(request, "capitanes/index.html", {"coordinadores": coordinadores})
+
+    async def get_capitanes_list(self, request):
+        try:
+            capitanes = self.capitanes_ctrl.listar_capitanes()
+            return self.render(request, "capitanes/list.html", {"capitanes": capitanes})
+        except Exception as e:
+            return self.redirect("/capitanes", f"Error al cargar la lista: {str(e)}", "error")
