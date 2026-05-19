@@ -1,9 +1,10 @@
 import logging
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import selectinload
 from controllers.base_controller import BaseController
 from models.servidor import Servidor
-from models.areas import Area
 from models.capitanes import Capitan
+from models.coordinadores import Coordinador
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +38,6 @@ class ServidorController(BaseController):
                 if db.query(Servidor).filter(Servidor.correo == correo, Servidor.is_deleted.is_(False)).first():
                     raise ValueError(f"El correo {correo} ya está registrado.")
 
-            # 2. Resolución de Relaciones (Mapping de nombres a IDs)
-            id_area = datos.get('id_area')
-            if not id_area and datos.get('area_servicio'):
-                area_obj = db.query(Area).filter(Area.area == datos['area_servicio'].strip()).first()
-                if area_obj:
-                    id_area = area_obj.id
-
             id_capitan = datos.get('id_capitan')
             if not id_capitan and datos.get('capitan'):
                 cap_obj = db.query(Capitan).filter(Capitan.nombre == datos['capitan'].strip()).first()
@@ -58,7 +52,6 @@ class ServidorController(BaseController):
                 celular=datos.get('celular'),
                 numero_equipo=int(datos.get('numero_equipo')) if datos.get('numero_equipo') else None,
                 fecha_nacimiento=datos.get('fecha_nacimiento'),
-                id_area=id_area,
                 id_capitan=id_capitan
             )
             
@@ -74,10 +67,53 @@ class ServidorController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Servidor creado exitosamente.", user_context=user_context)
 
+    def actualizar_servidor(self, id, datos: dict, user_context=None):
+        """
+        Actualiza un servidor existente.
+        """
+        if not id or not isinstance(id, int):
+            return False, "El ID del servidor es obligatorio y debe ser un número entero."
+
+        def operacion(db):
+            servidor = db.query(Servidor).filter(Servidor.id == id, Servidor.is_deleted.is_(False)).first()
+            if not servidor:
+                raise ValueError("Servidor no encontrado.")
+
+            # Actualizar campos directos
+            servidor.nombre = datos.get('nombre', servidor.nombre).strip()
+            servidor.celular = datos.get('celular', servidor.celular)
+            servidor.correo = datos.get('correo', servidor.correo).strip() or None
+            servidor.numero_equipo = int(datos.get('numero_equipo')) if datos.get('numero_equipo') else None
+            servidor.fecha_nacimiento = datos.get('fecha_nacimiento', servidor.fecha_nacimiento)
+            servidor.id_capitan = datos.get('id_capitan', servidor.id_capitan)
+
+            # Si no se envía fecha, la edad es obligatoria (según tu modelo nullable=False)
+            if not servidor.fecha_nacimiento:
+                try:
+                    servidor.edad = int(datos.get('edad'))
+                except (ValueError, TypeError):
+                    raise ValueError("Debe proporcionar la edad o la fecha de nacimiento.")
+
+            db.add(servidor)
+            logger.info(f"Servidor '{servidor.nombre}' actualizado.")
+
+        return self.ejecutar_transaccion(operacion, "Servidor actualizado exitosamente.", user_context=user_context)
+
     def listar_servidores(self):
         db = self.get_db_session()
         try:
-            return self.query_activa(db).all()
+            return self.query_activa(db).options(selectinload(Servidor.capitan).selectinload(Capitan.coordinador).selectinload(Coordinador.area)).all()
         finally:
             if not self.session:
                 db.close()
+
+    def eliminar_servidor(self, id, user_context=None):
+        if not id or not isinstance(id, int):
+            return False, "El ID del servidor es obligatorio."
+        def operacion(db):
+            servidor = db.query(Servidor).filter(Servidor.id == id, Servidor.is_deleted.is_(False)).first()
+            if not servidor:
+                raise ValueError("Servidor no encontrado.")
+            self.marcar_eliminado(servidor, db)
+            self.registrar_evento_sync(db, 'servidores', servidor, 'delete')
+        return self.ejecutar_transaccion(operacion, "Servidor eliminado exitosamente.", user_context=user_context)
