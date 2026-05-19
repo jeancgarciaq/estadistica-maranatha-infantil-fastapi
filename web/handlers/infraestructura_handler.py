@@ -84,9 +84,13 @@ class InfraestructuraWebHandler(BaseWebHandler):
 
     # Aulas
     async def get_aulas_index(self, request):
-        salones = self.salones_ctrl.listar_salones()
-        servidores = self.serv_ctrl.listar_servidores()
-        return self.render(request, "aulas/index.html", {"salones": salones, "servidores": servidores})
+        salones = self.aulas_ctrl.listar_salones()
+        docentes = self.aulas_ctrl.listar_docentes()
+        auxiliares = self.aulas_ctrl.listar_auxiliares()
+        colaboradores = self.aulas_ctrl.listar_colaboradores()
+        return self.render(request, "aulas/index.html", {
+            "salones": salones, "docentes": docentes, "auxiliares": auxiliares, "colaboradores": colaboradores
+        })
 
     async def get_aulas_list(self, request, fecha=None):
         aulas = self.aulas_ctrl.listar_aulas_por_fecha(fecha=fecha)
