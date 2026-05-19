@@ -52,7 +52,7 @@ class BaseController:
         Ejecuta una operación dentro de una transacción de base de datos.
         :param operacion: Función que contiene la lógica de la operación.
         :param mensaje_exito: Mensaje de éxito a devolver (opcional).
-        :param user_context: Contexto del usuario (necesario en Web para sync).
+        :param user_context: Contexto del usuario.
         :return: Tupla (Booleano Exito, Mensaje)
         """
         db = self.session if self.session else self.get_db_session()
@@ -72,29 +72,6 @@ class BaseController:
         finally:
             if not self.session:
                 db.close()
-
-    def _sincronizar_si_corresponde(self, db, user_context=None):
-        """
-        Dispara la sincronización con Firebase.
-        """
-        sync_manager = self.sync_manager
-        current_user = None
-
-        if user_context:
-            sync_manager = user_context.get('sync_manager', sync_manager)
-            current_user = user_context.get('user')
-            # Nota: El token de Firebase debería estar disponible aquí para el sync_manager
-
-        if not sync_manager or not current_user or not sync_manager.client.is_configured():
-            return
-
-        # En entorno web, el token ya debería estar en el context o manejarse vía BackgroundTasks
-        # Esta lógica se simplificará al mover el sync a tareas asíncronas de FastAPI
-
-        try:
-            sync_manager.push_pending(db)
-        except Exception as exc:
-            logger.warning("No se pudo sincronizar con Firebase tras guardar el cambio: %s", exc)
 
     def marcar_eliminado(self, registro, db):
         """Marca un registro como eliminado sin borrarlo físicamente."""
