@@ -54,8 +54,8 @@ class InfraestructuraWebHandler(BaseWebHandler):
         exito, msg = self.salones_ctrl.crear_salon(nombre, edad, user_context={"user": request.state.user})
         return self.redirect("/salones", msg, "success" if exito else "error")
 
-    async def post_salon_actualizar(self, request, id, nombre, edad):
-        exito, msg = self.salones_ctrl.actualizar_salon(id, nombre, edad, user_context={"user": request.state.user})
+    async def post_salon_actualizar(self, request, id, nombre, edad, id_area):
+        exito, msg = self.salones_ctrl.actualizar_salon(id, nombre, edad, id_area, user_context={"user": request.state.user})
         return self.redirect("/salones", msg, "success" if exito else "error")
 
     async def post_salon_eliminar(self, request, id):
