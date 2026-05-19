@@ -33,12 +33,20 @@
                 <td class="p-4 text-xs text-slate-500">
                     {{ u.updated_at.strftime('%d/%m/%Y %H:%M') if u.updated_at else 'Sin registro' }}
                 </td>
-                <td class="p-4 text-right">
+                <td class="p-4 text-right flex justify-end gap-2">
                     <button
                         onclick='openEditModal({"id": {{ u.id }}, "username": {{ u.username|tojson }}, "rol": {{ u.rol.nombre|tojson }}, "activo": {{ "true" if u.activo else "false" }} })'
-                        class="text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-600 p-2 rounded-lg transition-all">
+                        class="text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-600 p-2 rounded-lg transition-all" title="Editar">
                         <i class="la la-edit text-xl"></i>
                     </button>
+                    {% if u.rol.nombre != 'root' %}
+                    <form action="/usuarios/eliminar" method="POST" onsubmit="return confirm('¿Está seguro de que desea eliminar al usuario {{ u.username }}?')" class="inline">
+                        <input type="hidden" name="id" value="{{ u.id }}">
+                        <button type="submit" class="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 p-2 rounded-lg transition-all" title="Eliminar">
+                            <i class="la la-trash text-xl"></i>
+                        </button>
+                    </form>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
