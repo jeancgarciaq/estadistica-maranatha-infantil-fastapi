@@ -13,16 +13,33 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ROLE_ROOT = 'root'
 ROLE_ADMIN = 'administrador'
 ROLE_MAESTRO = 'maestro'
+ROLE_SECRETARIA = 'secretaria'
 ROLE_DISTRIBUIDOR = 'distribuidor'
 
 # Límites de usuarios por rol
 ROLE_LIMITS = {
     ROLE_ROOT: 2,
     ROLE_ADMIN: 1,
-    ROLE_MAESTRO: 1,
+    ROLE_SECRETARIA: 1, # Nuevo límite para secretaria
+    ROLE_MAESTRO: 0, # Sin límite fijo, validado contra la tabla de docentes
     ROLE_DISTRIBUIDOR: 1
 }
 
+SECRETARIA_PERMISSIONS = [
+    'areas.view', 'areas.manage',
+    'salones.view', 'salones.manage',
+    'aulas.view', 'aulas.manage',
+    'estadistica.view',
+    'donaciones.view', 'donaciones.manage',
+    'preparados.view', 'preparados.manage',
+    'distribuciones.view', 'distribuciones.manage',
+    'logistica.view', 'logistica.manage',
+    'otras_areas.view', 'otras_areas.manage',
+    'ensenanza.view', 'ensenanza.manage',
+    'recepcion.view', 'recepcion.manage',
+    'reporte.view',
+    'ayuda.view',
+]
 
 DEFAULT_ROLE_PERMISSIONS = {
     ROLE_ROOT: ['*'],
@@ -39,6 +56,12 @@ DEFAULT_ROLE_PERMISSIONS = {
         'ensenanza.view', 'ensenanza.manage',
         'recepcion.view', 'recepcion.manage',
         'servidores.view', 'servidores.manage',
+        'pastores.view', 'pastores.manage', # Permisos de pastores
+        'lideres.view', 'lideres.manage',   # Permisos de líderes
+        'capitanes.view', 'capitanes.manage', # Permisos de capitanes
+        'docentes.view', 'docentes.manage', # Permisos de docentes
+        'auxiliares.view', 'auxiliares.manage', # Permisos de auxiliares
+        'colaboradores.view', 'colaboradores.manage', # Permisos de colaboradores
         'reporte.view',
         'ayuda.view',
     ],
