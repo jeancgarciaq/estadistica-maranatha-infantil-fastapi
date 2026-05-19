@@ -22,5 +22,12 @@ class AsistenciaServidor(Base, AuditMixin):
     # ID del registro en la tabla correspondiente (ej: id de la tabla 'aulas')
     referencia_id = Column(Integer, nullable=True)
 
+    # Relación virtual para compatibilidad con plantillas existentes que buscan .servidor
+    servidor = relationship(
+        "Servidor", 
+        primaryjoin="foreign(AsistenciaServidor.id_persona) == Servidor.id",
+        viewonly=True
+    )
+
     def __repr__(self):
         return f"<AsistenciaServidor(id={self.id}, id_persona='{self.id_persona}', fecha='{self.fecha}', rol='{self.rol}', categoria='{self.categoria_contexto}')>"
