@@ -17,20 +17,15 @@ class ServidoresWebHandler(BaseWebHandler):
         if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
             return self.redirect("/dashboard", "Acceso restringido", "error")
         
-        areas = self.areas_ctrl.listar_areas()
         capitanes = self.capitanes_ctrl.listar_capitanes()
-        return self.render(request, "servidores/index.html", {"areas": areas, "capitanes": capitanes})
+        return self.render(request, "servidores/index.html", {"capitanes": capitanes})
 
     async def get_list(self, request, filtros: dict):
         if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.view"):
             return Response("Acceso denegado", status_code=403)
         
         servidores = self.controller.listar_servidores()
-        return self.render(request, "servidores/list.html", {
-            "servidores": servidores,
-            "areas": self.areas_ctrl.listar_areas(),
-            "capitanes": self.capitanes_ctrl.listar_capitanes()
-        })
+        return self.render(request, "servidores/list.html", {"servidores": servidores, "capitanes": self.capitanes_ctrl.listar_capitanes()})
 
     async def post_crear(self, request, datos: dict):
         if not UsuariosController.usuario_tiene_permiso(request.state.user, "servidores.manage"):
