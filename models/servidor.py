@@ -18,11 +18,14 @@ class Servidor(Base, AuditMixin):
     correo = Column(String(100), nullable=True, unique=True)
     numero_equipo = Column(Integer, nullable=True)
 
-    id_area = Column(Integer, ForeignKey('areas.id'), nullable=True)
-    area = relationship("Area", backref="servidores")
-
     id_capitan = Column(Integer, ForeignKey('capitanes.id'), nullable=True)
     capitan = relationship("Capitan", backref="servidores")
+
+    @property
+    def area(self):
+        if self.capitan and self.capitan.coordinador:
+            return self.capitan.coordinador.area
+        return None
 
     def __repr__(self):
         return f"<Servidor(id={self.id}, nombre='{self.nombre}', cedula='{self.cedula}')>"
