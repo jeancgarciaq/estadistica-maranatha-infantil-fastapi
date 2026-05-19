@@ -20,6 +20,13 @@ class CoordinadoresController(BaseController):
         return self.ejecutar_transaccion(operacion, "Coordinador creado exitosamente.", user_context=user_context)
 
     def actualizar_coordinador(self, id, datos, user_context=None):
+        if not id or not isinstance(id, int):
+            return False, "El ID del coordinador es obligatorio y debe ser un número entero."
+
+        errores = self._validar_datos_coordinador(datos)
+        if errores:
+            return False, "\n".join(errores)
+
         def operacion(db):
             coordinador = self.query_activa(db).filter(Coordinador.id == id).first()
             if not coordinador: raise ValueError("Coordinador no encontrado.")
@@ -31,3 +38,10 @@ class CoordinadoresController(BaseController):
             coordinador = self.query_activa(db).filter(Coordinador.id == id).first()
             self.marcar_eliminado(coordinador, db)
         return self.ejecutar_transaccion(operacion, "Coordinador eliminado.", user_context=user_context)
+
+    def _validar_datos_coordinador(self, datos):
+        errores = []
+        if not datos.get('nombre'):
+            errores.append("El nombre del coordinador es obligatorio.")
+        # Aquí podrías añadir más validaciones para id_lider, id_area, etc.
+        return errores
