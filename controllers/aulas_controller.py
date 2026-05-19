@@ -61,8 +61,6 @@ class AulasController(BaseController):
                         'aula',
                         aula.id
                     )
-            
-            self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
 
         return self.ejecutar_transaccion(operacion, "Aula y asistencia registradas.", user_context=user_context)
 
@@ -109,7 +107,6 @@ class AulasController(BaseController):
                 if s_id:
                     asistencia_ctrl.registrar_asistencia(db, s_id, aula.fecha, 'Colaborador', 'aula', aula.id)
             
-            self.registrar_evento_sync(db, 'aulas', aula, 'upsert')
             logger.info(f"Aula actualizada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Aula actualizada exitosamente.", user_context=user_context)
@@ -129,7 +126,6 @@ class AulasController(BaseController):
                 raise ValueError("Aula no encontrada.")
             
             self.marcar_eliminado(aula, db)
-            self.registrar_evento_sync(db, 'aulas', aula, 'delete')
             logger.info(f"Aula eliminada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Aula eliminada exitosamente.", user_context=user_context)
