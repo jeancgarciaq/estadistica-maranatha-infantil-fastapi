@@ -156,6 +156,29 @@ class UsuariosController(BaseController):
 
         return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.', user_context=user_context)
 
+    def eliminar_usuario(self, user_id, user_context=None):
+        if not user_id:
+            return False, 'Debe indicar el usuario a eliminar.'
+
+        def operacion(db):
+            usuario = self.query_activa(db).filter(Usuario.id == int(user_id)).first()
+            if not usuario:
+                raise ValueError('Usuario no encontrado.')
+
+            # No permitir que el usuario se elimine a sí mismo
+            if user_context and user_context.get('user'):
+                if usuario.id == user_context['user'].id:
+                    raise ValueError('No puedes eliminar tu propio usuario.')
+
+            # No permitir eliminar un usuario con rol root (superusuario)
+            if usuario.rol.nombre == ROLE_ROOT:
+                raise ValueError('No se permite eliminar un usuario con rol superusuario (root).')
+
+            self.marcar_eliminado(usuario, db)
+            logger.info("Usuario marcado como eliminado localmente: ID %s", user_id)
+
+        return self.ejecutar_transaccion(operacion, 'Usuario eliminado exitosamente.', user_context=user_context)
+
     def obtener_usuario(self, user_id):
         db = self.get_db_session()
         try:
