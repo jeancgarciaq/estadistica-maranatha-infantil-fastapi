@@ -75,8 +75,8 @@
                         <select name="id_maestra" id="aula_maestra"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 appearance-none">
                             <option value="">Sin asignar</option>
-                            {% for servidor in servidores %}
-                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% for docente in docentes %}
+                            <option value="{{ docente.id }}">{{ docente.nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -86,8 +86,8 @@
                         <select name="id_auxiliar" id="aula_auxiliar"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 appearance-none">
                             <option value="">Sin asignar</option>
-                            {% for servidor in servidores %}
-                            <option value="{{ servidor.id }}">{{ servidor.nombre }}</option>
+                            {% for auxiliar in auxiliares %}
+                            <option value="{{ auxiliar.id }}">{{ auxiliar.nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -97,8 +97,9 @@
                         <select name="ids_colaboradores" id="aula_colaboradores" multiple size="5"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-orange-500 appearance-none h-auto">
                             <option value="">Sin asignar</option>
-                            {% for servidor in servidores %}
-                            <option value="{{ servidor.id }}">{{ servidor.nombre }} (ID: {{ servidor.id }})</option>
+                            {% for colaborador in colaboradores %}
+                            <option value="{{ colaborador.id }}">{{ colaborador.nombre }} (ID: {{ colaborador.id }})
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
