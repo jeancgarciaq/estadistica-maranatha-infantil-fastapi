@@ -56,6 +56,14 @@ async def list_docentes(request: Request, db: Session = Depends(get_db)):
 async def create_docente(request: Request, nombre: str = Form(...), cedula: int = Form(...), edad: int = Form(...), db: Session = Depends(get_db)):
     return await JerarquiaWebHandler(db, templates).post_docente_crear(request, {"nombre": nombre, "cedula": cedula, "edad": edad})
 
+@router.post("/docentes/actualizar")
+async def update_docente(request: Request, id: int = Form(...), nombre: str = Form(...), cedula: int = Form(...), id_capitan: int = Form(None), db: Session = Depends(get_db)):
+    return await JerarquiaWebHandler(db, templates).post_docente_actualizar(request, id, {"nombre": nombre, "cedula": cedula, "id_capitan": id_capitan})
+
+@router.post("/docentes/eliminar")
+async def delete_docente(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
+    return await JerarquiaWebHandler(db, templates).post_docente_eliminar(request, id)
+
 # Rutas de Auxiliares
 @router.get("/auxiliares")
 async def view_auxiliares(request: Request, db: Session = Depends(get_db)):
