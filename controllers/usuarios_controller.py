@@ -145,7 +145,7 @@ class UsuariosController(BaseController):
             if activo is not None:
                 setattr(usuario, 'activo', bool(activo))
 
-            logger.info("Usuario actualizado localmente y encolado para sync: ID %s", user_id)
+            logger.info("Usuario actualizado localmente: ID %s", user_id)
 
         return self.ejecutar_transaccion(operacion, 'Usuario actualizado exitosamente.', user_context=user_context)
 
