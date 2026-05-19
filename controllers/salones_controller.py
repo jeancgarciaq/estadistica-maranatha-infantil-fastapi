@@ -25,7 +25,7 @@ class SalonesController(BaseController):
 
         return self.ejecutar_transaccion(operacion, "Salón creado exitosamente.", user_context=user_context)
 
-    def actualizar_salon(self, id, nombre, edad, user_context=None):
+    def actualizar_salon(self, id, nombre, edad, id_area, user_context=None):
         if not id:
             return False, "El ID del salón es obligatorio."
         if not nombre:
@@ -40,6 +40,7 @@ class SalonesController(BaseController):
             
             salon.salon = nombre
             salon.edad = edad
+            salon.id_area = id_area if id_area else None # Actualiza el id_area
             logger.info(f"Salón actualizado: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Salón actualizado exitosamente.", user_context=user_context)
