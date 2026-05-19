@@ -25,3 +25,18 @@ class AuxiliaresController(BaseController):
             db.add(nuevo)
             return nuevo
         return self.ejecutar_transaccion(operacion, "Auxiliar registrado exitosamente", user_context)
+
+    def actualizar_auxiliar(self, id, datos, user_context=None):
+        def operacion(db):
+            auxiliar = self.query_activa(db).filter(Auxiliar.id == id).first()
+            if not auxiliar: raise ValueError("Auxiliar no encontrado.")
+            datos.pop('id_area', None)
+            for key, value in datos.items(): setattr(auxiliar, key, value)
+        return self.ejecutar_transaccion(operacion, "Auxiliar actualizado.", user_context)
+
+    def eliminar_auxiliar(self, id, user_context=None):
+        def operacion(db):
+            auxiliar = self.query_activa(db).filter(Auxiliar.id == id).first()
+            if not auxiliar: raise ValueError("Auxiliar no encontrado.")
+            self.marcar_eliminado(auxiliar, db)
+        return self.ejecutar_transaccion(operacion, "Auxiliar eliminado.", user_context)
