@@ -15,7 +15,7 @@
                     <p class="mt-1 text-sm text-slate-400">{{ capitan.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/capitanes?id={{ capitan.id }}&nombre={{ capitan.nombre|urlencode }}&cedula={{ capitan.cedula }}&edad={{ capitan.edad }}&id_coordinador={{ capitan.id_coordinador or '' }}&celular={{ (capitan.celular or '')|urlencode }}&correo={{ (capitan.correo or '')|urlencode }}"
+                    <a href="/capitanes?id={{ capitan.id }}&nombre={{ capitan.nombre|urlencode }}&cedula={{ capitan.cedula }}&edad={{ capitan.edad }}&id_coordinador={{ capitan.id_coordinador or '' }}&celular={{ (capitan.celular or '')|urlencode }}&correo={{ (capitan.correo or '')|urlencode }}&fecha_nacimiento={{ capitan.fecha_nacimiento or '' }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
