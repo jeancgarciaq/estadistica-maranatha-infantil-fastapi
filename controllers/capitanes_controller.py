@@ -30,6 +30,7 @@ class CapitanesController(BaseController):
             
             # Limpiamos datos redundantes para evitar errores de modelo
             datos.pop('id_area', None)
+            datos.pop('id', None)
             for key, value in datos.items(): 
                 setattr(capitan, key, value)
         return self.ejecutar_transaccion(operacion, "Capitán actualizado.", user_context=user_context)
