@@ -23,8 +23,6 @@ class RecepcionController(BaseController):
         def operacion(db):
             recepcion = Recepcion(nombre=nombre, fecha=fecha_obj)
             db.add(recepcion)
-            db.flush()
-            self.registrar_evento_sync(db, 'recepciones', recepcion, 'upsert')
             logger.info(f"Recepción creada: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Recepción registrada exitosamente.", user_context=user_context)
@@ -44,7 +42,6 @@ class RecepcionController(BaseController):
             
             recepcion.nombre = nombre
             recepcion.fecha = fecha_obj
-            self.registrar_evento_sync(db, 'recepciones', recepcion, 'upsert')
             logger.info(f"Recepción actualizada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Recepción actualizada exitosamente.", user_context=user_context)
@@ -59,7 +56,6 @@ class RecepcionController(BaseController):
                 raise ValueError("Recepción no encontrada.")
             
             self.marcar_eliminado(recepcion, db)
-            self.registrar_evento_sync(db, 'recepciones', recepcion, 'delete')
             logger.info(f"Recepción eliminada: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Recepción eliminada exitosamente.", user_context=user_context)
