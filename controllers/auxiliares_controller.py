@@ -1,5 +1,8 @@
 from controllers.base_controller import BaseController
 from models.auxiliares import Auxiliar
+from models.capitanes import Capitan
+from models.coordinadores import Coordinador
+from sqlalchemy.orm import selectinload
 
 class AuxiliaresController(BaseController):
     def __init__(self, session=None):
@@ -8,7 +11,7 @@ class AuxiliaresController(BaseController):
     def listar_auxiliares(self):
         db = self.session if self.session else self.get_db_session()
         try:
-            query = self.query_activa(db)
+            query = self.query_activa(db).options(selectinload(Auxiliar.capitan).selectinload(Capitan.coordinador).selectinload(Coordinador.area))
             return query.all()
         finally:
             if not self.session:
@@ -16,6 +19,8 @@ class AuxiliaresController(BaseController):
 
     def crear_auxiliar(self, datos, user_context=None):
         def operacion(db):
+            # Limpieza de datos jerárquicos redundantes
+            datos.pop('id_area', None)
             nuevo = Auxiliar(**datos)
             db.add(nuevo)
             return nuevo
