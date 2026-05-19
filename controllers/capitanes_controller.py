@@ -21,8 +21,6 @@ class CapitanesController(BaseController):
             datos.pop('id_area', None)
             capitan = Capitan(**datos)
             db.add(capitan)
-            db.flush()
-            self.registrar_evento_sync(db, 'capitanes', capitan, 'upsert')
         return self.ejecutar_transaccion(operacion, "Capitán registrado exitosamente.", user_context=user_context)
 
     def actualizar_capitan(self, id, datos, user_context=None):
@@ -34,12 +32,10 @@ class CapitanesController(BaseController):
             datos.pop('id_area', None)
             for key, value in datos.items(): 
                 setattr(capitan, key, value)
-            self.registrar_evento_sync(db, 'capitanes', capitan, 'upsert')
         return self.ejecutar_transaccion(operacion, "Capitán actualizado.", user_context=user_context)
 
     def eliminar_capitan(self, id, user_context=None):
         def operacion(db):
             capitan = self.query_activa(db).filter(Capitan.id == id).first()
             self.marcar_eliminado(capitan, db)
-            self.registrar_evento_sync(db, 'capitanes', capitan, 'delete')
         return self.ejecutar_transaccion(operacion, "Capitán eliminado.", user_context=user_context)
