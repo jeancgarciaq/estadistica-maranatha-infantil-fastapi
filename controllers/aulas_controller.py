@@ -1,5 +1,8 @@
 from models.aulas import Aula
 from models.salones import Salon
+from models.docentes import Docente
+from models.auxiliares import Auxiliar
+from models.colaboradores import Colaborador
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from controllers.base_controller import BaseController
@@ -176,6 +179,57 @@ class AulasController(BaseController):
             return salones
         except SQLAlchemyError as e:
             logger.error(f"Error al listar salones en AulasController: {e}")
+            return []
+        finally:
+            if not self.session:
+                db.close()
+
+    def listar_docentes(self):
+        """
+        Lista todos los docentes (maestras) disponibles.
+        :return: Lista de objetos Docente.
+        """
+        db = self.get_db_session()
+        try:
+            docentes = db.query(Docente).filter(Docente.is_deleted.is_(False)).all()
+            logger.info(f"{len(docentes)} docentes obtenidos para AulasController.")
+            return docentes
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar docentes en AulasController: {e}")
+            return []
+        finally:
+            if not self.session:
+                db.close()
+
+    def listar_auxiliares(self):
+        """
+        Lista todos los auxiliares disponibles.
+        :return: Lista de objetos Auxiliar.
+        """
+        db = self.get_db_session()
+        try:
+            auxiliares = db.query(Auxiliar).filter(Auxiliar.is_deleted.is_(False)).all()
+            logger.info(f"{len(auxiliares)} auxiliares obtenidos para AulasController.")
+            return auxiliares
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar auxiliares en AulasController: {e}")
+            return []
+        finally:
+            if not self.session:
+                db.close()
+
+    def listar_colaboradores(self):
+        """
+        Lista todos los colaboradores disponibles.
+        :return: Lista de objetos Colaborador.
+        """
+        db = self.get_db_session()
+        try:
+            colaboradores = db.query(Colaborador).filter(Colaborador.is_deleted.is_(False)).all()
+            logger.info(f"{len(colaboradores)} colaboradores obtenidos para AulasController.")
+            return colaboradores
+        except SQLAlchemyError as e:
+            logger.error(f"Error al listar colaboradores en AulasController: {e}")
             return []
         finally:
             if not self.session:
