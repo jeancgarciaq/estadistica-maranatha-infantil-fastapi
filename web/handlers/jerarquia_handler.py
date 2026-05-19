@@ -59,6 +59,14 @@ class JerarquiaWebHandler(BaseWebHandler):
         exito, msg = self.auxiliares_ctrl.crear_auxiliar(datos, user_context={"user": request.state.user})
         return self.redirect("/auxiliares", msg, "success" if exito else "error")
 
+    async def post_auxiliar_actualizar(self, request, id, datos):
+        exito, msg = self.auxiliares_ctrl.actualizar_auxiliar(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/auxiliares", msg, "success" if exito else "error")
+
+    async def post_auxiliar_eliminar(self, request, id):
+        exito, msg = self.auxiliares_ctrl.eliminar_auxiliar(id, user_context={"user": request.state.user})
+        return self.redirect("/auxiliares", msg, "success" if exito else "error")
+
     # Lógica para Colaboradores
     async def get_colaboradores_index(self, request):
         capitanes = self.capitanes_ctrl.listar_capitanes()
@@ -70,6 +78,14 @@ class JerarquiaWebHandler(BaseWebHandler):
 
     async def post_colaborador_crear(self, request, datos):
         exito, msg = self.colaboradores_ctrl.crear_colaborador(datos, user_context={"user": request.state.user})
+        return self.redirect("/colaboradores", msg, "success" if exito else "error")
+
+    async def post_colaborador_actualizar(self, request, id, datos):
+        exito, msg = self.colaboradores_ctrl.actualizar_colaborador(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/colaboradores", msg, "success" if exito else "error")
+
+    async def post_colaborador_eliminar(self, request, id):
+        exito, msg = self.colaboradores_ctrl.eliminar_colaborador(id, user_context={"user": request.state.user})
         return self.redirect("/colaboradores", msg, "success" if exito else "error")
 
     async def get_pastores_index(self, request):
@@ -84,6 +100,14 @@ class JerarquiaWebHandler(BaseWebHandler):
         exito, msg = self.pastores_ctrl.crear_pastor(datos, user_context={"user": request.state.user})
         return self.redirect("/pastores", msg, "success" if exito else "error")
 
+    async def post_pastor_actualizar(self, request, id, datos):
+        exito, msg = self.pastores_ctrl.actualizar_pastor(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/pastores", msg, "success" if exito else "error")
+
+    async def post_pastor_eliminar(self, request, id):
+        exito, msg = self.pastores_ctrl.eliminar_pastor(id, user_context={"user": request.state.user})
+        return self.redirect("/pastores", msg, "success" if exito else "error")
+
     # Lógica para Líderes
     async def get_lideres_index(self, request):
         if not self._check_admin(request): return self.redirect("/dashboard", "Acceso denegado", "error")
@@ -94,6 +118,18 @@ class JerarquiaWebHandler(BaseWebHandler):
         lideres = self.lideres_ctrl.listar_lideres()
         return self.render(request, "lideres/list.html", {"lideres": lideres})
 
+    async def post_lider_crear(self, request, datos):
+        exito, msg = self.lideres_ctrl.crear_lider(datos, user_context={"user": request.state.user})
+        return self.redirect("/lideres", msg, "success" if exito else "error")
+
+    async def post_lider_actualizar(self, request, id, datos):
+        exito, msg = self.lideres_ctrl.actualizar_lider(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/lideres", msg, "success" if exito else "error")
+
+    async def post_lider_eliminar(self, request, id):
+        exito, msg = self.lideres_ctrl.eliminar_lider(id, user_context={"user": request.state.user})
+        return self.redirect("/lideres", msg, "success" if exito else "error")
+
     # Lógica para Coordinadores
     async def get_coordinadores_index(self, request):
         lideres = self.lideres_ctrl.listar_lideres()
@@ -103,6 +139,21 @@ class JerarquiaWebHandler(BaseWebHandler):
     async def get_coordinadores_list(self, request):
         coordinadores = self.coordinadores_ctrl.listar_coordinadores()
         return self.render(request, "coordinadores/list.html", {"coordinadores": coordinadores})
+
+    async def post_coordinador_crear(self, request, datos):
+        exito, msg = self.coordinadores_ctrl.crear_coordinador(datos, user_context={"user": request.state.user})
+        return self.redirect("/coordinadores", msg, "success" if exito else "error")
+
+    async def post_coordinador_actualizar(self, request, id, datos):
+        exito, msg = self.coordinadores_ctrl.actualizar_coordinador(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/coordinadores", msg, "success" if exito else "error")
+
+    async def post_coordinador_eliminar(self, request, id):
+        exito, msg = self.coordinadores_ctrl.eliminar_coordinador(id, user_context={"user": request.state.user})
+        return self.redirect("/coordinadores", msg, "success" if exito else "error")
+
+
+
 
     # Lógica para Capitanes
     async def get_capitanes_index(self, request):
@@ -115,3 +166,15 @@ class JerarquiaWebHandler(BaseWebHandler):
             return self.render(request, "capitanes/list.html", {"capitanes": capitanes})
         except Exception as e:
             return self.redirect("/capitanes", f"Error al cargar la lista: {str(e)}", "error")
+
+    async def post_capitan_crear(self, request, datos):
+        exito, msg = self.capitanes_ctrl.crear_capitan(datos, user_context={"user": request.state.user})
+        return self.redirect("/capitanes", msg, "success" if exito else "error")
+
+    async def post_capitan_actualizar(self, request, id, datos):
+        exito, msg = self.capitanes_ctrl.actualizar_capitan(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/capitanes", msg, "success" if exito else "error")
+
+    async def post_capitan_eliminar(self, request, id):
+        exito, msg = self.capitanes_ctrl.eliminar_capitan(id, user_context={"user": request.state.user})
+        return self.redirect("/capitanes", msg, "success" if exito else "error")
