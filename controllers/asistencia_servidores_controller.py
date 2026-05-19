@@ -6,21 +6,19 @@ class AsistenciaServidoresController(BaseController):
     def __init__(self, session=None):
         super().__init__(model=AsistenciaServidor, session=session)
 
-    def registrar_asistencia(self, db, id_servidor, fecha, rol, categoria, referencia_id):
+    def registrar_asistencia(self, db, id_persona, fecha, rol, categoria, referencia_id):
         """
-        Registra una entrada de asistencia. 
+        Registra la asistencia individual de una persona.
         Este método se llama usualmente dentro de una transacción existente.
         """
         asistencia = AsistenciaServidor(
-            id_servidor=id_servidor,
+            id_persona=id_persona,
             fecha=fecha,
             rol=rol,
             categoria_contexto=categoria,
             referencia_id=referencia_id
         )
         db.add(asistencia)
-        db.flush()
-        self.registrar_evento_sync(db, 'asistencia_servidores', asistencia, 'upsert')
         return asistencia
 
     def limpiar_asistencias_referencia(self, db, categoria, referencia_id):
