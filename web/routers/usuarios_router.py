@@ -35,3 +35,10 @@ async def update_usuario(
 ):
     handler = UsuariosWebHandler(db, templates)
     return await handler.post_actualizar(request, id, password, rol_nombre, activo)
+
+@router.post("/eliminar")
+async def delete_usuario(
+    request: Request, id: int = Form(...), db: Session = Depends(get_db)
+):
+    handler = UsuariosWebHandler(db, templates)
+    return await handler.post_eliminar(request, id)
