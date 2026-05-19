@@ -46,16 +46,16 @@ class AulasController(BaseController):
             
             # 2. Registrar asistencias individuales
             if id_maestra:
-                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id)
+                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id) # id_maestra es id_persona
             
             if id_auxiliar:
-                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id)
+                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id) # id_auxiliar es id_persona
 
             for s_id in ids_colaboradores:
                 if s_id:
                     asistencia_ctrl.registrar_asistencia(
                         db, 
-                        s_id,
+                        s_id, # s_id es id_persona
                         aula.fecha,
                         'Colaborador',
                         'aula',
@@ -101,10 +101,10 @@ class AulasController(BaseController):
             asistencia_ctrl = AsistenciaServidoresController()
             asistencia_ctrl.limpiar_asistencias_referencia(db, 'aula', aula.id)
 
-            if id_maestra:
-                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id)
-            if id_auxiliar:
-                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id)
+            if id_maestra: # id_maestra es id_persona
+                asistencia_ctrl.registrar_asistencia(db, id_maestra, aula.fecha, 'Maestra', 'aula', aula.id) 
+            if id_auxiliar: # id_auxiliar es id_persona
+                asistencia_ctrl.registrar_asistencia(db, id_auxiliar, aula.fecha, 'Auxiliar', 'aula', aula.id) 
             for s_id in ids_colaboradores:
                 if s_id:
                     asistencia_ctrl.registrar_asistencia(db, s_id, aula.fecha, 'Colaborador', 'aula', aula.id)
