@@ -41,8 +41,8 @@ async def create_salon(request: Request, nombre: str = Form(...), edad: str = Fo
     return await InfraestructuraWebHandler(db, templates).post_salon_crear(request, nombre, edad)
 
 @router.post("/salones/actualizar")
-async def update_salon(request: Request, id: int = Form(...), nombre: str = Form(...), edad: str = Form(...), db: Session = Depends(get_db)):
-    return await InfraestructuraWebHandler(db, templates).post_salon_actualizar(request, id, nombre, edad)
+async def update_salon(request: Request, id: int = Form(...), nombre: str = Form(...), edad: str = Form(...), id_area: Optional[int] = Form(None), db: Session = Depends(get_db)):
+    return await InfraestructuraWebHandler(db, templates).post_salon_actualizar(request, id, nombre, edad, id_area)
 
 @router.post("/salones/eliminar")
 async def delete_salon(request: Request, id: int = Form(...), db: Session = Depends(get_db)):
