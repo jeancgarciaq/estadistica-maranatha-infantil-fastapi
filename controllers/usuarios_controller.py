@@ -9,8 +9,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
 from controllers.base_controller import BaseController
+from models.docentes import Docente
 from models.security import (
-    ROLE_ROOT, ROLE_LIMITS,
+    ROLE_ROOT, ROLE_LIMITS, ROLE_MAESTRO,
     Permiso, 
     Rol,
     Usuario,
@@ -108,6 +109,12 @@ class UsuariosController(BaseController):
             
             if limite > 0 and conteo_actual >= limite: # Solo aplicar límite si es > 0
                 raise ValueError(f'Se ha alcanzado el límite máximo de usuarios para el rol: {rol_nombre} ({limite}).')
+
+            # 3. Validación específica para Maestras: el correo debe estar precargado en la tabla Docente
+            if rol_nombre == ROLE_MAESTRO:
+                docente = db.query(Docente).filter(Docente.correo == username, Docente.is_deleted.is_(False)).first()
+                if not docente:
+                    raise ValueError('No se puede registrar: El correo electrónico no se encuentra en el listado oficial de docentes. Contacte al administrador.')
 
             nuevo_usuario = Usuario()
             setattr(nuevo_usuario, 'username', username)
