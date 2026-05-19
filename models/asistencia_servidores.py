@@ -10,7 +10,7 @@ class AsistenciaServidor(Base, AuditMixin):
     """
     __tablename__ = 'asistencia_servidores'
 
-    id_servidor = Column(Integer, ForeignKey('servidores.id'), nullable=False)
+    id_persona = Column(Integer, nullable=False) # ID de la persona (Servidor, Capitan, Docente, Auxiliar, Colaborador)
     fecha = Column(Date, nullable=False, index=True)
     
     # Rol desempeñado en esa fecha específica (ej: 'Maestra', 'Auxiliar', 'Logística')
@@ -22,7 +22,5 @@ class AsistenciaServidor(Base, AuditMixin):
     # ID del registro en la tabla correspondiente (ej: id de la tabla 'aulas')
     referencia_id = Column(Integer, nullable=True)
 
-    servidor = relationship("Servidor", backref="asistencias")
-
     def __repr__(self):
-        return f"<AsistenciaServidor(id={self.id}, servidor='{self.id_servidor}', fecha='{self.fecha}', rol='{self.rol}')>"
+        return f"<AsistenciaServidor(id={self.id}, id_persona='{self.id_persona}', fecha='{self.fecha}', rol='{self.rol}', categoria='{self.categoria_contexto}')>"
