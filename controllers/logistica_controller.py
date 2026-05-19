@@ -37,50 +37,45 @@ class LogisticaController(BaseController):
         return self.ejecutar_transaccion(operacion, "Logística creada exitosamente.", user_context=user_context)
 
     def crear_logistica_con_asistencia(self, datos, user_context=None):
-        """Crea el registro de logística y registra la asistencia individual de cada puesto."""
+        """
+        Crea el registro de logística y registra la asistencia detallada por sub-área.
+        'datos' debe contener:
+        - fecha: str
+        - observaciones: str
+        - asignaciones: lista de dicts { 'area_nombre': str, 'id_capitan': int, 'servidores_presentes': [ids] }
+        """
         # Validar y convertir fecha
         fecha_dt = self.validar_y_convertir_fecha(datos.get('fecha'))
         if not fecha_dt:
             return False, "Formato de fecha incorrecto. Debe ser YYYY-MM-DD."
-        datos['fecha'] = fecha_dt
-
-        # Extraer IDs de servidores
-        servidores_puestos = {
-            'Capitán': datos.pop('id_capitan', None),
-            'Almacén': datos.pop('id_almacen', None),
-            'Distribución': datos.pop('id_distribucion', None),
-            'Hidratación': datos.pop('id_hidratacion', None),
-            'Pasillo': datos.pop('id_pasillo', None),
-            'Secretaría': datos.pop('id_secretaria', None),
-        }
-
-        # Preparar contadores de resumen para la tabla Logistica (para compatibilidad con reportes)
-        datos['almacen'] = 1 if servidores_puestos['Almacén'] else 0
-        datos['distribucion'] = 1 if servidores_puestos['Distribución'] else 0
-        datos['hidratacion'] = 1 if servidores_puestos['Hidratación'] else 0
-        datos['pasillo'] = 1 if servidores_puestos['Pasillo'] else 0
-        datos['secretaria'] = 1 if servidores_puestos['Secretaría'] else 0
-        datos['capitan'] = 1 if servidores_puestos['Capitán'] else 0
-        datos['id_capitan'] = servidores_puestos['Capitán']
+        
+        asignaciones = datos.pop('asignaciones', [])
 
         def operacion(db):
             asistencia_ctrl = AsistenciaServidoresController()
             
             # 1. Crear cabecera de Logistica
-            logistica = Logistica(**datos)
+            logistica = Logistica(
+                fecha=fecha_dt, 
+                observaciones=datos.get('observaciones')
+            )
             db.add(logistica)
             db.flush()
 
-            # 2. Registrar asistencias individuales en la tabla pivote
-            for rol, s_id in servidores_puestos.items():
-                if s_id:
+            # 2. Registrar asistencias por cada sub-área asignada
+            for asig in asignaciones:
+                area_tag = asig.get('area_nombre') # Ej: "Almacén"
+                cap_id = asig.get('id_capitan')
+                servidores_ids = asig.get('servidores_presentes', [])
+
+                if cap_id:
                     asistencia_ctrl.registrar_asistencia(
-                        db,
-                        id_servidor=s_id,
-                        fecha=logistica.fecha,
-                        rol=rol,
-                        categoria='logistica',
-                        referencia_id=logistica.id
+                        db, cap_id, logistica.fecha, f"Capitán - {area_tag}", 'logistica', logistica.id # cap_id es id_persona
+                    )
+                
+                for s_id in servidores_ids:
+                    asistencia_ctrl.registrar_asistencia(
+                        db, s_id, logistica.fecha, f"Servidor - {area_tag}", 'logistica', logistica.id # s_id es id_persona
                     )
 
         return self.ejecutar_transaccion(operacion, "Logística y asistencias registradas.", user_context=user_context)
