@@ -25,3 +25,18 @@ class ColaboradoresController(BaseController):
             db.add(nuevo)
             return nuevo
         return self.ejecutar_transaccion(operacion, "Colaborador registrado exitosamente", user_context)
+
+    def actualizar_colaborador(self, id, datos, user_context=None):
+        def operacion(db):
+            colaborador = self.query_activa(db).filter(Colaborador.id == id).first()
+            if not colaborador: raise ValueError("Colaborador no encontrado.")
+            datos.pop('id_area', None)
+            for key, value in datos.items(): setattr(colaborador, key, value)
+        return self.ejecutar_transaccion(operacion, "Colaborador actualizado.", user_context)
+
+    def eliminar_colaborador(self, id, user_context=None):
+        def operacion(db):
+            colaborador = self.query_activa(db).filter(Colaborador.id == id).first()
+            if not colaborador: raise ValueError("Colaborador no encontrado.")
+            self.marcar_eliminado(colaborador, db)
+        return self.ejecutar_transaccion(operacion, "Colaborador eliminado.", user_context)
