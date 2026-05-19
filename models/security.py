@@ -77,6 +77,7 @@ DEFAULT_ROLE_PERMISSIONS = {
         'preparados.view', 'preparados.manage',
         'distribuciones.view', 'distribuciones.manage',
     ],
+    ROLE_SECRETARIA: SECRETARIA_PERMISSIONS,
 }
 
 
