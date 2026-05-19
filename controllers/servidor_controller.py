@@ -63,7 +63,7 @@ class ServidorController(BaseController):
                     raise ValueError("Debe proporcionar la edad o la fecha de nacimiento.")
 
             db.add(nuevo_servidor)
-            logger.info(f"Servidor '{nombre}' preparado para guardado local y sincronización.")
+            logger.info(f"Servidor '{nombre}' creado exitosamente.")
 
         return self.ejecutar_transaccion(operacion, "Servidor creado exitosamente.", user_context=user_context)
 
@@ -115,5 +115,4 @@ class ServidorController(BaseController):
             if not servidor:
                 raise ValueError("Servidor no encontrado.")
             self.marcar_eliminado(servidor, db)
-            self.registrar_evento_sync(db, 'servidores', servidor, 'delete')
         return self.ejecutar_transaccion(operacion, "Servidor eliminado exitosamente.", user_context=user_context)
