@@ -42,3 +42,13 @@ class UsuariosWebHandler(BaseWebHandler):
             user_context={"user": request.state.user}
         )
         return self.redirect("/usuarios", mensaje, "success" if exito else "error")
+
+    async def post_eliminar(self, request, id):
+        if not self._check_root(request):
+            return self.redirect("/dashboard")
+        
+        exito, mensaje = self.controller.eliminar_usuario(
+            user_id=id,
+            user_context={"user": request.state.user}
+        )
+        return self.redirect("/usuarios", mensaje, "success" if exito else "error")
