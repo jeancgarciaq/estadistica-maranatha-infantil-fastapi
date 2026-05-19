@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from controllers.areas_controller import AreasController
 from controllers.pastores_controller import PastoresController
 from controllers.lideres_controller import LideresController
 from controllers.coordinadores_controller import CoordinadoresController
@@ -12,6 +13,7 @@ from models.security import ROLE_ROOT
 class JerarquiaWebHandler(BaseWebHandler):
     def __init__(self, db: Session, templates):
         super().__init__(templates)
+        self.areas_ctrl = AreasController(db)
         self.pastores_ctrl = PastoresController(db)
         self.lideres_ctrl = LideresController(db)
         self.coordinadores_ctrl = CoordinadoresController(db)
@@ -25,7 +27,8 @@ class JerarquiaWebHandler(BaseWebHandler):
 
     # Lógica para Docentes
     async def get_docentes_index(self, request):
-        return self.render(request, "docentes/index.html")
+        capitanes = self.capitanes_ctrl.listar_capitanes()
+        return self.render(request, "docentes/index.html", {"capitanes": capitanes})
 
     async def get_docentes_list(self, request):
         docentes = self.docentes_ctrl.listar_docentes()
@@ -35,9 +38,18 @@ class JerarquiaWebHandler(BaseWebHandler):
         exito, msg = self.docentes_ctrl.crear_docente(datos, user_context={"user": request.state.user})
         return self.redirect("/docentes", msg, "success" if exito else "error")
 
+    async def post_docente_actualizar(self, request, id, datos):
+        exito, msg = self.docentes_ctrl.actualizar_docente(id, datos, user_context={"user": request.state.user})
+        return self.redirect("/docentes", msg, "success" if exito else "error")
+
+    async def post_docente_eliminar(self, request, id):
+        exito, msg = self.docentes_ctrl.eliminar_docente(id, user_context={"user": request.state.user})
+        return self.redirect("/docentes", msg, "success" if exito else "error")
+
     # Lógica para Auxiliares
     async def get_auxiliares_index(self, request):
-        return self.render(request, "auxiliares/index.html")
+        capitanes = self.capitanes_ctrl.listar_capitanes()
+        return self.render(request, "auxiliares/index.html", {"capitanes": capitanes})
 
     async def get_auxiliares_list(self, request):
         auxiliares = self.auxiliares_ctrl.listar_auxiliares()
@@ -49,7 +61,8 @@ class JerarquiaWebHandler(BaseWebHandler):
 
     # Lógica para Colaboradores
     async def get_colaboradores_index(self, request):
-        return self.render(request, "colaboradores/index.html")
+        capitanes = self.capitanes_ctrl.listar_capitanes()
+        return self.render(request, "colaboradores/index.html", {"capitanes": capitanes})
 
     async def get_colaboradores_list(self, request):
         colaboradores = self.colaboradores_ctrl.listar_colaboradores()
@@ -84,7 +97,8 @@ class JerarquiaWebHandler(BaseWebHandler):
     # Lógica para Coordinadores
     async def get_coordinadores_index(self, request):
         lideres = self.lideres_ctrl.listar_lideres()
-        return self.render(request, "coordinadores/index.html", {"lideres": lideres})
+        areas = self.areas_ctrl.listar_areas()
+        return self.render(request, "coordinadores/index.html", {"lideres": lideres, "areas": areas})
 
     async def get_coordinadores_list(self, request):
         coordinadores = self.coordinadores_ctrl.listar_coordinadores()
