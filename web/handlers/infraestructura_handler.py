@@ -43,7 +43,8 @@ class InfraestructuraWebHandler(BaseWebHandler):
 
     # Salones
     async def get_salones_index(self, request):
-        return self.render(request, "salones/index.html")
+        areas = self.areas_ctrl.listar_areas()
+        return self.render(request, "salones/index.html", {"areas": areas})
 
     async def get_salones_list(self, request):
         salones = self.salones_ctrl.listar_salones()
