@@ -14,12 +14,15 @@ class Docente(Base, AuditMixin):
     celular = Column(String(20), nullable=True)
     correo = Column(String(100), nullable=True, unique=True)
     numero_equipo = Column(Integer, nullable=True)
-    
-    id_area = Column(Integer, ForeignKey('areas.id'), nullable=True)
-    area = relationship("Area", backref="docentes")
 
     id_capitan = Column(Integer, ForeignKey('capitanes.id'), nullable=True)
     capitan = relationship("Capitan", backref="docentes")
+
+    @property
+    def area(self):
+        if self.capitan and self.capitan.coordinador:
+            return self.capitan.coordinador.area
+        return None
 
     def __repr__(self):
         return f"<Docente(id={self.id}, nombre='{self.nombre}', cedula='{self.cedula}')>"
