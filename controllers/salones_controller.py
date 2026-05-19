@@ -21,8 +21,6 @@ class SalonesController(BaseController):
         def operacion(db):
             salon = Salon(salon=nombre, edad=edad)
             db.add(salon)
-            db.flush()
-            self.registrar_evento_sync(db, 'salones', salon, 'upsert')
             logger.info(f"Salón creado: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Salón creado exitosamente.", user_context=user_context)
@@ -42,7 +40,6 @@ class SalonesController(BaseController):
             
             salon.salon = nombre
             salon.edad = edad
-            self.registrar_evento_sync(db, 'salones', salon, 'upsert')
             logger.info(f"Salón actualizado: {nombre}")
 
         return self.ejecutar_transaccion(operacion, "Salón actualizado exitosamente.", user_context=user_context)
@@ -57,7 +54,6 @@ class SalonesController(BaseController):
                 raise ValueError("Salón no encontrado.")
             
             self.marcar_eliminado(salon, db)
-            self.registrar_evento_sync(db, 'salones', salon, 'delete')
             logger.info(f"Salón eliminado: ID {id}")
 
         return self.ejecutar_transaccion(operacion, "Salón eliminado exitosamente.", user_context=user_context)
