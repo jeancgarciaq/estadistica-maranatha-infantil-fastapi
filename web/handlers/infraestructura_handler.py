@@ -6,7 +6,7 @@ from controllers.recepcion_controller import RecepcionController
 from controllers.ensenanza_controller import EnsenanzaController
 from controllers.logistica_controller import LogisticaController
 from controllers.otras_areas_controller import OtrasAreasController
-from controllers.servidor_controller import ServidorController
+from controllers.colaboradores_controller import ColaboradoresController
 from web.handlers.base_handler import BaseWebHandler
 
 class InfraestructuraWebHandler(BaseWebHandler):
@@ -19,7 +19,7 @@ class InfraestructuraWebHandler(BaseWebHandler):
         self.ensenanza_ctrl = EnsenanzaController(db)
         self.logistica_ctrl = LogisticaController(db)
         self.otrasareas_ctrl = OtrasAreasController(db)
-        self.serv_ctrl = ServidorController(db)
+        self.colab_ctrl = ColaboradoresController(db)
 
     # Áreas
     async def get_areas_index(self, request):
@@ -130,7 +130,7 @@ class InfraestructuraWebHandler(BaseWebHandler):
 
     # Logística
     async def get_logistica_index(self, request):
-        servidores = self.serv_ctrl.listar_servidores()
+        servidores = self.colab_ctrl.listar_colaboradores()
         return self.render(request, "logistica/index.html", {"servidores": servidores})
 
     async def get_logistica_list(self, request, fecha=None):
