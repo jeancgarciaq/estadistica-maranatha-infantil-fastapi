@@ -24,8 +24,8 @@ class AsistenciaServidor(Base, AuditMixin):
 
     # Relación virtual para compatibilidad con plantillas existentes que buscan .servidor
     servidor = relationship(
-        "Servidor", 
-        primaryjoin="foreign(AsistenciaServidor.id_persona) == Servidor.id",
+        "Colaborador", 
+        primaryjoin="foreign(AsistenciaServidor.id_persona) == Colaborador.id",
         viewonly=True
     )
 
