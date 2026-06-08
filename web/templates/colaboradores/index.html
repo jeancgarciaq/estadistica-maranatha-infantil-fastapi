@@ -45,18 +45,63 @@
                     placeholder="Nombre del colaborador">
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Cédula</label>
-                <input type="number" name="cedula" id="colaborador_cedula" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                    placeholder="Documento de identidad">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Cédula</label>
+                    <input type="number" name="cedula" id="colaborador_cedula" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                        placeholder="Documento de identidad">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha de Nacimiento</label>
+                    <div class="relative">
+                        <input type="text" data-visible-date
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                            placeholder="DD/MM/YYYY" autocomplete="off" inputmode="numeric">
+                        <input type="date" name="fecha_nacimiento" id="colaborador_fecha_nacimiento" class="hidden fecha-native" aria-hidden="true">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Edad</label>
+                    <input type="number" name="edad" id="colaborador_edad" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                        placeholder="Años">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Celular</label>
+                    <input type="text" name="celular" id="colaborador_celular"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                        placeholder="Número de celular">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Correo Electrónico</label>
+                    <input type="email" name="correo" id="colaborador_correo"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                        placeholder="Correo">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Número de Equipo</label>
+                    <input type="number" name="numero_equipo" id="colaborador_numero_equipo"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
+                        placeholder="N° de equipo">
+                </div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Edad</label>
-                <input type="number" name="edad" id="colaborador_edad" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                    placeholder="Años">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Capitán Asignado</label>
+                <select name="id_capitan" id="colaborador_id_capitan"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 appearance-none">
+                    <option value="">Seleccione Capitán...</option>
+                    {% for cap in capitanes %}
+                    <option value="{{ cap.id }}">{{ cap.nombre }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-2">
@@ -117,8 +162,95 @@
             document.getElementById('colaborador_nombre').value = params.get('nombre') || '';
             document.getElementById('colaborador_cedula').value = params.get('cedula') || '';
             document.getElementById('colaborador_edad').value = params.get('edad') || '';
+            document.getElementById('colaborador_celular').value = params.get('celular') || '';
+            document.getElementById('colaborador_correo').value = params.get('correo') || '';
+            document.getElementById('colaborador_numero_equipo').value = params.get('numero_equipo') || '';
+            document.getElementById('colaborador_id_capitan').value = params.get('id_capitan') || '';
+            
+            const fechaNac = params.get('fecha_nacimiento');
+            if (fechaNac) {
+                document.getElementById('colaborador_fecha_nacimiento').value = fechaNac;
+            }
             cambiarAModoEdicion();
         }
     });
+
+    // --- LÓGICA DE FECHA Y CÁLCULO DE EDAD ---
+    function parseDateFromText(text) {
+        if (!text) return null;
+        text = text.trim();
+        const dmy = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (dmy) {
+            const dd = parseInt(dmy[1], 10);
+            const mm = parseInt(dmy[2], 10) - 1;
+            const yyyy = parseInt(dmy[3], 10);
+            return new Date(yyyy, mm, dd);
+        }
+        const ymd = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (ymd) {
+            return new Date(parseInt(ymd[1], 10), parseInt(ymd[2], 10) - 1, parseInt(ymd[3], 10));
+        }
+        return null;
+    }
+
+    function formatToDisplay(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function formatToISO(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function calculateAge(date) {
+        if (!date || isNaN(date.getTime())) return null;
+        const today = new Date();
+        let age = today.getFullYear() - date.getFullYear();
+        const m = today.getMonth() - date.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
+        return age;
+    }
+
+    function attachDateHandlers() {
+        const v = document.querySelector('input[data-visible-date]');
+        const native = document.querySelector('input[name="fecha_nacimiento"]');
+        const edadInput = document.querySelector('input[name="edad"]');
+
+        if (native.value) {
+            const dt = parseDateFromText(native.value);
+            if (dt) v.value = formatToDisplay(dt);
+        }
+
+        v.addEventListener('focus', () => {
+            try { native.showPicker(); } catch (e) { native.click(); }
+        });
+
+        native.addEventListener('change', () => {
+            const dt = parseDateFromText(native.value);
+            if (dt) {
+                v.value = formatToDisplay(dt);
+                const age = calculateAge(dt);
+                if (age !== null) edadInput.value = age;
+            }
+        });
+
+        v.addEventListener('blur', () => {
+            const dt = parseDateFromText(v.value);
+            native.value = dt ? formatToISO(dt) : '';
+            if (dt) {
+                const age = calculateAge(dt);
+                if (age !== null) edadInput.value = age;
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', attachDateHandlers);
 </script>
 {% endblock %}
