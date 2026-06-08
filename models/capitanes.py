@@ -17,6 +17,20 @@ class Capitan(Base, AuditMixin):
     celular = Column(String(20), nullable=True)
     correo = Column(String(100), nullable=True, unique=True)
     
+    # Nuevos campos solicitados
+    sexo = Column(String(20), nullable=True)  # masculino, femenino
+    profesion = Column(String(100), nullable=True)
+    estado_civil = Column(String(20), nullable=True)  # soltero, casado, divorciado, viudo, concubinato
+    cantidad_hijos = Column(Integer, nullable=True, default=0)
+    numero_equipo = Column(Integer, nullable=True)  # Equipo
+    tiempo_servicio = Column(String(100), nullable=True)
+    pertenece_evangelio_cambia = Column(String(5), nullable=True)  # si, no
+    sirve_otra_area = Column(String(5), nullable=True)  # si, no
+    otra_area_detalle = Column(String(100), nullable=True)
+    bautizado = Column(String(5), nullable=True)  # si, no
+    asiste_discipulado = Column(String(5), nullable=True)  # si, no
+    usa_transporte = Column(String(5), nullable=True)  # si, no
+    
     id_coordinador = Column(Integer, ForeignKey('coordinadores.id'), nullable=True)
     coordinador = relationship("Coordinador", backref="capitanes")
 
