@@ -46,7 +46,6 @@ security = HTTPBearer()
 
 # Incluir Routers
 app.include_router(alimentos_router.router)
-app.include_router(servidores_router.router)
 app.include_router(auth_router.router)
 app.include_router(usuarios_router.router)
 app.include_router(jerarquia_router.router)
