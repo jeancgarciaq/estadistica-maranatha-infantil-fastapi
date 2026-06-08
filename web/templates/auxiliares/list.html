@@ -28,10 +28,14 @@
                     <h3 class="font-bold text-slate-100 text-lg">{{ auxiliar.nombre }}</h3>
                     <p class="text-sm text-sky-400/80 font-medium">Cédula: {{ auxiliar.cedula }} | Edad: {{
                         auxiliar.edad }} años</p>
+                    {% if auxiliar.celular %}
+                    <p class="text-xs text-slate-400">Cel: {{ auxiliar.celular }}{% if auxiliar.correo %} | {{
+                        auxiliar.correo }}{% endif %}</p>
+                    {% endif %}
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/auxiliares?id={{ auxiliar.id }}&nombre={{ auxiliar.nombre|urlencode }}&cedula={{ auxiliar.cedula }}&edad={{ auxiliar.edad }}"
+                <a href="/auxiliares?id={{ auxiliar.id }}&nombre={{ auxiliar.nombre|urlencode }}&cedula={{ auxiliar.cedula }}&edad={{ auxiliar.edad }}&fecha_nacimiento={{ auxiliar.fecha_nacimiento or '' }}&celular={{ auxiliar.celular|urlencode if auxiliar.celular else '' }}&correo={{ auxiliar.correo|urlencode if auxiliar.correo else '' }}&numero_equipo={{ auxiliar.numero_equipo or '' }}&id_capitan={{ auxiliar.id_capitan or '' }}"
                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all"
                     title="Editar">
                     <i class="la la-edit text-xl"></i>
