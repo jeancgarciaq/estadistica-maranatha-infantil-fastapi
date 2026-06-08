@@ -19,7 +19,7 @@ class ColaboradoresController(BaseController):
 
     def crear_colaborador(self, datos, user_context=None):
         def operacion(db):
-            # El área es heredada a través de la jerarquía
+            # Limpieza de datos jerárquicos redundantes
             datos.pop('id_area', None)
             nuevo = Colaborador(**datos)
             db.add(nuevo)
