@@ -20,7 +20,7 @@ from models.database import configure_database, SessionLocal, shutdown_db
 from models.security import ROLE_ROOT, Usuario
 
 # Importar Routers Refactorizados
-from web.routers import alimentos_router, servidores_router, auth_router, usuarios_router, jerarquia_router, infraestructura_router, reportes_router, ayuda_router, analisis_router
+from web.routers import alimentos_router, auth_router, usuarios_router, jerarquia_router, infraestructura_router, reportes_router, ayuda_router, analisis_router
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
