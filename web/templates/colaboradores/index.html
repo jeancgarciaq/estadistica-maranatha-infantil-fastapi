@@ -104,6 +104,113 @@
                 </select>
             </div>
 
+            <!-- Información Adicional -->
+            <div class="border-t border-slate-700/50 pt-4 space-y-4 text-start">
+                <h3 class="text-sm font-bold text-sky-400 uppercase">Información Adicional</h3>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Sexo</label>
+                        <select name="sexo" id="colaborador_sexo"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione Sexo...</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="femenino">Femenino</option>
+                        </select>
+                    </div>
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Estado Civil</label>
+                        <select name="estado_civil" id="colaborador_estado_civil"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="soltero">Soltero</option>
+                            <option value="casado">Casado</option>
+                            <option value="divorciado">Divorciado</option>
+                            <option value="viudo">Viudo</option>
+                            <option value="concubinato">Concubinato</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Profesión</label>
+                        <input type="text" name="profesion" id="colaborador_profesion"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
+                    </div>
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Cantidad de Hijos</label>
+                        <input type="number" name="cantidad_hijos" id="colaborador_cantidad_hijos" value="0" min="0"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Tiempo de Servicio</label>
+                        <input type="text" name="tiempo_servicio" id="colaborador_tiempo_servicio" placeholder="Ej. 2 años"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
+                    </div>
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Evangelio Cambia?</label>
+                        <select name="pertenece_evangelio_cambia" id="colaborador_pertenece_evangelio_cambia"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Bautizado?</label>
+                        <select name="bautizado" id="colaborador_bautizado"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Asiste Discipulado?</label>
+                        <select name="asiste_discipulado" id="colaborador_asiste_discipulado"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Usa Transporte?</label>
+                        <select name="usa_transporte" id="colaborador_usa_transporte"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="text-start">
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Sirve en otra área?</label>
+                        <select name="sirve_otra_area" id="colaborador_sirve_otra_area" onchange="toggleOtraAreaDetalle(this)"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-start hidden" id="otra_area_detalle_div">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Cuál área?</label>
+                    <input type="text" name="otra_area_detalle" id="colaborador_otra_area_detalle" placeholder="Área de servicio"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button type="submit" id="btn_submit"
                     class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-sky-600/30 uppercase tracking-widest text-xs">
@@ -150,6 +257,17 @@
         }
     }
 
+    function toggleOtraAreaDetalle(selectEl) {
+        const div = document.getElementById('otra_area_detalle_div');
+        if (selectEl && selectEl.value === 'si') {
+            div.classList.remove('hidden');
+        } else {
+            div.classList.add('hidden');
+            const input = div.querySelector('input');
+            if (input) input.value = '';
+        }
+    }
+
     document.getElementById('colaborador_id').addEventListener('input', (e) => {
         document.getElementById('delete_id').value = e.target.value;
     });
@@ -167,6 +285,22 @@
             document.getElementById('colaborador_numero_equipo').value = params.get('numero_equipo') || '';
             document.getElementById('colaborador_id_capitan').value = params.get('id_capitan') || '';
             
+            // Campos nuevos
+            document.getElementById('colaborador_sexo').value = params.get('sexo') || '';
+            document.getElementById('colaborador_profesion').value = params.get('profesion') || '';
+            document.getElementById('colaborador_estado_civil').value = params.get('estado_civil') || '';
+            document.getElementById('colaborador_cantidad_hijos').value = params.get('cantidad_hijos') || '0';
+            document.getElementById('colaborador_tiempo_servicio').value = params.get('tiempo_servicio') || '';
+            document.getElementById('colaborador_pertenece_evangelio_cambia').value = params.get('pertenece_evangelio_cambia') || '';
+            document.getElementById('colaborador_bautizado').value = params.get('bautizado') || '';
+            document.getElementById('colaborador_asiste_discipulado').value = params.get('asiste_discipulado') || '';
+            document.getElementById('colaborador_usa_transporte').value = params.get('usa_transporte') || '';
+            
+            const sirveOtraSelect = document.getElementById('colaborador_sirve_otra_area');
+            sirveOtraSelect.value = params.get('sirve_otra_area') || '';
+            document.getElementById('colaborador_otra_area_detalle').value = params.get('otra_area_detalle') || '';
+            toggleOtraAreaDetalle(sirveOtraSelect);
+
             const fechaNac = params.get('fecha_nacimiento');
             if (fechaNac) {
                 document.getElementById('colaborador_fecha_nacimiento').value = fechaNac;
