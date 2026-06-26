@@ -44,7 +44,18 @@ class ServidorController(BaseController):
                 celular=datos.get('celular'),
                 numero_equipo=int(datos.get('numero_equipo')) if datos.get('numero_equipo') else None,
                 fecha_nacimiento=datos.get('fecha_nacimiento'),
-                id_capitan=id_capitan
+                id_capitan=id_capitan,
+                sexo=datos.get('sexo'),
+                profesion=datos.get('profesion'),
+                estado_civil=datos.get('estado_civil'),
+                cantidad_hijos=int(datos.get('cantidad_hijos')) if datos.get('cantidad_hijos') else None,
+                tiempo_servicio=datos.get('tiempo_servicio'),
+                pertenece_evangelio_cambia=datos.get('pertenece_evangelio_cambia'),
+                sirve_otra_area=datos.get('sirve_otra_area'),
+                otra_area_detalle=datos.get('otra_area_detalle'),
+                bautizado=datos.get('bautizado'),
+                asiste_discipulado=datos.get('asiste_discipulado'),
+                usa_transporte=datos.get('usa_transporte'),
             )
 
             if not nuevo_servidor.fecha_nacimiento:
@@ -73,6 +84,17 @@ class ServidorController(BaseController):
             servidor.numero_equipo = int(datos.get('numero_equipo')) if datos.get('numero_equipo') else None
             servidor.fecha_nacimiento = datos.get('fecha_nacimiento', servidor.fecha_nacimiento)
             servidor.id_capitan = datos.get('id_capitan', servidor.id_capitan)
+            servidor.sexo = datos.get('sexo', servidor.sexo)
+            servidor.profesion = datos.get('profesion', servidor.profesion)
+            servidor.estado_civil = datos.get('estado_civil', servidor.estado_civil)
+            servidor.cantidad_hijos = int(datos.get('cantidad_hijos')) if datos.get('cantidad_hijos') else None
+            servidor.tiempo_servicio = datos.get('tiempo_servicio', servidor.tiempo_servicio)
+            servidor.pertenece_evangelio_cambia = datos.get('pertenece_evangelio_cambia', servidor.pertenece_evangelio_cambia)
+            servidor.sirve_otra_area = datos.get('sirve_otra_area', servidor.sirve_otra_area)
+            servidor.otra_area_detalle = datos.get('otra_area_detalle', servidor.otra_area_detalle)
+            servidor.bautizado = datos.get('bautizado', servidor.bautizado)
+            servidor.asiste_discipulado = datos.get('asiste_discipulado', servidor.asiste_discipulado)
+            servidor.usa_transporte = datos.get('usa_transporte', servidor.usa_transporte)
 
             if not servidor.fecha_nacimiento:
                 try:
