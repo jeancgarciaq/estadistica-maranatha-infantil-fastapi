@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade() -> None:
     # Eliminar tabla 'servidores' de forma segura en SQLite y PostgreSQL
-    op.drop_table('servidores', if_exists=True)
+    op.execute('DROP TABLE IF EXISTS servidores CASCADE')
 
 
 def downgrade() -> None:
