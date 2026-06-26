@@ -7,11 +7,10 @@ logger = logging.getLogger(__name__)
 
 
 def load_app_env():
-    """Carga variables de entorno desde .env en la raiz del proyecto o desde config/firebase.env."""
+    """Carga variables de entorno desde .env en la raiz del proyecto."""
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     env_candidates = [
-        os.path.join(project_root, '.env'),
-        os.path.join(project_root, 'config', 'firebase.env'),
+        os.path.join(project_root, '.env')
     ]
 
     loaded_path = None
