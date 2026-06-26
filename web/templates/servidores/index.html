@@ -80,6 +80,98 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Sexo</label>
+                    <select name="sexo"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                        <option value="">Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Profesión</label>
+                    <input type="text" name="profesion"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" maxlength="100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Estado Civil</label>
+                    <select name="estado_civil"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                        <option value="">Seleccione...</option>
+                        <option value="soltero">Soltero</option>
+                        <option value="casado">Casado</option>
+                        <option value="divorciado">Divorciado</option>
+                        <option value="viudo">Viudo</option>
+                        <option value="concubinato">Concubinato</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Cantidad de Hijos</label>
+                    <input type="number" name="cantidad_hijos" min="0"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-slate-400">Tiempo de Servicio</label>
+                    <input type="text" name="tiempo_servicio"
+                        class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" maxlength="100" placeholder="Ej: 2 años">
+                </div>
+            </div>
+
+            <div class="border-t border-slate-700 pt-4 mt-4">
+                <h6 class="text-sm font-bold text-slate-300 mb-3">Información Complementaria</h6>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Pertenece a Evangelio Cambia?</label>
+                        <select name="pertenece_evangelio_cambia"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Sirve en Otra Área?</label>
+                        <select name="sirve_otra_area"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Cuál otra área?</label>
+                        <input type="text" name="otra_area_detalle"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none" maxlength="100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Bautizado?</label>
+                        <select name="bautizado"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Asiste a Discipulado?</label>
+                        <select name="asiste_discipulado"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-slate-400">¿Usa Transporte?</label>
+                        <select name="usa_transporte"
+                            class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg outline-none text-white">
+                            <option value="">Seleccione...</option>
+                            <option value="si">Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
