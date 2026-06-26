@@ -35,6 +35,17 @@ async def create_servidor(
     numero_equipo: Optional[int] = Form(None),
     fecha_nacimiento: Optional[str] = Form(None),
     id_capitan: Optional[int] = Form(None),
+    sexo: Optional[str] = Form(None),
+    profesion: Optional[str] = Form(None),
+    estado_civil: Optional[str] = Form(None),
+    cantidad_hijos: Optional[int] = Form(None),
+    tiempo_servicio: Optional[str] = Form(None),
+    pertenece_evangelio_cambia: Optional[str] = Form(None),
+    sirve_otra_area: Optional[str] = Form(None),
+    otra_area_detalle: Optional[str] = Form(None),
+    bautizado: Optional[str] = Form(None),
+    asiste_discipulado: Optional[str] = Form(None),
+    usa_transporte: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     handler = ServidoresWebHandler(db, templates)
@@ -43,7 +54,17 @@ async def create_servidor(
         "celular": celular, "correo": correo,
         "numero_equipo": numero_equipo,
         "fecha_nacimiento": fecha_nacimiento,
-        "id_capitan": id_capitan
+        "id_capitan": id_capitan,
+        "sexo": sexo, "profesion": profesion,
+        "estado_civil": estado_civil,
+        "cantidad_hijos": cantidad_hijos,
+        "tiempo_servicio": tiempo_servicio,
+        "pertenece_evangelio_cambia": pertenece_evangelio_cambia,
+        "sirve_otra_area": sirve_otra_area,
+        "otra_area_detalle": otra_area_detalle,
+        "bautizado": bautizado,
+        "asiste_discipulado": asiste_discipulado,
+        "usa_transporte": usa_transporte,
     }
     return await handler.post_crear(request, datos)
 
@@ -59,6 +80,17 @@ async def update_servidor(
     numero_equipo: Optional[int] = Form(None),
     fecha_nacimiento: Optional[str] = Form(None),
     id_capitan: Optional[int] = Form(None),
+    sexo: Optional[str] = Form(None),
+    profesion: Optional[str] = Form(None),
+    estado_civil: Optional[str] = Form(None),
+    cantidad_hijos: Optional[int] = Form(None),
+    tiempo_servicio: Optional[str] = Form(None),
+    pertenece_evangelio_cambia: Optional[str] = Form(None),
+    sirve_otra_area: Optional[str] = Form(None),
+    otra_area_detalle: Optional[str] = Form(None),
+    bautizado: Optional[str] = Form(None),
+    asiste_discipulado: Optional[str] = Form(None),
+    usa_transporte: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     handler = ServidoresWebHandler(db, templates)
@@ -67,7 +99,17 @@ async def update_servidor(
         "celular": celular, "correo": correo,
         "numero_equipo": numero_equipo,
         "fecha_nacimiento": fecha_nacimiento,
-        "id_capitan": id_capitan
+        "id_capitan": id_capitan,
+        "sexo": sexo, "profesion": profesion,
+        "estado_civil": estado_civil,
+        "cantidad_hijos": cantidad_hijos,
+        "tiempo_servicio": tiempo_servicio,
+        "pertenece_evangelio_cambia": pertenece_evangelio_cambia,
+        "sirve_otra_area": sirve_otra_area,
+        "otra_area_detalle": otra_area_detalle,
+        "bautizado": bautizado,
+        "asiste_discipulado": asiste_discipulado,
+        "usa_transporte": usa_transporte,
     }
     return await handler.post_actualizar(request, id, datos)
 
