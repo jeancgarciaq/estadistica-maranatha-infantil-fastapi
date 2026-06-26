@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-px bg-slate-700/60">
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-px bg-slate-700/60">
                 <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Cédula</p>
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.cedula }}</p>
@@ -55,12 +55,28 @@
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.edad }} años</p>
                 </div>
                 <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Sexo</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.sexo or 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Contacto</p>
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.celular or 'N/A' }}</p>
                 </div>
                 <div class="bg-slate-800 p-4">
                     <p class="text-xs uppercase tracking-wide text-slate-500">Capitán</p>
                     <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.capitan.nombre if servidor.capitan else 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Estado Civil</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.estado_civil or 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Hijos</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.cantidad_hijos if servidor.cantidad_hijos is not none else 'N/A' }}</p>
+                </div>
+                <div class="bg-slate-800 p-4">
+                    <p class="text-xs uppercase tracking-wide text-slate-500">Tiempo Servicio</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-200">{{ servidor.tiempo_servicio or 'N/A' }}</p>
                 </div>
             </div>
 
@@ -133,6 +149,96 @@
                                         {% for c in capitanes %}
                                         <option value="{{ c.id }}" {% if servidor.id_capitan==c.id %}selected{% endif %}>{{ c.nombre }}</option>
                                         {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Sexo</label>
+                                    <select name="sexo"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="masculino" {% if servidor.sexo=='masculino' %}selected{% endif %}>Masculino</option>
+                                        <option value="femenino" {% if servidor.sexo=='femenino' %}selected{% endif %}>Femenino</option>
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Profesión</label>
+                                    <input type="text" name="profesion"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
+                                        value="{{ servidor.profesion or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Estado Civil</label>
+                                    <select name="estado_civil"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="soltero" {% if servidor.estado_civil=='soltero' %}selected{% endif %}>Soltero</option>
+                                        <option value="casado" {% if servidor.estado_civil=='casado' %}selected{% endif %}>Casado</option>
+                                        <option value="divorciado" {% if servidor.estado_civil=='divorciado' %}selected{% endif %}>Divorciado</option>
+                                        <option value="viudo" {% if servidor.estado_civil=='viudo' %}selected{% endif %}>Viudo</option>
+                                        <option value="concubinato" {% if servidor.estado_civil=='concubinato' %}selected{% endif %}>Concubinato</option>
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Cantidad de Hijos</label>
+                                    <input type="number" name="cantidad_hijos" min="0"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
+                                        value="{{ servidor.cantidad_hijos or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">Tiempo de Servicio</label>
+                                    <input type="text" name="tiempo_servicio"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
+                                        value="{{ servidor.tiempo_servicio or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Pertenece a Evangelio Cambia?</label>
+                                    <select name="pertenece_evangelio_cambia"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="si" {% if servidor.pertenece_evangelio_cambia=='si' %}selected{% endif %}>Sí</option>
+                                        <option value="no" {% if servidor.pertenece_evangelio_cambia=='no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Sirve en Otra Área?</label>
+                                    <select name="sirve_otra_area"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="si" {% if servidor.sirve_otra_area=='si' %}selected{% endif %}>Sí</option>
+                                        <option value="no" {% if servidor.sirve_otra_area=='no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2 text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Cuál otra área?</label>
+                                    <input type="text" name="otra_area_detalle"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none"
+                                        value="{{ servidor.otra_area_detalle or '' }}">
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Bautizado?</label>
+                                    <select name="bautizado"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="si" {% if servidor.bautizado=='si' %}selected{% endif %}>Sí</option>
+                                        <option value="no" {% if servidor.bautizado=='no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Asiste a Discipulado?</label>
+                                    <select name="asiste_discipulado"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="si" {% if servidor.asiste_discipulado=='si' %}selected{% endif %}>Sí</option>
+                                        <option value="no" {% if servidor.asiste_discipulado=='no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                <div class="text-start">
+                                    <label class="mb-1 block text-sm font-medium text-slate-400">¿Usa Transporte?</label>
+                                    <select name="usa_transporte"
+                                        class="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 outline-none text-white">
+                                        <option value="">Seleccione...</option>
+                                        <option value="si" {% if servidor.usa_transporte=='si' %}selected{% endif %}>Sí</option>
+                                        <option value="no" {% if servidor.usa_transporte=='no' %}selected{% endif %}>No</option>
                                     </select>
                                 </div>
                             </div>
