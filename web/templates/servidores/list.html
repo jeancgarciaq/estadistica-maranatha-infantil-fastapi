@@ -85,6 +85,7 @@
                 class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
                 <div class="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl">
                     <form action="/servidores/actualizar" method="POST" class="p-0 m-0">
+                        <input type="hidden" name="id" value="{{ servidor.id }}">
                         <div class="flex items-center justify-between border-b border-slate-700 p-6">
                             <h5 class="text-xl font-bold text-amber-400">Editar Servidor</h5>
                             <button type="button"
@@ -93,7 +94,7 @@
                                 <i class="la la-times text-2xl"></i>
                             </button>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 max-h-[32rem] overflow-y-auto">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="md:col-span-2 text-start">
                                     <label class="mb-1 block text-sm font-medium text-slate-400">Nombre Completo</label>
