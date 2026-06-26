@@ -19,4 +19,5 @@ from .otras_areas_controller import OtrasAreasController
 from .pastores_controller import PastoresController
 from .recepcion_controller import RecepcionController
 from .salones_controller import SalonesController
+from .servidor_controller import ServidorController
 from .usuarios_controller import UsuariosController
