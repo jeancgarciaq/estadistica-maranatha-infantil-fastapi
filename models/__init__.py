@@ -17,5 +17,6 @@ from .otras_areas import OtrasAreas
 from .pastores import Pastor
 from .recepcion import Recepcion
 from .salones import Salon
+from .servidor import Servidor
 from .sync_queue import SyncQueue
 from .security import Usuario, Rol, Permiso
