@@ -53,12 +53,14 @@
                         placeholder="Documento de identidad">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha de Nacimiento</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Fecha de
+                        Nacimiento</label>
                     <div class="relative">
                         <input type="text" data-visible-date
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
                             placeholder="DD/MM/YYYY" autocomplete="off" inputmode="numeric">
-                        <input type="date" name="fecha_nacimiento" id="docente_fecha_nacimiento" class="hidden fecha-native" aria-hidden="true">
+                        <input type="date" name="fecha_nacimiento" id="docente_fecha_nacimiento"
+                            class="hidden fecha-native" aria-hidden="true">
                     </div>
                 </div>
             </div>
@@ -80,13 +82,15 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Correo Electrónico</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Correo
+                        Electrónico</label>
                     <input type="email" name="correo" id="docente_correo"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
                         placeholder="Correo">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Número de Equipo</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">Número de
+                        Equipo</label>
                     <input type="number" name="numero_equipo" id="docente_numero_equipo"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
                         placeholder="N° de equipo">
@@ -107,7 +111,7 @@
             <!-- Información Adicional -->
             <div class="border-t border-slate-700/50 pt-4 space-y-4 text-start">
                 <h3 class="text-sm font-bold text-sky-400 uppercase">Información Adicional</h3>
-                
+
                 <div class="grid grid-cols-2 gap-3">
                     <div class="text-start">
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Sexo</label>
@@ -139,7 +143,8 @@
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
                     </div>
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Cantidad de Hijos</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Cantidad de
+                            Hijos</label>
                         <input type="number" name="cantidad_hijos" id="docente_cantidad_hijos" value="0" min="0"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
                     </div>
@@ -147,12 +152,14 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Tiempo de Servicio</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Tiempo de
+                            Servicio</label>
                         <input type="text" name="tiempo_servicio" id="docente_tiempo_servicio" placeholder="Ej. 2 años"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
                     </div>
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Evangelio Cambia?</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Evangelio
+                            Cambia?</label>
                         <select name="pertenece_evangelio_cambia" id="docente_pertenece_evangelio_cambia"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
                             <option value="">Seleccione...</option>
@@ -173,7 +180,8 @@
                         </select>
                     </div>
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Asiste Discipulado?</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Asiste
+                            Discipulado?</label>
                         <select name="asiste_discipulado" id="docente_asiste_discipulado"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
                             <option value="">Seleccione...</option>
@@ -185,7 +193,8 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Usa Transporte?</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Usa
+                            Transporte?</label>
                         <select name="usa_transporte" id="docente_usa_transporte"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
                             <option value="">Seleccione...</option>
@@ -194,8 +203,9 @@
                         </select>
                     </div>
                     <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Sirve en otra área?</label>
-                        <select name="sirve_otra_area" id="docente_sirve_otra_area" onchange="toggleOtraAreaDetalle(this)"
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Sirve en otra
+                            área?</label>
+                        <select name="sirve_otra_area" id="docente_sirve_otra_area"
                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
                             <option value="">Seleccione...</option>
                             <option value="si">Sí</option>
@@ -204,33 +214,50 @@
                     </div>
                 </div>
 
-                <div class="text-start hidden" id="otra_area_detalle_div">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Cuál área?</label>
-                    <input type="text" name="otra_area_detalle" id="docente_otra_area_detalle" placeholder="Área de servicio"
+                <div class="text-start">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Cuál otra área?</label>
+                    <input type="text" name="otra_area_detalle" id="docente_otra_area_detalle"
+                        placeholder="Especifique el �rea de servicio"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none">
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2">
-                <button type="submit" id="btn_submit"
-                    class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-sky-600/30 uppercase tracking-widest text-xs">
-                    CREAR
-                </button>
-                <button type="button" onclick="cambiarAModoEdicion()" id="btn_mode"
-                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all uppercase tracking-widest text-xs">
-                    MODO EDICIÓN
-                </button>
+                <div class="text-start pt-2">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Ha sido levantada como maestra?</label>
+                    <select name="levantado" id="docente_levantado"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none appearance-none">
+                        <option value="">Seleccione...</option>
+                        <option value="si">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="text-start pt-2">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Dirección</label>
+                    <textarea name="direccion" id="docente_direccion" rows="3"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-sky-500 outline-none"></textarea>
+                </div>
             </div>
-        </form>
-
-        <form id="deleteForm" action="/docentes/eliminar" method="post" class="hidden">
-            <input type="hidden" name="id" id="delete_id">
-            <button type="submit" onclick="return confirm('¿Está seguro de eliminar este docente?')"
-                class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2">
-                ELIMINAR REGISTRO
-            </button>
-        </form>
     </div>
+
+    <div class="grid grid-cols-2 gap-3 pt-2">
+        <button type="submit" id="btn_submit"
+            class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-sky-600/30 uppercase tracking-widest text-xs">
+            CREAR
+        </button>
+        <button type="button" onclick="cambiarAModoEdicion()" id="btn_mode"
+            class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all uppercase tracking-widest text-xs">
+            MODO EDICIÓN
+        </button>
+    </div>
+    </form>
+
+    <form id="deleteForm" action="/docentes/eliminar" method="post" class="hidden">
+        <input type="hidden" name="id" id="delete_id">
+        <button type="submit" onclick="return confirm('¿Está seguro de eliminar este docente?')"
+            class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2">
+            ELIMINAR REGISTRO
+        </button>
+    </form>
+</div>
 </div>
 
 <script>
@@ -257,17 +284,6 @@
         }
     }
 
-    function toggleOtraAreaDetalle(selectEl) {
-        const div = document.getElementById('otra_area_detalle_div');
-        if (selectEl && selectEl.value === 'si') {
-            div.classList.remove('hidden');
-        } else {
-            div.classList.add('hidden');
-            const input = div.querySelector('input');
-            if (input) input.value = '';
-        }
-    }
-
     document.getElementById('docente_id').addEventListener('input', (e) => {
         document.getElementById('delete_id').value = e.target.value;
     });
@@ -284,7 +300,7 @@
             document.getElementById('docente_correo').value = params.get('correo') || '';
             document.getElementById('docente_numero_equipo').value = params.get('numero_equipo') || '';
             document.getElementById('docente_id_capitan').value = params.get('id_capitan') || '';
-            
+
             // Campos nuevos
             document.getElementById('docente_sexo').value = params.get('sexo') || '';
             document.getElementById('docente_profesion').value = params.get('profesion') || '';
@@ -295,15 +311,19 @@
             document.getElementById('docente_bautizado').value = params.get('bautizado') || '';
             document.getElementById('docente_asiste_discipulado').value = params.get('asiste_discipulado') || '';
             document.getElementById('docente_usa_transporte').value = params.get('usa_transporte') || '';
-            
-            const sirveOtraSelect = document.getElementById('docente_sirve_otra_area');
-            sirveOtraSelect.value = params.get('sirve_otra_area') || '';
+            document.getElementById('docente_levantado').value = params.get('levantado') || '';
+            document.getElementById('docente_direccion').value = params.get('direccion') || '';
+            document.getElementById('docente_sirve_otra_area').value = params.get('sirve_otra_area') || '';
             document.getElementById('docente_otra_area_detalle').value = params.get('otra_area_detalle') || '';
-            toggleOtraAreaDetalle(sirveOtraSelect);
-            
+
             const fechaNac = params.get('fecha_nacimiento');
             if (fechaNac) {
                 document.getElementById('docente_fecha_nacimiento').value = fechaNac;
+                const visibleDate = document.querySelector('input[data-visible-date]');
+                if (visibleDate) {
+                    const dt = parseDateFromText(fechaNac);
+                    if (dt) visibleDate.value = formatToDisplay(dt);
+                }
             }
             cambiarAModoEdicion();
         }
