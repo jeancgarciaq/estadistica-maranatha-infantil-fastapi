@@ -1,0 +1,59 @@
+sheet:
+  url: "https://docs.google.com/spreadsheets/d/1RPkMwVpY2wBxPyn2lZgoCZbuZ3AH5SlEj3BS5vZqxeY/export?format=csv"
+
+columns:
+  Marca temporal: _skip
+  Capitán o Responsable: _skip
+  Nombres: _compose
+  Apellidos: _compose
+  Cédula: cedula
+  Fecha de Nacimiento: fecha_nacimiento
+  Edad: edad
+  Sexo: sexo
+  Profesión u Oficio: profesion
+  Estado Civil: estado_civil
+  Cantidad de Hijos: cantidad_hijos
+  Número de Celular: celular
+  Equipo: numero_equipo
+  ¿Cuánto tiempo lleva sirviendo en Maranatha Kids?: tiempo_servicio
+  ¿Pertenece al Evangelio Cambia?: pertenece_evangelio_cambia
+  ¿Sirve en otra área de la iglesia?: sirve_otra_area
+  Si es así, ¿Qué área?: otra_area_detalle
+  ¿Bautizado?: bautizado
+  ¿Asiste al discipulado?: asiste_discipulado
+  ¿Ha sido levantado como servidor?: levantado
+  ¿Usa transporte de la iglesia?: usa_transporte
+  Indique la dirección dónde vive: direccion
+  Cargo: _skip
+
+campos_compuestos:
+  nombre:
+    from: [Nombres, Apellidos]
+
+columna_cargo: Cargo
+cargo_default: servidores
+
+cargo_patrones:
+  - match: [maestr, docente]
+    tabla: docentes
+  - match: [capitan, capitán, capitana]
+    tabla: capitanes
+  - match: [colaborador]
+    tabla: colaboradores
+  - match: [auxiliar]
+    tabla: auxiliares
+  - match: [servidor, servidora]
+    tabla: servidores
+  - match: [coordinador, responsable]
+    tabla: coordinadores
+
+columna_jerarquia: Capitán o Responsable
+fk_lookup:
+  - tabla: capitanes
+    campo_busqueda: nombre
+    fk_destino: id_capitan
+    aplica_a: [servidores, docentes, auxiliares, colaboradores]
+  - tabla: coordinadores
+    campo_busqueda: nombre
+    fk_destino: id_coordinador
+    aplica_a: [capitanes]
