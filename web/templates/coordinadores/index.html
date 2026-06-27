@@ -49,20 +49,20 @@
                     <input type="number" name="edad" required
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Celular</label>
-                        <input type="text" name="celular" id="coordinador_celular"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
-                    </div>
-                    <div class="text-start">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Correo</label>
-                        <input type="email" name="correo" id="coordinador_correo"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Celular</label>
+                    <input type="text" name="celular" id="coordinador_celular"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
                 </div>
+            </div>
 
+            <div class="text-start">
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Correo</label>
+                <input type="email" name="correo" id="coordinador_correo"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
                 <div class="text-start">
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Líder Asignado</label>
                     <select name="id_lider" required
@@ -73,7 +73,6 @@
                         {% endfor %}
                     </select>
                 </div>
-
                 <div class="text-start">
                     <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Área Asignada</label>
                     <select name="id_area"
@@ -192,12 +191,28 @@
                             <option value="no">No</option>
                         </select>
                     </div>
-                    <div class="text-start hidden" id="otra_area_detalle_div">
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Cuál área?</label>
-                        <input type="text" name="otra_area_detalle" placeholder="Área de servicio"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
-                    </div>
+                <div class="text-start hidden" id="otra_area_detalle_div">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Cuál área?</label>
+                    <input type="text" name="otra_area_detalle" placeholder="Área de servicio"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none">
                 </div>
+            </div>
+                <div class="text-start pt-2">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">¿Ha sido levantado como coordinador/responsable?</label>
+                    <select name="levantado"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none appearance-none">
+                        <option value="">Seleccione...</option>
+                        <option value="si">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="text-start pt-2">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Dirección</label>
+                    <textarea name="direccion" rows="3"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none"></textarea>
+                </div>
+            </div>
+        </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-4">
@@ -281,7 +296,9 @@
         document.querySelector('select[name="bautizado"]').value = urlParams.get('bautizado') || "";
         document.querySelector('select[name="asiste_discipulado"]').value = urlParams.get('asiste_discipulado') || "";
         document.querySelector('select[name="usa_transporte"]').value = urlParams.get('usa_transporte') || "";
-        
+        document.querySelector('select[name="levantado"]').value = urlParams.get('levantado') || "";
+        document.querySelector('textarea[name="direccion"]').value = urlParams.get('direccion') || '';
+
         const sirveOtraSelect = document.querySelector('select[name="sirve_otra_area"]');
         sirveOtraSelect.value = urlParams.get('sirve_otra_area') || "";
         document.querySelector('input[name="otra_area_detalle"]').value = urlParams.get('otra_area_detalle') || "";
@@ -292,6 +309,11 @@
         if (fechaNac) {
             const nativeDate = document.querySelector('input[name="fecha_nacimiento"]');
             nativeDate.value = fechaNac;
+            const visibleDate = document.querySelector('input[data-visible-date]');
+            if (visibleDate) {
+                const dt = parseDateFromText(fechaNac);
+                if (dt) visibleDate.value = formatToDisplay(dt);
+            }
         }
     }
 
