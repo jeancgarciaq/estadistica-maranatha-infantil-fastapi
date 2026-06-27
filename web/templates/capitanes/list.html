@@ -4,8 +4,15 @@
 
 {% block content %}
 <div class="space-y-4 p-4 md:p-6">
+    <!-- Buscador -->
+    <div class="relative mb-4">
+        <i class="la la-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+        <input type="text" id="buscador" oninput="filtrarCapitanes()" placeholder="Buscar por nombre, cédula, correo..."
+            class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:border-amber-500 outline-none text-sm">
+    </div>
+
     {% if capitanes and capitanes|length > 0 %}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div id="lista-capitanes" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {% for capitan in capitanes %}
         <article class="rounded-2xl border border-slate-700 bg-slate-800/80 shadow-lg overflow-hidden">
             <div
@@ -15,7 +22,7 @@
                     <p class="mt-1 text-sm text-slate-400">{{ capitan.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/capitanes?id={{ capitan.id }}&nombre={{ capitan.nombre|urlencode }}&cedula={{ capitan.cedula }}&edad={{ capitan.edad }}&id_coordinador={{ capitan.id_coordinador or '' }}&celular={{ (capitan.celular or '')|urlencode }}&correo={{ (capitan.correo or '')|urlencode }}&fecha_nacimiento={{ capitan.fecha_nacimiento or '' }}&sexo={{ (capitan.sexo or '')|urlencode }}&profesion={{ (capitan.profesion or '')|urlencode }}&estado_civil={{ (capitan.estado_civil or '')|urlencode }}&cantidad_hijos={{ capitan.cantidad_hijos or '0' }}&numero_equipo={{ capitan.numero_equipo or '' }}&tiempo_servicio={{ (capitan.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (capitan.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (capitan.bautizado or '')|urlencode }}&asiste_discipulado={{ (capitan.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (capitan.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (capitan.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (capitan.otra_area_detalle or '')|urlencode }}"
+                    <a href="/capitanes?id={{ capitan.id }}&nombre={{ capitan.nombre|urlencode }}&cedula={{ capitan.cedula }}&edad={{ capitan.edad }}&id_coordinador={{ capitan.id_coordinador or '' }}&celular={{ (capitan.celular or '')|urlencode }}&correo={{ (capitan.correo or '')|urlencode }}&fecha_nacimiento={{ capitan.fecha_nacimiento or '' }}&sexo={{ (capitan.sexo or '')|urlencode }}&profesion={{ (capitan.profesion or '')|urlencode }}&estado_civil={{ (capitan.estado_civil or '')|urlencode }}&cantidad_hijos={{ capitan.cantidad_hijos or '0' }}&numero_equipo={{ capitan.numero_equipo or '' }}&tiempo_servicio={{ (capitan.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (capitan.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (capitan.bautizado or '')|urlencode }}&asiste_discipulado={{ (capitan.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (capitan.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (capitan.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (capitan.otra_area_detalle or '')|urlencode }}&levantado={{ (capitan.levantado or '')|urlencode }}&direccion={{ (capitan.direccion or '')|urlencode }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
@@ -76,4 +83,35 @@
     </div>
     {% endif %}
 </div>
+
+{% block scripts %}
+<script>
+    function filtrarCapitanes() {
+        const term = document.getElementById('buscador').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('#lista-capitanes > article');
+        let visible = 0;
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            if (!term || text.includes(term)) {
+                card.classList.remove('hidden');
+                visible++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        let empty = document.getElementById('sin-resultados');
+        if (visible === 0 && term) {
+            if (!empty) {
+                empty = document.createElement('div');
+                empty.id = 'sin-resultados';
+                empty.className = 'col-span-full text-center py-12';
+                empty.innerHTML = '<i class="la la-search-minus text-5xl text-slate-700 mb-3"></i><p class="text-slate-500 font-medium">No se encontraron capitanes con &laquo;' + term + '&raquo;</p>';
+                document.getElementById('lista-capitanes').appendChild(empty);
+            }
+        } else if (empty) {
+            empty.remove();
+        }
+    }
+</script>
+{% endblock %}
 {% endblock %}
