@@ -56,6 +56,8 @@ class ServidorController(BaseController):
                 bautizado=datos.get('bautizado'),
                 asiste_discipulado=datos.get('asiste_discipulado'),
                 usa_transporte=datos.get('usa_transporte'),
+                levantado=datos.get('levantado'),
+                direccion=datos.get('direccion'),
             )
 
             if not nuevo_servidor.fecha_nacimiento:
@@ -95,6 +97,8 @@ class ServidorController(BaseController):
             servidor.bautizado = datos.get('bautizado', servidor.bautizado)
             servidor.asiste_discipulado = datos.get('asiste_discipulado', servidor.asiste_discipulado)
             servidor.usa_transporte = datos.get('usa_transporte', servidor.usa_transporte)
+            servidor.levantado = datos.get('levantado', servidor.levantado)
+            servidor.direccion = datos.get('direccion', servidor.direccion)
 
             if not servidor.fecha_nacimiento:
                 try:
