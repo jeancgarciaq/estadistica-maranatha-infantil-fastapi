@@ -133,13 +133,15 @@
         document.getElementById('lider_correo').value = urlParams.get('correo') || "";
         document.querySelector('select[name="id_pastor"]').value = urlParams.get('id_pastor') || "";
         
-        // Cargar fecha de nacimiento si existe
         const fechaNac = urlParams.get('fecha_nacimiento');
         if (fechaNac) {
             const nativeDate = document.querySelector('input[name="fecha_nacimiento"]');
             const visibleDate = document.querySelector('input[data-visible-date]');
             nativeDate.value = fechaNac;
-            // El handler attachDateHandlers se encargará de actualizar el visibleDate
+            if (visibleDate) {
+                const dt = parseDateFromText(fechaNac);
+                if (dt) visibleDate.value = formatToDisplay(dt);
+            }
         }
     }
 
