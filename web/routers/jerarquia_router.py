@@ -136,6 +136,8 @@ async def extraer_datos_servidor(request: Request):
         "bautizado": to_str("bautizado"),
         "asiste_discipulado": to_str("asiste_discipulado"),
         "usa_transporte": to_str("usa_transporte"),
+        "levantado": to_str("levantado"),
+        "direccion": to_str("direccion"),
     }
     
     if "id_lider" in form:
