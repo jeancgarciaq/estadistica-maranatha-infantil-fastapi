@@ -30,6 +30,8 @@ class Coordinador(Base, AuditMixin):
     bautizado = Column(String(5), nullable=True)  # si, no
     asiste_discipulado = Column(String(5), nullable=True)  # si, no
     usa_transporte = Column(String(5), nullable=True)  # si, no
+    levantado = Column(String(5), nullable=True)  # si, no
+    direccion = Column(String(1000), nullable=True)
     
     id_lider = Column(Integer, ForeignKey('lideres.id'), nullable=True)
     lider = relationship("Lider", backref="coordinadores")
