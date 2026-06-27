@@ -25,6 +25,8 @@ class Servidor(Base, AuditMixin):
     bautizado = Column(String(5), nullable=True)
     asiste_discipulado = Column(String(5), nullable=True)
     usa_transporte = Column(String(5), nullable=True)
+    levantado = Column(String(5), nullable=True)
+    direccion = Column(String(1000), nullable=True)
 
     id_capitan = Column(Integer, ForeignKey('capitanes.id'), nullable=True)
     capitan = relationship("Capitan", backref="servidores")
