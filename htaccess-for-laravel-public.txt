@@ -1,0 +1,21 @@
+# .htaccess para Laravel/public/
+# Proxy /semi/* → FastAPI en puerto asignado por cPanel
+# COLOCAR EN: /home/usuario/public_html/public/.htaccess (raíz de Laravel)
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Manejar /semi/ y todo lo que esté debajo
+    RewriteRule ^semi(.*)$ /semi-proxy.php$1 [L,QSA]
+
+    # Rutas normales de Laravel
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Headers de seguridad para el proxy
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
