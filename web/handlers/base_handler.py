@@ -18,15 +18,18 @@ class BaseWebHandler:
         return self.templates.TemplateResponse(request, template_name, full_context)
 
     def redirect(self, url: str, msg: str = None, type: str = "success"):
-        """Crea una redirección con mensaje flash opcional asegurando el prefijo."""
-        # 1. Si la URL empieza con '/' y NO empieza ya con '/semi', le añadimos el prefijo
-        if url.startswith("/") and not url.startswith(self.PREFIX):
-            url = f"{self.PREFIX}{url}"
+        """Crea una redirección garantizada con el prefijo /semi."""
         
-        # 2. Si la URL viene como "" o "/", la enviamos a la raíz del prefijo "/semi"
-        elif url == "":
-            url = self.PREFIX
+        # 1. Limpiar o asegurar el prefijo /semi
+        if not url.startswith(self.PREFIX):
+            if url.startswith("/"):
+                url = f"{self.PREFIX}{url}"
+            else:
+                url = f"{self.PREFIX}/{url}"
 
-        # 3. Construcción de URL final con mensaje flash
+        # 2. Construir la cadena de consulta si hay mensaje flash
         final_url = f"{url}?msg={msg}&type={type}" if msg else url
+
+        # 3. Retornar RedirectResponse
+        # Importante: pasamos final_url tal cual. 
         return RedirectResponse(url=final_url, status_code=status.HTTP_303_SEE_OTHER)
