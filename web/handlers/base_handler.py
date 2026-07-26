@@ -18,18 +18,13 @@ class BaseWebHandler:
         return self.templates.TemplateResponse(request, template_name, full_context)
 
     def redirect(self, url: str, msg: str = None, type: str = "success"):
-        """Crea una redirección garantizada con el prefijo /semi."""
-        
-        # 1. Limpiar o asegurar el prefijo /semi
+        # Asegurar prefijo /semi
         if not url.startswith(self.PREFIX):
-            if url.startswith("/"):
-                url = f"{self.PREFIX}{url}"
-            else:
-                url = f"{self.PREFIX}/{url}"
+            url = f"{self.PREFIX}{url}" if url.startswith("/") else f"{self.PREFIX}/{url}"
 
-        # 2. Construir la cadena de consulta si hay mensaje flash
         final_url = f"{url}?msg={msg}&type={type}" if msg else url
-
-        # 3. Retornar RedirectResponse
-        # Importante: pasamos final_url tal cual. 
-        return RedirectResponse(url=final_url, status_code=status.HTTP_303_SEE_OTHER)
+        
+        # Creamos la respuesta 303 forzando la cabecera Location exacta sin que Starlette la altere
+        response = RedirectResponse(url=final_url, status_code=status.HTTP_303_SEE_OTHER)
+        response.headers["Location"] = final_url
+        return response
