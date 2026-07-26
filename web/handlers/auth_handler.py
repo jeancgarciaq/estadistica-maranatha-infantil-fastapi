@@ -7,6 +7,7 @@ class AuthWebHandler(BaseWebHandler):
     def __init__(self, db: Session, templates):
         super().__init__(templates)
         self.controller = UsuariosController(db)
+        # Definimos el prefijo de la subruta
         self.prefix = "/semi"
 
     async def get_login(self, request):
@@ -15,14 +16,16 @@ class AuthWebHandler(BaseWebHandler):
     async def post_login(self, request, username, password):
         exito, usuario, mensaje = self.controller.autenticar(username, password)
         if exito:
-            response = self.redirect("/dashboard")
+            # ✅ REPARADO: Redirige a /semi/dashboard
+            response = self.redirect(f"{self.prefix}/dashboard")
             # Establecer cookie de sesión
             response.set_cookie(key="session_user", value=usuario.username, httponly=True)
             return response
         return self.render(request, "login.html", {"error": mensaje})
 
     async def get_logout(self, request):
-        response = self.redirect("/")
+        # ✅ REPARADO: Redirige a /semi (o /semi/login)
+        response = self.redirect(f"{self.prefix}/login")
         response.delete_cookie("session_user")
         return response
 
@@ -36,7 +39,6 @@ class AuthWebHandler(BaseWebHandler):
         })
 
     async def post_register(self, request, datos, math_answer, math_expected):
-        # Validación de campos obligatorios
         if not all([datos.get("username"), datos.get("password"), datos.get("rol_nombre"), math_answer is not None]):
             return self._render_register_error(request, "Todos los campos son obligatorios.")
 
@@ -45,12 +47,12 @@ class AuthWebHandler(BaseWebHandler):
 
         exito, mensaje = self.controller.registrar_usuario(datos)
         if exito:
-            return self.redirect("/", "Registro exitoso. Ya puede iniciar sesión.", "success")
+            # ✅ REPARADO: Redirige a /semi/login
+            return self.redirect(f"{self.prefix}/login", "Registro exitoso. Ya puede iniciar sesión.", "success")
         
         return self._render_register_error(request, mensaje)
 
     def _render_register_error(self, request, error_msg):
-        """Re-renderiza el registro con un nuevo desafío matemático tras un error."""
         roles = self.controller.listar_roles()
         num1, num2 = random.randint(1, 10), random.randint(1, 10)
         return self.render(request, "register.html", {
@@ -91,5 +93,6 @@ class AuthWebHandler(BaseWebHandler):
             })
         exito, mensaje = self.controller.restablecer_contrasena(token, password)
         if exito:
-            return self.redirect("/", "Contraseña restablecida exitosamente.", "success")
+            # ✅ REPARADO: Redirige a /semi/login
+            return self.redirect(f"{self.prefix}/login", "Contraseña restablecida exitosamente.", "success")
         return self.render(request, "reset_password.html", {"token": token, "error": mensaje})
