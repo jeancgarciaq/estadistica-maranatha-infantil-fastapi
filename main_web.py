@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
     shutdown_db()
 
 # Inicializar FastAPI
-app = FastAPI(title="Estadística Maranatha Kids - Web", lifespan=lifespan)
+app = FastAPI(title="Estadistica Maranatha Kids - Web", lifespan=lifespan, root_path="/semi")
 security = HTTPBearer()
 
 # Incluir Routers

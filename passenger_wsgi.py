@@ -1,47 +1,96 @@
-#!/usr/bin/env python3
-"""
-Entry point para cPanel Python App (Passenger)
-COLOCAR EN: Ra铆z de la aplicaci贸n (mismo nivel que main_web.py)
-"""
-
 import os
 import sys
+import asyncio
 
-# A帽adir el directorio de la app al path
+# 1. Asegurar el path de la aplicación
 app_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, app_dir)
+if app_dir not in sys.path:
+    sys.path.insert(0, app_dir)
 
-# Configurar variable de entorno para que use el puerto correcto
-# cPanel asigna un puerto via variable de entorno PASSENGER_APP_PORT
-# o se puede obtener del archivo passenger_wsgi.ini
-port = os.environ.get('PASSENGER_APP_PORT', os.environ.get('PORT', '8555'))
-os.environ['PORT'] = port
+# 2. Importar tu app de FastAPI desde main_web.py
+from main_web import app as fast_app
 
-# Importar la app FastAPI
-from main_web import app
+# 3. Adaptador WSGI a ASGI seguro
+def application(environ, start_response):
+    status_code = "200 OK"
+    response_headers = []
+    body_chunks = []
 
-# Para Passenger WSGI, necesitamos un objeto application WSGI
-# FastAPI es ASGI, as铆 que usamos uvicorn como adaptador
-# Passenger 6+ soporta ASGI nativamente si se configura bien
+    path_info = environ.get('PATH_INFO', '')
+    # Forzar /semi como script_name para que FastAPI lo reconozca como prefijo de subruta
+    script_name = '/semi'
 
-# Si Passenger llama a este archivo como WSGI:
-try:
-    from uvicorn.middleware.wsgi import WSGIMiddleware
-    application = WSGIMiddleware(app)
-except ImportError:
-    # Fallback: crear wrapper simple
-    def application(environ, start_response):
-        """WSGI adapter simple para FastAPI"""
-        from wsgiref.util import request_uri
-        import asyncio
+    async def receive():
+        try:
+            length = int(environ.get('CONTENT_LENGTH', 0) or 0)
+        except ValueError:
+            length = 0
         
-        # Esta es una implementaci贸n m铆nima - en producci贸n
-        # se recomienda usar uvicorn + Passenger ASGI mode
-        status = '500 Internal Server Error'
-        headers = [('Content-Type', 'text/plain')]
-        start_response(status, headers)
-        return [b'Use Passenger ASGI mode for FastAPI']
+        body = environ['wsgi.input'].read(length) if length > 0 else b''
+        return {
+            'type': 'http.request',
+            'body': body,
+            'more_body': False,
+        }
 
-# Para modo ASGI nativo (Passenger 6+), exportar la app directamente
-# Passenger detectar谩 autom谩ticamente si es ASGI
-__all__ = ['app', 'application']
+    async def send(message):
+        nonlocal status_code, response_headers, body_chunks
+
+        if message['type'] == 'http.response.start':
+            status_code = f"{message['status']} Status"
+            headers_list = []
+            
+            for name, value in message.get('headers', []):
+                header_name = name.decode('latin1')
+                header_val = value.decode('latin1')
+                
+                # REPARACIÓN DE REDIRECCIONES:
+                # Si FastAPI intenta redirigir a /login o /dashboard sin el prefijo /semi,
+                # interceptamos la cabecera Location y le anteponemos /semi
+                if header_name.lower() == 'location':
+                    if header_val.startswith('/') and not header_val.startswith('/semi'):
+                        header_val = f"/semi{header_val}"
+                
+                headers_list.append((header_name, header_val))
+                
+            response_headers = headers_list
+
+        elif message['type'] == 'http.response.body':
+            body_chunks.append(message.get('body', b''))
+
+    scope = {
+        'type': 'http',
+        'asgi': {'version': '3.0'},
+        'http_version': '1.1',
+        'method': environ['REQUEST_METHOD'],
+        'path': path_info or '/',
+        'raw_path': (path_info or '/').encode('latin1'),
+        'query_string': environ.get('QUERY_STRING', '').encode('latin1'),
+        'root_path': script_name,
+        'scheme': environ.get('wsgi.url_scheme', 'http'),
+        'headers': [
+            (k[5:].lower().replace('_', '-').encode('latin1'), v.encode('latin1'))
+            for k, v in environ.items()
+            if k.startswith('HTTP_')
+        ],
+    }
+
+    if 'CONTENT_TYPE' in environ:
+        scope['headers'].append((b'content-type', environ['CONTENT_TYPE'].encode('latin1')))
+    if 'CONTENT_LENGTH' in environ:
+        scope['headers'].append((b'content-length', environ['CONTENT_LENGTH'].encode('latin1')))
+
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(fast_app(scope, receive, send))
+        loop.close()
+    except Exception as e:
+        status_code = "500 Internal Server Error"
+        response_headers = [('Content-Type', 'text/plain; charset=utf-8')]
+        body_chunks = [f"Error en adaptador Python: {str(e)}".encode('utf-8')]
+
+    start_response(status_code, response_headers)
+    return body_chunks
+
+app = application
