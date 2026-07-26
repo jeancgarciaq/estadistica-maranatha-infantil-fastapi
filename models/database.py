@@ -104,12 +104,12 @@ def configure_database():
     from models.security import seed_security_data
     import models.security, models.areas, models.donaciones, models.salones, models.aulas, models.distribucion, models.logistica, models.ensenanza, models.otras_areas, models.recepcion, models.alimento_preparado, models.alimento_preparado_componente, models.pastores, models.lideres, models.coordinadores, models.capitanes, models.docentes, models.auxiliares, models.colaboradores, models.servidor
 
-    engine.dispose()
-    
     if "sqlite" in DATABASE_URL:
         logger.info("🧪 Modo SQLite detectado: creando tablas con Base.metadata.create_all")
+        engine.dispose()
         Base.metadata.create_all(bind=engine)
     else:
+        reset_mode = os.getenv("RESET_ALEMBIC", "false").lower() == "true"
         try:
             ini_path = "alembic.ini"
             if not os.path.exists(ini_path):
@@ -119,18 +119,38 @@ def configure_database():
             alembic_cfg = Config(ini_path)
             logger.info(f"📖 Configuración de Alembic cargada desde {ini_path}")
             
-            reset_mode = os.getenv("RESET_ALEMBIC", "false").lower() == "true"
+            from alembic.script import ScriptDirectory
+            from sqlalchemy import text
+            
+            script = ScriptDirectory.from_config(alembic_cfg)
+            head_revision = script.get_current_head()
+            
             if reset_mode:
-                logger.info("🔄 Modo RESET detectado. Ejecutando 'alembic stamp head'...")
+                logger.info(f"🔄 Modo RESET detectado. Stamping head ({head_revision})...")
+                engine.dispose()
                 command.stamp(alembic_cfg, "head")
-                logger.info("✅ Base de datos marcada como actualizada (stamp head).")
             else:
-                logger.info("🧩 Ejecutando migraciones de Alembic hasta head...")
-                command.upgrade(alembic_cfg, "head")
-                logger.info("✅ Migraciones de Alembic aplicadas exitosamente (upgrade head) en %.2fs.", time.time() - start_time)
+                # Verificar si ya estamos en head para evitar hang
+                needs_upgrade = True
+                try:
+                    tmp = SessionLocal()
+                    current_revision = tmp.execute(text("SELECT version_num FROM alembic_version")).scalar()
+                    tmp.close()
+                    if current_revision == head_revision:
+                        needs_upgrade = False
+                        logger.info(f"✅ BD ya en head ({head_revision}). Saltando migraciones.")
+                except Exception:
+                    pass  # Si falla la consulta, asumimos que necesita upgrade
+                
+                if needs_upgrade:
+                    logger.info(f"🧩 Ejecutando migraciones de Alembic hasta head ({head_revision})...")
+                    engine.dispose()
+                    command.upgrade(alembic_cfg, "head")
+                    logger.info("✅ Migraciones aplicadas exitosamente en %.2fs.", time.time() - start_time)
         except Exception as e:
-            logger.warning(f"⚠️ No se pudieron aplicar las migraciones vía Alembic: {e}")
+            logger.warning(f"⚠️ Error con migraciones: {e}")
             logger.info("Intentando fallback con Base.metadata.create_all...")
+            engine.dispose()
             Base.metadata.create_all(bind=engine)
     
     logger.info("🌱 Iniciando siembra de datos (seeding)...")
