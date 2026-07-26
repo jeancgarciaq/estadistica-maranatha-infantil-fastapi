@@ -7,6 +7,7 @@ class AuthWebHandler(BaseWebHandler):
     def __init__(self, db: Session, templates):
         super().__init__(templates)
         self.controller = UsuariosController(db)
+        self.prefix = "/semi"
 
     async def get_login(self, request):
         return self.render(request, "login.html")
