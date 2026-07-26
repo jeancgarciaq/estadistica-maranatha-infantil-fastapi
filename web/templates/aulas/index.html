@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Gestión de Aulas</h2>
             <p class="text-slate-400 text-sm">Registro de asistencia y servidores</p>
         </div>
-        <a href="/aulas/lista" class="text-orange-400 hover:text-orange-300 flex flex-col items-center">
+        <a href="{{ prefix }}/aulas/lista" class="text-orange-400 hover:text-orange-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -30,7 +30,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="aulaForm" action="/aulas/crear" method="post" class="space-y-6">
+        <form id="aulaForm" action="{{ prefix }}/aulas/crear" method="post" class="space-y-6">
             <!-- ID solo para edición -->
             <div id="id_field" class="hidden">
                 <label class="block text-[10px] font-bold text-amber-500 uppercase mb-1 ml-1 tracking-wider">ID de
@@ -153,7 +153,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/aulas/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/aulas/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar registro de aula?')"
                 class="w-full bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-bold py-4 rounded-2xl border border-red-500/30 transition-all mt-4 uppercase text-xs tracking-widest">
@@ -195,7 +195,7 @@
         delForm.classList.toggle('hidden');
 
         if (!idField.classList.contains('hidden')) {
-            form.action = "/aulas/actualizar";
+            form.action = "{{ prefix }}/aulas/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             document.getElementById('btn_mode').innerText = "MODO CREAR";
             document.getElementById('aula_id').required = true;
@@ -203,7 +203,7 @@
                 document.getElementById('delete_id').value = e.target.value;
             });
         } else {
-            form.action = "/aulas/crear";
+            form.action = "{{ prefix }}/aulas/crear";
             btnSubmit.innerText = "REGISTRAR";
             document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
             document.getElementById('aula_id').required = false;

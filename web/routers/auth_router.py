@@ -7,6 +7,7 @@ from typing import Optional
 
 router = APIRouter(tags=["Autenticación"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 @router.get("/")
 @router.get("/login")

@@ -8,7 +8,7 @@
             <h2 class="text-xl font-bold text-white">Preparación de Alimentos</h2>
             <p class="text-slate-400 text-sm">Combine materias primas</p>
         </div>
-        <a href="/preparados/lista" class="text-amber-400 hover:text-amber-300 flex flex-col items-center">
+        <a href="{{ prefix }}/preparados/lista" class="text-amber-400 hover:text-amber-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -29,7 +29,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl space-y-6">
-        <form id="preparadoForm" action="/preparados/crear" method="post" class="space-y-4">
+        <form id="preparadoForm" action="{{ prefix }}/preparados/crear" method="post" class="space-y-4">
             <div id="id_field" class="hidden">
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Registro</label>
                 <input type="number" name="id" id="prep_id" readonly
@@ -94,7 +94,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/preparados/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/preparados/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Está seguro de eliminar este registro?')"
                 class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
@@ -130,18 +130,18 @@
         delForm.classList.toggle('hidden');
 
         if (esModoEdicion) {
-            form.action = "/preparados/actualizar";
+            form.action = "{{ prefix }}/preparados/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             btnMode.innerText = "MODO CREAR";
         } else {
-            form.action = "/preparados/crear";
+            form.action = "{{ prefix }}/preparados/crear";
             btnSubmit.innerText = "REGISTRAR";
             btnMode.innerText = "MODO EDICIÓN";
         }
     }
 
     async function abrirModalMaterias() {
-        const res = await fetch('/api/materias-primas');
+        const res = await fetch('{{ prefix }}/api/materias-primas');
         const materias = await res.json();
         const container = document.getElementById('materias_container');
         container.innerHTML = '';

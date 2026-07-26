@@ -9,7 +9,7 @@
             <h2 class="text-2xl font-bold text-green-400"><i class="la la-id-badge mr-2"></i>Gestión de Servidores</h2>
             <p class="text-xs text-slate-500">Administración de personal de servicio</p>
         </div>
-        <a href="/servidores/lista"
+        <a href="{{ prefix }}/servidores/lista"
             class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-bold text-sky-400 transition hover:border-sky-500/40 hover:bg-sky-500/10 hover:text-sky-300">
             <i class="la la-list text-xl"></i>
             Ver Lista
@@ -24,7 +24,7 @@
             <p class="mt-1 text-sm text-slate-400">Complete los datos del servidor para crear el registro estadístico.</p>
         </div>
 
-        <form id="servidorForm" action="/servidores/crear" method="POST" class="p-6 pb-8 max-h-[32rem] overflow-y-auto">
+        <form id="servidorForm" action="{{ prefix }}/servidores/crear" method="POST" class="p-6 pb-8 max-h-[32rem] overflow-y-auto">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium mb-1 text-slate-400">Nombre Completo</label>

@@ -4,14 +4,14 @@
 <div class="max-w-md mx-auto">
     <div class="mb-6 flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">Gestión de Pastores</h2>
-        <a href="/pastores/lista" class="text-amber-400 hover:text-amber-300 flex flex-col items-center">
+        <a href="{{ prefix }}/pastores/lista" class="text-amber-400 hover:text-amber-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
     </div>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="pastorForm" action="/pastores/crear" method="post" class="space-y-4">
+        <form id="pastorForm" action="{{ prefix }}/pastores/crear" method="post" class="space-y-4">
             <!-- ID solo para edición -->
             <div id="id_field" class="hidden">
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1 text-start">ID del
@@ -44,7 +44,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/pastores/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/pastores/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar registro de pastor?')"
                 class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
@@ -67,12 +67,12 @@
         delForm.classList.toggle('hidden');
 
         if (!idField.classList.contains('hidden')) {
-            form.action = "/pastores/actualizar";
+            form.action = "{{ prefix }}/pastores/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             document.getElementById('btn_mode').innerText = "MODO CREAR";
             document.getElementById('pastor_id').required = true;
         } else {
-            form.action = "/pastores/crear";
+            form.action = "{{ prefix }}/pastores/crear";
             btnSubmit.innerText = "REGISTRAR";
             document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
             document.getElementById('pastor_id').required = false;

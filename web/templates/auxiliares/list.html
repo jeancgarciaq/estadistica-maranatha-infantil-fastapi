@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Lista de Auxiliares</h2>
             <p class="text-slate-400 text-sm">{{ auxiliares|length }} auxiliares registrados</p>
         </div>
-        <a href="/auxiliares" class="text-sky-400 hover:text-sky-300 flex flex-col items-center">
+        <a href="{{ prefix }}/auxiliares" class="text-sky-400 hover:text-sky-300 flex flex-col items-center">
             <i class="la la-plus-circle text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Gestión</span>
         </a>
@@ -42,12 +42,12 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/auxiliares?id={{ auxiliar.id }}&nombre={{ auxiliar.nombre|urlencode }}&cedula={{ auxiliar.cedula }}&edad={{ auxiliar.edad }}&fecha_nacimiento={{ auxiliar.fecha_nacimiento or '' }}&celular={{ auxiliar.celular|urlencode if auxiliar.celular else '' }}&correo={{ auxiliar.correo|urlencode if auxiliar.correo else '' }}&numero_equipo={{ auxiliar.numero_equipo or '' }}&id_capitan={{ auxiliar.id_capitan or '' }}&sexo={{ (auxiliar.sexo or '')|urlencode }}&profesion={{ (auxiliar.profesion or '')|urlencode }}&estado_civil={{ (auxiliar.estado_civil or '')|urlencode }}&cantidad_hijos={{ auxiliar.cantidad_hijos or '0' }}&tiempo_servicio={{ (auxiliar.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (auxiliar.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (auxiliar.bautizado or '')|urlencode }}&asiste_discipulado={{ (auxiliar.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (auxiliar.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (auxiliar.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (auxiliar.otra_area_detalle or '')|urlencode }}&levantado={{ (auxiliar.levantado or '')|urlencode }}&direccion={{ (auxiliar.direccion or '')|urlencode }}"
+                <a href="{{ prefix }}/auxiliares?id={{ auxiliar.id }}&nombre={{ auxiliar.nombre|urlencode }}&cedula={{ auxiliar.cedula }}&edad={{ auxiliar.edad }}&fecha_nacimiento={{ auxiliar.fecha_nacimiento or '' }}&celular={{ auxiliar.celular|urlencode if auxiliar.celular else '' }}&correo={{ auxiliar.correo|urlencode if auxiliar.correo else '' }}&numero_equipo={{ auxiliar.numero_equipo or '' }}&id_capitan={{ auxiliar.id_capitan or '' }}&sexo={{ (auxiliar.sexo or '')|urlencode }}&profesion={{ (auxiliar.profesion or '')|urlencode }}&estado_civil={{ (auxiliar.estado_civil or '')|urlencode }}&cantidad_hijos={{ auxiliar.cantidad_hijos or '0' }}&tiempo_servicio={{ (auxiliar.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (auxiliar.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (auxiliar.bautizado or '')|urlencode }}&asiste_discipulado={{ (auxiliar.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (auxiliar.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (auxiliar.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (auxiliar.otra_area_detalle or '')|urlencode }}&levantado={{ (auxiliar.levantado or '')|urlencode }}&direccion={{ (auxiliar.direccion or '')|urlencode }}"
                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all"
                     title="Editar">
                     <i class="la la-edit text-xl"></i>
                 </a>
-                <form action="/auxiliares/eliminar" method="post" class="inline"
+                <form action="{{ prefix }}/auxiliares/eliminar" method="post" class="inline"
                     onsubmit="return confirm('¿Está seguro de eliminar este auxiliar?')">
                     <input type="hidden" name="id" value="{{ auxiliar.id }}">
                     <button type="submit"

@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Lista de Recepciones</h2>
             <p class="text-slate-400 text-sm">{{ recepciones|length }} registros encontrados</p>
         </div>
-        <a href="/recepciones" class="text-teal-400 hover:text-teal-300 flex flex-col items-center">
+        <a href="{{ prefix }}/recepciones" class="text-teal-400 hover:text-teal-300 flex flex-col items-center">
             <i class="la la-plus-circle text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Gestión</span>
         </a>
@@ -35,11 +35,11 @@
             </div>
 
             <div class="flex justify-end gap-2 border-t border-slate-700 pt-3">
-                <a href="/recepciones?edit_id={{ r.id }}"
+                <a href="{{ prefix }}/recepciones?edit_id={{ r.id }}"
                     class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white p-2 rounded-lg transition-colors text-sm flex items-center gap-2">
                     <i class="la la-edit"></i> Editar
                 </a>
-                <form action="/recepciones/eliminar" method="post"
+                <form action="{{ prefix }}/recepciones/eliminar" method="post"
                     onsubmit="return confirm('¿Confirmar eliminación de {{ r.nombre }}?');">
                     <input type="hidden" name="id" value="{{ r.id }}">
                     <button type="submit"

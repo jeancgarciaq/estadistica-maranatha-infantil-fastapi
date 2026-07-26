@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from fastapi import status
 
 class BaseWebHandler:
+    PREFIX = "/semi"
+
     def __init__(self, templates: Jinja2Templates):
         self.templates = templates
 
@@ -17,5 +19,7 @@ class BaseWebHandler:
 
     def redirect(self, url: str, msg: str = None, type: str = "success"):
         """Crea una redirección con mensaje flash opcional."""
+        if url.startswith("/"):
+            url = f"{self.PREFIX}{url}"
         final_url = f"{url}?msg={msg}&type={type}" if msg else url
         return RedirectResponse(url=final_url, status_code=status.HTTP_303_SEE_OTHER)

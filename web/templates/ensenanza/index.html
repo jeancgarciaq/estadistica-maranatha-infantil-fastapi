@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Gestión de Enseñanza</h2>
             <p class="text-slate-400 text-sm">Registro de capitanes y subcapitanes</p>
         </div>
-        <a href="/ensenanza/lista" class="text-lime-400 hover:text-lime-300 flex flex-col items-center">
+        <a href="{{ prefix }}/ensenanza/lista" class="text-lime-400 hover:text-lime-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -30,7 +30,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="ensenanzaForm" action="/ensenanza/crear" method="post" class="space-y-4">
+        <form id="ensenanzaForm" action="{{ prefix }}/ensenanza/crear" method="post" class="space-y-4">
             <div id="id_field" class="hidden">
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Enseñanza</label>
                 <input type="number" name="id" id="ensenanza_id"
@@ -69,7 +69,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/ensenanza/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/ensenanza/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar registro de enseñanza?')"
                 class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
@@ -90,7 +90,7 @@
         delForm.classList.toggle('hidden');
 
         if (!idField.classList.contains('hidden')) {
-            form.action = "/ensenanza/actualizar";
+            form.action = "{{ prefix }}/ensenanza/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             document.getElementById('btn_mode').innerText = "MODO CREAR";
             document.getElementById('ensenanza_id').required = true;
@@ -98,7 +98,7 @@
                 document.getElementById('delete_id').value = e.target.value;
             });
         } else {
-            form.action = "/ensenanza/crear";
+            form.action = "{{ prefix }}/ensenanza/crear";
             btnSubmit.innerText = "REGISTRAR";
             document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
             document.getElementById('ensenanza_id').required = false;

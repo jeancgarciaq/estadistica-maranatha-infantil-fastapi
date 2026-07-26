@@ -14,11 +14,11 @@
                     <p class="mt-1 text-sm text-amber-400 font-medium">{{ pastor.iglesia }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/pastores?id={{ pastor.id }}&nombre={{ pastor.nombre|urlencode }}&iglesia={{ pastor.iglesia|urlencode }}"
+                    <a href="{{ prefix }}/pastores?id={{ pastor.id }}&nombre={{ pastor.nombre|urlencode }}&iglesia={{ pastor.iglesia|urlencode }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
-                    <form action="/pastores/eliminar" method="POST"
+                    <form action="{{ prefix }}/pastores/eliminar" method="POST"
                         onsubmit="return confirm('¿Eliminar registro de pastor?')">
                         <input type="hidden" name="id" value="{{ pastor.id }}">
                         <button type="submit"
@@ -49,7 +49,7 @@
     {% endif %}
 
     <div class="pt-4">
-        <a href="/pastores"
+        <a href="{{ prefix }}/pastores"
             class="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-colors uppercase text-sm">
             <i class="la la-plus mr-2"></i>Nuevo Pastor
         </a>

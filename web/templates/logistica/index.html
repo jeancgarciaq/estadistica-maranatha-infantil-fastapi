@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Gestión de Logística</h2>
             <p class="text-slate-400 text-sm">Asignación de equipo y puestos</p>
         </div>
-        <a href="/logistica/lista" class="text-yellow-400 hover:text-yellow-300 flex flex-col items-center">
+        <a href="{{ prefix }}/logistica/lista" class="text-yellow-400 hover:text-yellow-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -30,7 +30,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="logisticaForm" action="/logistica/crear" method="post" class="space-y-6">
+        <form id="logisticaForm" action="{{ prefix }}/logistica/crear" method="post" class="space-y-6">
             <!-- ID solo para edición -->
             <div id="id_field" class="hidden">
                 <label class="block text-[10px] font-bold text-yellow-500 uppercase mb-1 ml-1 tracking-wider">ID de
@@ -149,7 +149,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/logistica/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/logistica/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar registro de logística?')"
                 class="w-full bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-bold py-4 rounded-2xl border border-red-500/30 transition-all mt-4 uppercase text-xs tracking-widest">
@@ -171,7 +171,7 @@
         delForm.classList.toggle('hidden');
 
         if (!idField.classList.contains('hidden')) {
-            form.action = "/logistica/actualizar";
+            form.action = "{{ prefix }}/logistica/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             document.getElementById('btn_mode').innerText = "MODO CREAR";
             document.getElementById('logistica_id').required = true;
@@ -179,7 +179,7 @@
                 document.getElementById('delete_id').value = e.target.value;
             });
         } else {
-            form.action = "/logistica/crear";
+            form.action = "{{ prefix }}/logistica/crear";
             btnSubmit.innerText = "REGISTRAR";
             document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
             document.getElementById('logistica_id').required = false;

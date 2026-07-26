@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 router = APIRouter(prefix="/ayuda", tags=["Ayuda"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 @router.get("/")
 async def view_ayuda(request: Request):

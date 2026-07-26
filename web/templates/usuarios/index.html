@@ -39,7 +39,7 @@
             <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i
                     class="la la-times text-2xl"></i></button>
         </div>
-        <form id="userForm" action="/usuarios/actualizar" method="post" class="p-6 space-y-4">
+        <form id="userForm" action="{{ prefix }}/usuarios/actualizar" method="post" class="p-6 space-y-4">
             <input type="hidden" name="id" id="form_id">
 
             <div>
@@ -83,14 +83,14 @@
 <script>
     async function cargarUsuarios() {
         const container = document.getElementById('usuariosContainer');
-        const resp = await fetch('/usuarios/lista');
+        const resp = await fetch('{{ prefix }}/usuarios/lista');
         container.innerHTML = await resp.text();
         aplicarFiltro();
     }
 
     function openCreateModal() {
         const form = document.getElementById('userForm');
-        form.action = "/usuarios/crear";
+        form.action = "{{ prefix }}/usuarios/crear";
         document.getElementById('modalTitle').innerText = "Crear Nuevo Usuario";
         document.getElementById('form_id').value = "";
         document.getElementById('form_username').value = "";
@@ -103,7 +103,7 @@
 
     function openEditModal(user) {
         const form = document.getElementById('userForm');
-        form.action = "/usuarios/actualizar";
+        form.action = "{{ prefix }}/usuarios/actualizar";
         document.getElementById('modalTitle').innerText = "Editar Usuario: " + user.username;
         document.getElementById('form_id').value = user.id;
         document.getElementById('form_username').value = user.username;

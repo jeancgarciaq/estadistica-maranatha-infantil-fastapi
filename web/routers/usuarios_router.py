@@ -7,6 +7,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 @router.get("/")
 async def view_usuarios(request: Request, db: Session = Depends(get_db)):

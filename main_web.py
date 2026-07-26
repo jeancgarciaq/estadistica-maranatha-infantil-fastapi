@@ -66,6 +66,8 @@ def obtener_usuario_cache(db: Session, username: str):
     )
 
 templates = Jinja2Templates(directory="web/templates")
+PREFIX = "/semi"
+templates.env.globals["prefix"] = PREFIX
 
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
@@ -79,7 +81,7 @@ async def auth_middleware(request: Request, call_next):
     username = request.cookies.get("session_user")
 
     if not username:
-        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url=f"{PREFIX}/", status_code=status.HTTP_303_SEE_OTHER)
 
     db = SessionLocal()
     try:
@@ -91,7 +93,7 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
     except Exception as e:
         logger.error(f"Error crítico detectado: {e}", exc_info=True)
-        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        response = RedirectResponse(url=f"{PREFIX}/", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("session_user")
         return response
     finally:

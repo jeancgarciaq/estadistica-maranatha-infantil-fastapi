@@ -15,11 +15,11 @@
                     <p class="mt-1 text-sm text-slate-400">{{ lider.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/lideres?id={{ lider.id }}&nombre={{ lider.nombre|urlencode }}&cedula={{ lider.cedula }}&edad={{ lider.edad }}&id_pastor={{ lider.id_pastor or '' }}&celular={{ (lider.celular or '')|urlencode }}&correo={{ (lider.correo or '')|urlencode }}"
+                    <a href="{{ prefix }}/lideres?id={{ lider.id }}&nombre={{ lider.nombre|urlencode }}&cedula={{ lider.cedula }}&edad={{ lider.edad }}&id_pastor={{ lider.id_pastor or '' }}&celular={{ (lider.celular or '')|urlencode }}&correo={{ (lider.correo or '')|urlencode }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
-                    <form action="/lideres/eliminar" method="POST"
+                    <form action="{{ prefix }}/lideres/eliminar" method="POST"
                         onsubmit="return confirm('¿Eliminar registro de líder?')">
                         <input type="hidden" name="id" value="{{ lider.id }}">
                         <button type="submit"
@@ -66,7 +66,7 @@
     {% endif %}
 
     <div class="pt-4">
-        <a href="/lideres"
+        <a href="{{ prefix }}/lideres"
             class="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-colors uppercase text-sm">
             <i class="la la-plus mr-2"></i>Nuevo Líder
         </a>

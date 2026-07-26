@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Gestión de Distribución</h2>
             <p class="text-slate-400 text-sm">Registre la salida de insumos</p>
         </div>
-        <a href="/distribuciones/lista" class="text-purple-400 hover:text-purple-300 flex flex-col items-center">
+        <a href="{{ prefix }}/distribuciones/lista" class="text-purple-400 hover:text-purple-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -31,7 +31,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="distForm" action="/distribuciones/crear" method="post" class="space-y-6">
+        <form id="distForm" action="{{ prefix }}/distribuciones/crear" method="post" class="space-y-6">
 
             <div id="id_field" class="hidden">
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Registro</label>
@@ -148,7 +148,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/distribuciones/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/distribuciones/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar este registro de distribución?')"
                 class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
@@ -190,11 +190,11 @@
         delForm.classList.toggle('hidden');
 
         if (esModoEdicion) {
-            form.action = "/distribuciones/actualizar";
+            form.action = "{{ prefix }}/distribuciones/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             btnMode.innerText = "MODO CREAR";
         } else {
-            form.action = "/distribuciones/crear";
+            form.action = "{{ prefix }}/distribuciones/crear";
             btnSubmit.innerText = "GUARDAR";
             btnMode.innerText = "MODO EDICIÓN";
         }

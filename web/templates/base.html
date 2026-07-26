@@ -38,7 +38,7 @@
         </div>
         <div class="flex items-center gap-4">
             <span class="text-xs text-slate-400 hidden sm:inline">{{ user.username }}</span>
-            <a href="/logout"
+            <a href="{{ prefix }}/logout"
                 class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition-colors">
                 <i class="la la-sign-out-alt text-xl"></i>
             </a>
@@ -54,12 +54,12 @@
     {% if user %}
     <!-- Navegación Inferior Estilo App para Móviles -->
     <nav class="bg-slate-800 border-t border-slate-700 p-2 flex justify-around items-center sticky bottom-0 z-50">
-        <a href="/dashboard" class="flex flex-col items-center p-2 text-blue-400">
+        <a href="{{ prefix }}/dashboard" class="flex flex-col items-center p-2 text-blue-400">
             <i class="la la-home text-2xl"></i>
             <span class="text-[10px] uppercase font-bold">Inicio</span>
         </a>
         {% if user.rol.nombre == 'root' %}
-        <a href="/usuarios"
+        <a href="{{ prefix }}/usuarios"
             class="flex flex-col items-center p-2 text-slate-400 hover:text-purple-400 transition-colors">
             <i class="la la-users-cog text-2xl"></i>
             <span class="text-[10px] uppercase font-bold">Usuarios</span>

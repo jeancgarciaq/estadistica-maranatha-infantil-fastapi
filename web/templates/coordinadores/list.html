@@ -22,7 +22,7 @@
                     <p class="mt-1 text-sm text-slate-400">{{ coordinador.correo or 'Sin correo registrado' }}</p>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                    <a href="/coordinadores?id={{ coordinador.id }}&nombre={{ coordinador.nombre|urlencode }}&cedula={{ coordinador.cedula }}&edad={{ coordinador.edad }}&id_lider={{ coordinador.id_lider or '' }}&id_area={{ coordinador.id_area or '' }}&celular={{ (coordinador.celular or '')|urlencode }}&correo={{ (coordinador.correo or '')|urlencode }}&fecha_nacimiento={{ coordinador.fecha_nacimiento or '' }}&sexo={{ (coordinador.sexo or '')|urlencode }}&profesion={{ (coordinador.profesion or '')|urlencode }}&estado_civil={{ (coordinador.estado_civil or '')|urlencode }}&cantidad_hijos={{ coordinador.cantidad_hijos or '0' }}&numero_equipo={{ coordinador.numero_equipo or '' }}&tiempo_servicio={{ (coordinador.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (coordinador.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (coordinador.bautizado or '')|urlencode }}&asiste_discipulado={{ (coordinador.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (coordinador.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (coordinador.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (coordinador.otra_area_detalle or '')|urlencode }}&levantado={{ (coordinador.levantado or '')|urlencode }}&direccion={{ (coordinador.direccion or '')|urlencode }}"
+                    <a href="{{ prefix }}/coordinadores?id={{ coordinador.id }}&nombre={{ coordinador.nombre|urlencode }}&cedula={{ coordinador.cedula }}&edad={{ coordinador.edad }}&id_lider={{ coordinador.id_lider or '' }}&id_area={{ coordinador.id_area or '' }}&celular={{ (coordinador.celular or '')|urlencode }}&correo={{ (coordinador.correo or '')|urlencode }}&fecha_nacimiento={{ coordinador.fecha_nacimiento or '' }}&sexo={{ (coordinador.sexo or '')|urlencode }}&profesion={{ (coordinador.profesion or '')|urlencode }}&estado_civil={{ (coordinador.estado_civil or '')|urlencode }}&cantidad_hijos={{ coordinador.cantidad_hijos or '0' }}&numero_equipo={{ coordinador.numero_equipo or '' }}&tiempo_servicio={{ (coordinador.tiempo_servicio or '')|urlencode }}&pertenece_evangelio_cambia={{ (coordinador.pertenece_evangelio_cambia or '')|urlencode }}&bautizado={{ (coordinador.bautizado or '')|urlencode }}&asiste_discipulado={{ (coordinador.asiste_discipulado or '')|urlencode }}&usa_transporte={{ (coordinador.usa_transporte or '')|urlencode }}&sirve_otra_area={{ (coordinador.sirve_otra_area or '')|urlencode }}&otra_area_detalle={{ (coordinador.otra_area_detalle or '')|urlencode }}&levantado={{ (coordinador.levantado or '')|urlencode }}&direccion={{ (coordinador.direccion or '')|urlencode }}"
                         class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-300 transition hover:bg-amber-600 hover:text-white flex items-center justify-center">
                         <i class="la la-edit text-xl"></i>
                     </a>
@@ -80,7 +80,7 @@
     {% endif %}
 
     <div class="pt-4">
-        <a href="/coordinadores"
+        <a href="{{ prefix }}/coordinadores"
             class="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-colors uppercase text-sm">
             <i class="la la-plus mr-2"></i>Nuevo Coordinador
         </a>

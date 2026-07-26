@@ -7,6 +7,7 @@ from typing import Optional
 
 router = APIRouter(tags=["Alimentos"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 def get_handler(db: Session = Depends(get_db)):
     return AlimentosWebHandler(db, templates)

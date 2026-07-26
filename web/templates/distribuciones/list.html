@@ -9,20 +9,20 @@
             <h2 class="text-xl font-bold text-white">Lista de Distribuciones</h2>
             <p class="text-slate-400 text-sm">Historial de repartos</p>
         </div>
-        <a href="/distribuciones" class="text-purple-400 hover:text-purple-300 flex flex-col items-center">
+        <a href="{{ prefix }}/distribuciones" class="text-purple-400 hover:text-purple-300 flex flex-col items-center">
             <i class="la la-plus-circle text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Gestión</span>
         </a>
     </div>
 
     <!-- Filtro de Fecha -->
-    <form action="/distribuciones/lista" method="get" class="mb-6 flex gap-2">
+    <form action="{{ prefix }}/distribuciones/lista" method="get" class="mb-6 flex gap-2">
         <input type="date" name="fecha" value="{{ fecha_filtro or '' }}"
             class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-purple-500 text-sm">
         <button type="submit" class="bg-purple-600 px-4 rounded-xl text-white">
             <i class="la la-search"></i>
         </button>
-        <a href="/distribuciones/lista" class="bg-slate-700 px-4 rounded-xl text-white flex items-center">
+        <a href="{{ prefix }}/distribuciones/lista" class="bg-slate-700 px-4 rounded-xl text-white flex items-center">
             <i class="la la-sync"></i>
         </a>
     </form>
@@ -66,11 +66,11 @@
                 <p class="text-lg font-bold text-white">{{ dist.cantidad }} <span class="text-xs text-slate-500">{{
                         dist.unidad }}</span></p>
                 <div class="flex items-center gap-2">
-                    <a href="/distribuciones?id={{ dist.id }}&donacion_id={{ dist.donacion_id or '' }}&preparado_id={{ dist.alimento_preparado_id or '' }}&salon_id={{ dist.salon_id or '' }}&area_id={{ dist.area_id or '' }}&recepcion_id={{ dist.recepcion_id or '' }}&cantidad={{ dist.cantidad }}&unidad={{ dist.unidad|urlencode }}&fecha={{ dist.fecha.strftime('%Y-%m-%d') }}"
+                    <a href="{{ prefix }}/distribuciones?id={{ dist.id }}&donacion_id={{ dist.donacion_id or '' }}&preparado_id={{ dist.alimento_preparado_id or '' }}&salon_id={{ dist.salon_id or '' }}&area_id={{ dist.area_id or '' }}&recepcion_id={{ dist.recepcion_id or '' }}&cantidad={{ dist.cantidad }}&unidad={{ dist.unidad|urlencode }}&fecha={{ dist.fecha.strftime('%Y-%m-%d') }}"
                         class="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white transition-all">
                         <i class="la la-edit text-xl"></i>
                     </a>
-                    <form action="/distribuciones/eliminar" method="post"
+                    <form action="{{ prefix }}/distribuciones/eliminar" method="post"
                         onsubmit="return confirm('¿Eliminar registro?');">
                         <input type="hidden" name="id" value="{{ dist.id }}">
                         <button type="submit"

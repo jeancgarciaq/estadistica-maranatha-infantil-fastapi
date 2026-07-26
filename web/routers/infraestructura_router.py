@@ -7,6 +7,7 @@ from typing import List, Optional
 
 router = APIRouter(tags=["Infraestructura"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 @router.get("/areas")
 async def view_areas(request: Request, db: Session = Depends(get_db)):

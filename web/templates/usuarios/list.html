@@ -40,7 +40,7 @@
                         <i class="la la-edit text-xl"></i>
                     </button>
                     {% if u.rol.nombre != 'root' %}
-                    <form action="/usuarios/eliminar" method="POST" onsubmit="return confirm('¿Está seguro de que desea eliminar al usuario {{ u.username }}?')" class="inline">
+                    <form action="{{ prefix }}/usuarios/eliminar" method="POST" onsubmit="return confirm('¿Está seguro de que desea eliminar al usuario {{ u.username }}?')" class="inline">
                         <input type="hidden" name="id" value="{{ u.id }}">
                         <button type="submit" class="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 p-2 rounded-lg transition-all" title="Eliminar">
                             <i class="la la-trash text-xl"></i>

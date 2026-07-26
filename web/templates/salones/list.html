@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Lista de Salones</h2>
             <p class="text-slate-400 text-sm">{{ salones|length }} salones registrados</p>
         </div>
-        <a href="/salones" class="text-sky-400 hover:text-sky-300 flex flex-col items-center">
+        <a href="{{ prefix }}/salones" class="text-sky-400 hover:text-sky-300 flex flex-col items-center">
             <i class="la la-plus-circle text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Gestión</span>
         </a>
@@ -32,12 +32,12 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/salones?id={{ salon.id }}&nombre={{ salon.salon|urlencode }}&edad={{ salon.edad|urlencode }}&id_area={{ salon.id_area or '' }}"
+                <a href="{{ prefix }}/salones?id={{ salon.id }}&nombre={{ salon.salon|urlencode }}&edad={{ salon.edad|urlencode }}&id_area={{ salon.id_area or '' }}"
                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all"
                     title="Editar">
                     <i class="la la-edit text-xl"></i>
                 </a>
-                <form action="/salones/eliminar" method="post" class="inline"
+                <form action="{{ prefix }}/salones/eliminar" method="post" class="inline"
                     onsubmit="return confirm('¿Está seguro de eliminar este salón?')">
                     <input type="hidden" name="id" value="{{ salon.id }}">
                     <button type="submit"

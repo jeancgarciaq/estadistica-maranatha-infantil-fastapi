@@ -9,7 +9,7 @@
             <h2 class="text-xl font-bold text-white">Otras Áreas</h2>
             <p class="text-slate-400 text-sm">Registro de servidores transversales</p>
         </div>
-        <a href="/otras_areas/lista" class="text-rose-400 hover:text-rose-300 flex flex-col items-center">
+        <a href="{{ prefix }}/otras_areas/lista" class="text-rose-400 hover:text-rose-300 flex flex-col items-center">
             <i class="la la-list text-2xl"></i>
             <span class="text-[10px] font-bold uppercase">Ver Lista</span>
         </a>
@@ -30,7 +30,7 @@
     </script>
 
     <div class="glass p-6 rounded-2xl border border-white/10 shadow-2xl">
-        <form id="otrasareasForm" action="/otras_areas/crear" method="post" class="space-y-4">
+        <form id="otrasareasForm" action="{{ prefix }}/otras_areas/crear" method="post" class="space-y-4">
             <div id="id_field" class="hidden">
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2 ml-1">ID Registro</label>
                 <input type="number" name="id" id="oa_id"
@@ -98,7 +98,7 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="/otras_areas/eliminar" method="post" class="hidden">
+        <form id="deleteForm" action="{{ prefix }}/otras_areas/eliminar" method="post" class="hidden">
             <input type="hidden" name="id" id="delete_id">
             <button type="submit" onclick="return confirm('¿Eliminar este registro de áreas?')"
                 class="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold py-3 rounded-xl border border-red-600/50 transition-all mt-2 uppercase text-xs">
@@ -119,7 +119,7 @@
         delForm.classList.toggle('hidden');
 
         if (!idField.classList.contains('hidden')) {
-            form.action = "/otras_areas/actualizar";
+            form.action = "{{ prefix }}/otras_areas/actualizar";
             btnSubmit.innerText = "ACTUALIZAR";
             document.getElementById('btn_mode').innerText = "MODO CREAR";
             document.getElementById('oa_id').required = true;
@@ -127,7 +127,7 @@
                 document.getElementById('delete_id').value = e.target.value;
             });
         } else {
-            form.action = "/otras_areas/crear";
+            form.action = "{{ prefix }}/otras_areas/crear";
             btnSubmit.innerText = "REGISTRAR";
             document.getElementById('btn_mode').innerText = "MODO EDICIÓN";
             document.getElementById('oa_id').required = false;

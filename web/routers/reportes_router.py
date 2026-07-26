@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
 templates = Jinja2Templates(directory="web/templates")
+templates.env.globals["prefix"] = "/semi"
 
 @router.get("/")
 async def view_reportes(request: Request, fecha: str = None, db: Session = Depends(get_db)):
