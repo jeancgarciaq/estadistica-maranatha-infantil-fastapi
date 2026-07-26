@@ -2,7 +2,7 @@ import os
 import sys
 import asyncio
 
-# 1. Asegurar el path de la aplicación
+# 1. Asegurar el path de la aplicaci锟斤拷n
 app_dir = os.path.dirname(os.path.abspath(__file__))
 if app_dir not in sys.path:
     sys.path.insert(0, app_dir)
@@ -19,6 +19,13 @@ def application(environ, start_response):
     path_info = environ.get('PATH_INFO', '')
     # Forzar /semi como script_name para que FastAPI lo reconozca como prefijo de subruta
     script_name = '/semi'
+
+    # Dentro de la funci贸n application(environ, start_response) en passenger_wsgi.py:
+    path_info = environ.get('PATH_INFO', '')
+    script_name = environ.get('SCRIPT_NAME', '')
+    request_method = environ.get('REQUEST_METHOD', '')
+
+    print(f"--> [WSGI ENTRADA] Method: {request_method} | PATH_INFO: '{path_info}' | SCRIPT_NAME: '{script_name}'")
 
     async def receive():
         try:
@@ -43,8 +50,11 @@ def application(environ, start_response):
             for name, value in message.get('headers', []):
                 header_name = name.decode('latin1')
                 header_val = value.decode('latin1')
+
+                if header_name.lower() == 'location':
+                    print(f"<-- [ASGI SALIDA] Header Location generado por Python: {header_val}")
                 
-                # REPARACIÓN DE REDIRECCIONES:
+                # REPARACI锟�0锟�7N DE REDIRECCIONES:
                 # Si FastAPI intenta redirigir a /login o /dashboard sin el prefijo /semi,
                 # interceptamos la cabecera Location y le anteponemos /semi
                 if header_name.lower() == 'location':
