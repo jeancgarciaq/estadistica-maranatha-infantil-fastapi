@@ -67,6 +67,13 @@ def application(environ, start_response):
 
         elif message['type'] == 'http.response.body':
             body_chunks.append(message.get('body', b''))
+    
+    print("=" * 60)
+    print("REQUEST_METHOD:", environ.get("REQUEST_METHOD"))
+    print("REQUEST_URI:", environ.get("REQUEST_URI"))
+    print("PATH_INFO:", environ.get("PATH_INFO"))
+    print("SCRIPT_NAME:", environ.get("SCRIPT_NAME"))
+    print("=" * 60)
 
     scope = {
         'type': 'http',
