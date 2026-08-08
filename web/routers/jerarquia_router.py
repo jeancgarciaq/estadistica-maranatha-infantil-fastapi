@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 
 router = APIRouter(tags=["Jerarquía"])
 templates = Jinja2Templates(directory="web/templates")
-templates.env.globals["prefix"] = "/semi"
+templates.env.globals["prefix"] = ""
 
 @router.get("/pastores")
 async def view_pastores(request: Request, db: Session = Depends(get_db)):

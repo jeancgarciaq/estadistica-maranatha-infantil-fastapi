@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi import status, Request
 
 class BaseWebHandler:
-    PREFIX = "/semi"
+    PREFIX = ""
 
     def __init__(self, templates: Jinja2Templates):
         self.templates = templates
@@ -20,9 +20,10 @@ class BaseWebHandler:
     def redirect(self, url: str, msg: str = None, type: str = "success", request: Request = None):
         """Crea una redirección absoluta para evitar que Starlette borre /semi."""
         
-        # 1. Asegurar que la ruta empiece con /semi
+        # 1. Asegurar que la ruta empiece con /semi (evitar duplicación)
         if not url.startswith(self.PREFIX):
             url = f"{self.PREFIX}{url}" if url.startswith("/") else f"{self.PREFIX}/{url}"
+        # Si ya empieza con /semi, usarla tal cual
 
         # 2. Agregar mensaje flash si existe
         final_path = f"{url}?msg={msg}&type={type}" if msg else url
@@ -34,7 +35,7 @@ class BaseWebHandler:
             host = request.headers.get("host", request.url.netloc)
             target_url = f"{scheme}://{host}{final_path}"
         else:
-            # Fallback seguro
-            target_url = f"https://administromicondominio.com{final_path}"
+            # Fallback seguro - usar URL relativa en lugar de absoluta hardcodeada
+            target_url = final_path
 
         return RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
