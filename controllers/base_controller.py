@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, date
+import json
 
 from models.database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
@@ -92,6 +93,40 @@ class BaseController:
         if hasattr(self.model, 'is_deleted'):
             return query.filter(self.model.is_deleted.is_(False))
         return query
+
+    def registrar_evento_sync(self, db, entity_name, registro, operation, user_context=None):
+        """Registra un evento en la cola de sincronización (SyncQueue).
+
+        :param db: Sesión de base de datos activa (dentro de la transacción).
+        :param entity_name: Nombre de la entidad (ej: 'pastores').
+        :param registro: Instancia del modelo modificada.
+        :param operation: 'upsert' o 'delete'.
+        """
+        from models.sync_queue import SyncQueue
+
+        sync_id = getattr(registro, 'sync_id', None)
+        if not sync_id:
+            sync_id = str(getattr(registro, 'id', '') or '')
+
+        payload = {}
+        if hasattr(registro, '__table__'):
+            for col in registro.__table__.columns:
+                try:
+                    val = getattr(registro, col.name, None)
+                except Exception:
+                    val = None
+                if isinstance(val, (datetime, date)):
+                    val = val.isoformat()
+                payload[col.name] = val
+
+        db.add(SyncQueue(
+            entity_name=entity_name,
+            entity_sync_id=sync_id,
+            operation=str(operation).strip().lower(),
+            payload_json=json.dumps(payload, ensure_ascii=False, default=str),
+            status='pending',
+            attempts=0,
+        ))
     
     def buscar_por_id_o_nombre(self, id=None, nombre=None, nombre_campo="nombre"):
         """
