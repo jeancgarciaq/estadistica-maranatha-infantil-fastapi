@@ -1,58 +1,56 @@
 ```
-# Buildozer
-.buildozer/*
-.buildozer/bin/
-.buildozer/venv/
-
-# Build artifacts
-build/
-
-# Dependencies
-.python-version
-.venv/
-venv/
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Logs
-*.log
-
-# Environment
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
 .env
 .env.local
 .env.*
 
-# Coverage
+# Build artifacts
+build/
+dist/
+*.egg
+*.egg-info/
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.o
+*.obj
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
 .coverage
 coverage/
 htmlcov/
+.nyc_output/
+.pytest_cache/
+.hypothesis/
 
-# Distribution
-dist/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Temporary files
-*.tmp
-*.swp
-*.swo
+# Logs
+*.log
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-
-# Editors
-.vscode/
-.idea/
-
-# MyPy
-.mypy_cache/
+Icon?
 ```
-.aider*
-
-.htaccess
-
-models/app.db

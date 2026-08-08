@@ -7,7 +7,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/servidores", tags=["Servidores"])
 templates = Jinja2Templates(directory="web/templates")
-templates.env.globals["prefix"] = "/semi"
+templates.env.globals["prefix"] = ""
 
 @router.get("/")
 async def view_servidores(request: Request, db: Session = Depends(get_db)):

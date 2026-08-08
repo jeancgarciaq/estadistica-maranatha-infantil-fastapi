@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
     shutdown_db()
 
 # Inicializar FastAPI
-app = FastAPI(title="Estadistica Maranatha Kids - Web", lifespan=lifespan, root_path="/semi")
+app = FastAPI(title="Estadistica Maranatha Kids - Web", lifespan=lifespan)
 security = HTTPBearer()
 
 # Incluir Routers
@@ -66,22 +66,26 @@ def obtener_usuario_cache(db: Session, username: str):
     )
 
 templates = Jinja2Templates(directory="web/templates")
-PREFIX = "/semi"
+PREFIX = ""
 templates.env.globals["prefix"] = PREFIX
 
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
+    public_paths = ["/", "/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
     
-    if request.url.path == "/" or any(request.url.path.startswith(path) for path in public_paths):
+    # Normalizar path para comparación
+    request_path = request.url.path
+    
+    if request_path == "/" or any(request_path.startswith(path) for path in public_paths):
         return await call_next(request)
 
     # Obtener usuario de la cookie de sesión local
     username = request.cookies.get("session_user")
 
     if not username:
-        return RedirectResponse(url=f"{PREFIX}/", status_code=status.HTTP_303_SEE_OTHER)
+        # Redirigir al login explícitamente, no a la raíz
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     db = SessionLocal()
     try:
@@ -93,7 +97,7 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
     except Exception as e:
         logger.error(f"Error crítico detectado: {e}", exc_info=True)
-        response = RedirectResponse(url=f"{PREFIX}/", status_code=status.HTTP_303_SEE_OTHER)
+        response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("session_user")
         return response
     finally:

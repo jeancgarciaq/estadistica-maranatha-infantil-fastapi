@@ -8,7 +8,7 @@ class AuthWebHandler(BaseWebHandler):
         super().__init__(templates)
         self.controller = UsuariosController(db)
         # Definimos el prefijo de la subruta
-        self.prefix = "/semi"
+        self.prefix = ""
 
     async def get_login(self, request):
         return self.render(request, "login.html")
@@ -17,7 +17,7 @@ class AuthWebHandler(BaseWebHandler):
         exito, usuario, mensaje = self.controller.autenticar(username, password)
         if exito:
             # ✅ REPARADO: Redirige a /semi/dashboard
-            response = self.redirect(f"{self.prefix}/dashboard")
+            response = self.redirect(f"{self.prefix}/dashboard", request=request)
             # Establecer cookie de sesión
             response.set_cookie(key="session_user", value=usuario.username, httponly=True)
             return response
@@ -25,7 +25,7 @@ class AuthWebHandler(BaseWebHandler):
 
     async def get_logout(self, request):
         # ✅ REPARADO: Redirige a /semi (o /semi/login)
-        response = self.redirect(f"{self.prefix}/login")
+        response = self.redirect(f"{self.prefix}/login", request=request)
         response.delete_cookie("session_user")
         return response
 
@@ -48,7 +48,7 @@ class AuthWebHandler(BaseWebHandler):
         exito, mensaje = self.controller.registrar_usuario(datos)
         if exito:
             # ✅ REPARADO: Redirige a /semi/login
-            return self.redirect(f"{self.prefix}/login", "Registro exitoso. Ya puede iniciar sesión.", "success")
+            return self.redirect(f"{self.prefix}/login", "Registro exitoso. Ya puede iniciar sesión.", "success", request=request)
         
         return self._render_register_error(request, mensaje)
 
@@ -94,5 +94,5 @@ class AuthWebHandler(BaseWebHandler):
         exito, mensaje = self.controller.restablecer_contrasena(token, password)
         if exito:
             # ✅ REPARADO: Redirige a /semi/login
-            return self.redirect(f"{self.prefix}/login", "Contraseña restablecida exitosamente.", "success")
+            return self.redirect(f"{self.prefix}/login", "Contraseña restablecida exitosamente.", "success", request=request)
         return self.render(request, "reset_password.html", {"token": token, "error": mensaje})
