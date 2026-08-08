@@ -9,6 +9,11 @@ from functools import lru_cache
 from utils.env_loader import load_app_env
 load_app_env()
 
+# 2. CONFIGURAR LOGGING (consola + archivo logs/app.log)
+from utils.logger import setup_logging
+setup_logging()
+logger = logging.getLogger(__name__)
+
 # 2. IMPORTACIONES DE FASTAPI
 from fastapi import FastAPI, Request, status
 from fastapi.responses import RedirectResponse
@@ -21,10 +26,6 @@ from models.security import ROLE_ROOT, Usuario
 
 # Importar Routers Refactorizados
 from web.routers import alimentos_router, auth_router, usuarios_router, jerarquia_router, infraestructura_router, reportes_router, ayuda_router, analisis_router, servidores_router
-
-# Configuración de logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -91,17 +92,22 @@ async def auth_middleware(request: Request, call_next):
     try:
         user = obtener_usuario_cache(db, username)
         if not user:
-            raise Exception("Usuario no encontrado o inactivo")
+            # Sesión inválida: limpiar cookie y volver al login
+            response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+            response.delete_cookie("session_user")
+            return response
         request.state.user = user
-        # Continuamos con el resto de la aplicación
-        return await call_next(request)
     except Exception as e:
-        logger.error(f"Error crítico detectado: {e}", exc_info=True)
+        logger.error(f"Error de sesión al autenticar '{username}': {e}", exc_info=True)
         response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
         response.delete_cookie("session_user")
         return response
     finally:
         db.close()
+
+    # Continuamos con el resto de la aplicación. Los errores de los endpoints
+    # NO deben borrar la sesión del usuario.
+    return await call_next(request)
 
 @app.get("/dashboard")
 async def dashboard(request: Request):
