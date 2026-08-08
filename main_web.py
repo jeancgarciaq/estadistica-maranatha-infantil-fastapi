@@ -72,7 +72,7 @@ templates.env.globals["prefix"] = PREFIX
 # Middleware de Autenticación y Autorización
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    public_paths = ["/", "/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
+    public_paths = ["/login", "/logout", "/api/config/medidas", "/register", "/forgot-password", "/reset-password"]
     
     # Normalizar path para comparación
     request_path = request.url.path
