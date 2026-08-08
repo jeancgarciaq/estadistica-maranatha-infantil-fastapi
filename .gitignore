@@ -56,3 +56,5 @@ Thumbs.db
 .htaccess
 
 models/app.db
+php.ini
+.user.ini
