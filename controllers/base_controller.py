@@ -97,36 +97,44 @@ class BaseController:
     def registrar_evento_sync(self, db, entity_name, registro, operation, user_context=None):
         """Registra un evento en la cola de sincronización (SyncQueue).
 
+        Es una operación AUXILIAR: si falla, se registra en el log pero NUNCA
+        debe impedir que se guarde la entidad principal ni afectar la sesión.
+
         :param db: Sesión de base de datos activa (dentro de la transacción).
         :param entity_name: Nombre de la entidad (ej: 'pastores').
         :param registro: Instancia del modelo modificada.
         :param operation: 'upsert' o 'delete'.
         """
-        from models.sync_queue import SyncQueue
+        try:
+            from models.sync_queue import SyncQueue
 
-        sync_id = getattr(registro, 'sync_id', None)
-        if not sync_id:
-            sync_id = str(getattr(registro, 'id', '') or '')
+            sync_id = getattr(registro, 'sync_id', None)
+            if not sync_id:
+                sync_id = str(getattr(registro, 'id', '') or '')
 
-        payload = {}
-        if hasattr(registro, '__table__'):
-            for col in registro.__table__.columns:
-                try:
-                    val = getattr(registro, col.name, None)
-                except Exception:
-                    val = None
-                if isinstance(val, (datetime, date)):
-                    val = val.isoformat()
-                payload[col.name] = val
+            payload = {}
+            if hasattr(registro, '__table__'):
+                for col in registro.__table__.columns:
+                    try:
+                        val = getattr(registro, col.name, None)
+                    except Exception:
+                        val = None
+                    if isinstance(val, (datetime, date)):
+                        val = val.isoformat()
+                    payload[col.name] = val
 
-        db.add(SyncQueue(
-            entity_name=entity_name,
-            entity_sync_id=sync_id,
-            operation=str(operation).strip().lower(),
-            payload_json=json.dumps(payload, ensure_ascii=False, default=str),
-            status='pending',
-            attempts=0,
-        ))
+            with db.begin_nested():
+                db.add(SyncQueue(
+                    entity_name=entity_name,
+                    entity_sync_id=sync_id,
+                    operation=str(operation).strip().lower(),
+                    payload_json=json.dumps(payload, ensure_ascii=False, default=str),
+                    status='pending',
+                    attempts=0,
+                ))
+            db.flush()
+        except Exception as exc:
+            logger.error("No se pudo registrar evento de sync para %s (%s): %s", entity_name, operation, exc)
     
     def buscar_por_id_o_nombre(self, id=None, nombre=None, nombre_campo="nombre"):
         """
