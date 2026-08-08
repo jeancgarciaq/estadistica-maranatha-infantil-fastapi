@@ -3,7 +3,6 @@ import logging
 import asyncio # Added for potential sleep in lifespan
 import contextlib
 import time
-from functools import lru_cache
 
 # 1. CARGAR VARIABLES DE ENTORNO ANTES QUE CUALQUIER OTRA COSA
 from utils.env_loader import load_app_env
@@ -22,7 +21,7 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session, joinedload
 
 from models.database import configure_database, SessionLocal, shutdown_db
-from models.security import ROLE_ROOT, Usuario
+from models.security import ROLE_ROOT, Usuario, Rol
 
 # Importar Routers Refactorizados
 from web.routers import alimentos_router, auth_router, usuarios_router, jerarquia_router, infraestructura_router, reportes_router, ayuda_router, analisis_router, servidores_router
@@ -56,12 +55,15 @@ app.include_router(ayuda_router.router)
 app.include_router(analisis_router.router)
 app.include_router(servidores_router.router)
 
-@lru_cache(maxsize=32)
 def obtener_usuario_cache(db: Session, username: str):
-    """Cache simple para evitar consultas repetitivas a Cloud SQL en cada request."""
+    """Obtiene el usuario con su rol y permisos cargados (sin cache).
+
+    El @lru_cache anterior podía devolver un objeto ligado a una sesión ya
+    cerrada, provocando el error 'Parent instance is not bound to a Session'.
+    """
     return (
         db.query(Usuario)
-        .options(joinedload(Usuario.rol))
+        .options(joinedload(Usuario.rol).joinedload(Rol.permisos))
         .filter(Usuario.username == username, Usuario.activo == True)
         .first()
     )
@@ -90,24 +92,27 @@ async def auth_middleware(request: Request, call_next):
 
     db = SessionLocal()
     try:
-        user = obtener_usuario_cache(db, username)
+        try:
+            user = obtener_usuario_cache(db, username)
+        except Exception as e:
+            # Solo errores reales de autenticación/búsqueda del usuario
+            logger.error(f"Error de sesión al autenticar '{username}': {e}", exc_info=True)
+            response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+            response.delete_cookie("session_user")
+            return response
+
         if not user:
             # Sesión inválida: limpiar cookie y volver al login
             response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
             response.delete_cookie("session_user")
             return response
+
         request.state.user = user
-    except Exception as e:
-        logger.error(f"Error de sesión al autenticar '{username}': {e}", exc_info=True)
-        response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-        response.delete_cookie("session_user")
-        return response
+        # Mantener la sesión abierta durante el renderizado (permite lazy-load como user.rol.permisos).
+        # Se cierra en el finally DESPUÉS de enviar la respuesta.
+        return await call_next(request)
     finally:
         db.close()
-
-    # Continuamos con el resto de la aplicación. Los errores de los endpoints
-    # NO deben borrar la sesión del usuario.
-    return await call_next(request)
 
 @app.get("/dashboard")
 async def dashboard(request: Request):
