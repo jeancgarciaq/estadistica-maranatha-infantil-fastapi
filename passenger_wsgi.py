@@ -17,13 +17,13 @@ def application(environ, start_response):
     body_chunks = []
 
     path_info = environ.get('PATH_INFO', '')
-    # Forzar /semi como script_name para que FastAPI lo reconozca como prefijo de subruta
-    script_name = '/semi'
-
-    # Dentro de la función application(environ, start_response) en passenger_wsgi.py:
-    path_info = environ.get('PATH_INFO', '')
     script_name = environ.get('SCRIPT_NAME', '')
     request_method = environ.get('REQUEST_METHOD', '')
+
+    # La app se sirve en la raíz del subdominio (sin prefijo /semi).
+    # Si llega una URL legada con /semi, se recorta para que las rutas coincidan.
+    if path_info.startswith('/semi'):
+        path_info = path_info[len('/semi'):] or '/'
 
     print(f"--> [WSGI ENTRADA] Method: {request_method} | PATH_INFO: '{path_info}' | SCRIPT_NAME: '{script_name}'")
 
@@ -53,14 +53,7 @@ def application(environ, start_response):
 
                 if header_name.lower() == 'location':
                     print(f"<-- [ASGI SALIDA] Header Location generado por Python: {header_val}")
-                
-                # REPARACI�0�7N DE REDIRECCIONES:
-                # Si FastAPI intenta redirigir a /login o /dashboard sin el prefijo /semi,
-                # interceptamos la cabecera Location y le anteponemos /semi
-                if header_name.lower() == 'location':
-                    if header_val.startswith('/') and not header_val.startswith('/semi'):
-                        header_val = f"/semi{header_val}"
-                
+
                 headers_list.append((header_name, header_val))
                 
             response_headers = headers_list
